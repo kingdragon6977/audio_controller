@@ -7,36 +7,36 @@ void board_init(void)
 {
     GPIO_InitTypeDef gpio;
 
-    /* GPIOA clock */
+    /* PB2 LED clock */
     RCC_APB2PeriphClockCmd(
-        RCC_APB2Periph_GPIOA,
+        RCC_APB2Periph_GPIOB,
         ENABLE);
 
-    /* PA8 LED */
-    gpio.GPIO_Pin   = GPIO_Pin_8;
+    /* PB2 LED */
+    gpio.GPIO_Pin   = GPIO_Pin_2;
     gpio.GPIO_Mode  = GPIO_Mode_Out_PP;
     gpio.GPIO_Speed = GPIO_Speed_2MHz;
 
-    GPIO_Init(GPIOA,&gpio);
+    GPIO_Init(GPIOB, &gpio);
 
-    GPIO_ResetBits(GPIOA,GPIO_Pin_8);
+    GPIO_ResetBits(GPIOB, GPIO_Pin_2);
 }
 
 void led_on(void)
 {
-    GPIO_SetBits(GPIOA,GPIO_Pin_8);
+    GPIO_SetBits(GPIOB, GPIO_Pin_2);
     led_state = 1;
 }
 
 void led_off(void)
 {
-    GPIO_ResetBits(GPIOA,GPIO_Pin_8);
+    GPIO_ResetBits(GPIOB, GPIO_Pin_2);
     led_state = 0;
 }
 
 void led_toggle(void)
 {
-    if(led_state)
+    if (led_state)
         led_off();
     else
         led_on();
