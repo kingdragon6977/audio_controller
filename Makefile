@@ -33,6 +33,7 @@ SRC := \
     src/uart.c \
     src/i2c.c \
     src/cli.c \
+    src/syscalls.c \
     src/system_stm32f10x.c \
     Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
     Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
