@@ -1,76 +1,79 @@
-TARGET = directional_mic
+TARGET := audio_controller
+BUILD := build
 
-CC = arm-none-eabi-gcc
-OBJCOPY = arm-none-eabi-objcopy
-ASFLAGS = \
--mcpu=cortex-m3 \
--mthumb
-%.o: %.c
+CC := arm-none-eabi-gcc
+OBJCOPY := arm-none-eabi-objcopy
+SIZE := arm-none-eabi-size
+
+CPUFLAGS := -mcpu=cortex-m3 -mthumb
+
+CFLAGS := $(CPUFLAGS) \
+          -Os -g3 \
+          -Wall -Wextra -Wshadow -Wundef \
+          -ffunction-sections -fdata-sections \
+          -MMD -MP \
+          -DSTM32F10X_XL \
+          -DUSE_STDPERIPH_DRIVER \
+          -Iinc \
+          -ILibraries/CMSIS/CM3/CoreSupport \
+          -ILibraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
+          -ILibraries/STM32F10x_StdPeriph_Driver/inc
+
+ASFLAGS := $(CPUFLAGS) -g3
+
+LDFLAGS := $(CPUFLAGS) \
+           -Tlinker.ld \
+           -nostartfiles \
+           -Wl,--gc-sections \
+           -Wl,-Map=$(BUILD)/$(TARGET).map
+
+SRC := \
+    src/main.c \
+    src/board.c \
+    src/gpio.c \
+    src/uart.c \
+    src/i2c.c \
+    src/cli.c \
+    src/system_stm32f10x.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
+    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c
+
+OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
+OBJ += $(BUILD)/startup/startup_stm32f10x_xl.o
+
+.PHONY: all clean size
+
+all: $(BUILD)/$(TARGET).bin $(BUILD)/$(TARGET).hex
+
+$(BUILD):
+	mkdir -p $(BUILD)
+
+$(BUILD)/%.o: %.c | $(BUILD)
+	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: %.s
+$(BUILD)/startup/startup_stm32f10x_xl.o: startup/startup_stm32f10x_xl.s | $(BUILD)
+	@mkdir -p $(dir $@)
 	$(CC) $(ASFLAGS) -c $< -o $@
-CFLAGS = \
--mcpu=cortex-m3 \
--mthumb \
--Os \
--g3 \
--Wall \
--DSTM32F10X_XL \
--DUSE_STDPERIPH_DRIVER \
--Iinc \
--ILibraries/CMSIS/CM3/CoreSupport \
--ILibraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
--ILibraries/STM32F10x_StdPeriph_Driver/inc
 
-
-LDFLAGS = \
--Tlinker.ld \
--nostartfiles \
--Wl,--gc-sections
-
-
-SRC = \
-src/main.c \
-src/uart.c \
-src/i2c.c \
-src/cli.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c 
-
-OBJ = \
-src/main.o \
-src/uart.o \
-src/i2c.o \
-src/cli.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/misc.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.o \
-Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/system_stm32f10x.o \
-Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.o \
-startup/startup_stm32f10x_xl.o
-
-all: $(TARGET).bin
-
-
-$(TARGET).elf: $(OBJ)
+$(BUILD)/$(TARGET).elf: $(OBJ) linker.ld | $(BUILD)
 	$(CC) $(LDFLAGS) -o $@ $(OBJ)
 
-$(TARGET).bin: $(TARGET).elf
+$(BUILD)/$(TARGET).bin: $(BUILD)/$(TARGET).elf
 	$(OBJCOPY) -O binary $< $@
 
+$(BUILD)/$(TARGET).hex: $(BUILD)/$(TARGET).elf
+	$(OBJCOPY) -O ihex $< $@
+
+size: $(BUILD)/$(TARGET).elf
+	$(SIZE) $<
 
 clean:
-	rm -f src/*.o
-	rm -f startup/*.o
-	rm -f Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x/*.o
-	rm -f Libraries/STM32F10x_StdPeriph_Driver/src/*.o
-	rm -f *.elf *.bin
+	rm -rf $(BUILD)
+
+-include $(OBJ:.o=.d)
