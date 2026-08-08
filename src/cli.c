@@ -43,7 +43,6 @@ static void execute(char *cmd)
     if(strcmp(cmd,"uid")==0)
     {
         uint32_t *uid=(uint32_t*)0x1FFFF7E8;
-
         char buf[80];
 
         sprintf(buf,
@@ -58,14 +57,14 @@ static void execute(char *cmd)
 
     if(strcmp(cmd,"led on")==0)
     {
-        GPIO_SetBits(GPIOB,GPIO_Pin_2);
+        GPIO_ResetBits(GPIOB,GPIO_Pin_2);
         uart4_print("LED ON\r\n");
         return;
     }
 
     if(strcmp(cmd,"led off")==0)
     {
-        GPIO_ResetBits(GPIOB,GPIO_Pin_2);
+        GPIO_SetBits(GPIOB,GPIO_Pin_2);
         uart4_print("LED OFF\r\n");
         return;
     }
@@ -92,6 +91,7 @@ char uart4_getc(void)
 {
     return USART2->DR;
 }
+
 void cli_task(void)
 {
     while(uart4_available())
@@ -110,13 +110,10 @@ void cli_task(void)
 
             line_index=0;
         }
-        else
+        else if(line_index<63)
         {
-            if(line_index<63)
-            {
-                line[line_index++]=c;
-                uart4_putc(c);
-            }
+            line[line_index++]=c;
+            uart4_putc(c);
         }
     }
 }
