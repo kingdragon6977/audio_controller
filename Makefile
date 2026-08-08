@@ -30,7 +30,6 @@ LDFLAGS := $(CPUFLAGS) \
 SRC := \
     src/main.c \
     src/board.c \
-    src/gpio.c \
     src/uart.c \
     src/i2c.c \
     src/cli.c \
