@@ -12,7 +12,7 @@ CFLAGS := $(CPUFLAGS) \
           -Wall -Wextra -Wshadow -Wundef \
           -ffunction-sections -fdata-sections \
           -MMD -MP \
-          -DSTM32F10X_XL \
+          -DSTM32F10X_MD \
           -DUSE_STDPERIPH_DRIVER \
           -Iinc \
           -ILibraries/CMSIS/CM3/CoreSupport \
@@ -44,7 +44,7 @@ SRC := \
     Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c
 
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
-OBJ += $(BUILD)/startup/startup_stm32f10x_xl.o
+OBJ += $(BUILD)/startup/startup_stm32f10x_md.o
 
 .PHONY: all clean size
 
@@ -57,7 +57,7 @@ $(BUILD)/%.o: %.c | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BUILD)/startup/startup_stm32f10x_xl.o: startup/startup_stm32f10x_xl.s | $(BUILD)
+$(BUILD)/startup/startup_stm32f10x_md.o: startup/startup_stm32f10x_md.s | $(BUILD)
 	@mkdir -p $(dir $@)
 	$(CC) $(ASFLAGS) -c $< -o $@
 
