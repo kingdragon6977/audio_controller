@@ -4,7 +4,7 @@
 #include "cli.h"
 #include <stdio.h>
 static char line[64];
-static int index=0;
+static int line_index=0;
 
 static void execute(char *cmd)
 {
@@ -24,19 +24,19 @@ static void execute(char *cmd)
 
     if(strcmp(cmd,"id")==0)
     {
-        uart4_print("STM32F103VFT6 XL\r\n");
+        uart4_print("STM32F103RBT6 MD\r\n");
         return;
     }
 
     if(strcmp(cmd,"flash")==0)
     {
-        uart4_print("FLASH = 768 KB\r\n");
+        uart4_print("FLASH = 128 KB\r\n");
         return;
     }
 
     if(strcmp(cmd,"ram")==0)
     {
-        uart4_print("RAM = 96 KB\r\n");
+        uart4_print("RAM = 20 KB\r\n");
         return;
     }
 
@@ -58,14 +58,14 @@ static void execute(char *cmd)
 
     if(strcmp(cmd,"led on")==0)
     {
-        GPIO_SetBits(GPIOA,GPIO_Pin_8);
+        GPIO_SetBits(GPIOB,GPIO_Pin_2);
         uart4_print("LED ON\r\n");
         return;
     }
 
     if(strcmp(cmd,"led off")==0)
     {
-        GPIO_ResetBits(GPIOA,GPIO_Pin_8);
+        GPIO_ResetBits(GPIOB,GPIO_Pin_2);
         uart4_print("LED OFF\r\n");
         return;
     }
@@ -80,17 +80,17 @@ static void execute(char *cmd)
 
 void cli_init(void)
 {
-    index=0;
+    line_index=0;
 }
 
 int uart4_available(void)
 {
-    return (UART4->SR & USART_SR_RXNE);
+    return (USART2->SR & USART_SR_RXNE);
 }
 
 char uart4_getc(void)
 {
-    return UART4->DR;
+    return USART2->DR;
 }
 void cli_task(void)
 {
@@ -100,7 +100,7 @@ void cli_task(void)
 
         if(c=='\r' || c=='\n')
         {
-            line[index]=0;
+            line[line_index]=0;
 
             uart4_print("\r\n");
 
@@ -108,13 +108,13 @@ void cli_task(void)
 
             uart4_print("> ");
 
-            index=0;
+            line_index=0;
         }
         else
         {
-            if(index<63)
+            if(line_index<63)
             {
-                line[index++]=c;
+                line[line_index++]=c;
                 uart4_putc(c);
             }
         }
