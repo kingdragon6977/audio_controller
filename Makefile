@@ -15,9 +15,9 @@ CFLAGS := $(CPUFLAGS) \
           -DSTM32F10X_MD \
           -DUSE_STDPERIPH_DRIVER \
           -Iinc \
-          -ILibraries/CMSIS/CM3/CoreSupport \
-          -ILibraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
-          -ILibraries/STM32F10x_StdPeriph_Driver/inc
+          -Ilib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/CMSIS/CM3/CoreSupport \
+		  -Ilib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/CMSIS/CM3/DeviceSupport/ST/STM32F10x \
+		  -Ilib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/inc
 
 ASFLAGS := $(CPUFLAGS) -g3
 
@@ -35,13 +35,13 @@ SRC := \
     src/cli.c \
     src/syscalls.c \
     src/system_stm32f10x.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
-    Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c
+	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
+	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_gpio.c \
+	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_rcc.c \
+	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_spi.c \
+	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_dma.c \
+	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_usart.c \
+ 	lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/stm32f10x_i2c.c
 
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
 OBJ += $(BUILD)/startup/startup_stm32f10x_md.o
