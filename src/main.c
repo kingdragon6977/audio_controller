@@ -19,7 +19,7 @@ int main(void)
     uart2_print("\r\n");
     uart2_print("---------------------------------\r\n");
     uart2_print(" Directional Mic Controller\r\n");
-    uart2_print(" STM32F103RBT6\r\n");
+    uart2_print(" STM32F103RCT6\r\n");
     uart2_print(" 72 MHz / USART2 PA2/PA3\r\n");
     uart2_print(" ESP USART1 PA9/PA10\r\n");
     uart2_print(" CLI Ready\r\n");
