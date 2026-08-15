@@ -1,6 +1,7 @@
 #include <string.h>
 #include "stm32f10x.h"
 #include "uart.h"
+#include "i2c.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -15,8 +16,8 @@ static void execute(char *cmd)
         uart2_print(" help\r\n");
         uart2_print(" id\r\n");
         uart2_print(" uid\r\n");
-        uart2_print(" flash\r\n");
-        uart2_print(" ram\r\n");
+        uart2_print(" clock\r\n");
+        uart2_print(" codec\r\n");
         uart2_print(" reboot\r\n");
         uart2_print(" led on\r\n");
         uart2_print(" led off\r\n");
@@ -26,19 +27,34 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "id") == 0)
     {
-        uart2_print("STM32F103RBT6 MD\r\n");
+        uart2_print("STM32F103RCT6 HD\r\n");
         return;
     }
 
-    if (strcmp(cmd, "flash") == 0)
+    if (strcmp(cmd, "clock") == 0)
     {
-        uart2_print("FLASH = 128 KB\r\n");
+        uart2_print("RCC->CR   = ");
+        {
+            static const char hex[] = "0123456789ABCDEF";
+            int s;
+            for (s = 28; s >= 0; s -= 4)
+                uart2_putc(hex[(RCC->CR >> s) & 0x0Fu]);
+        }
+        uart2_print("\r\nRCC->CFGR = ");
+        {
+            static const char hex[] = "0123456789ABCDEF";
+            int s;
+            for (s = 28; s >= 0; s -= 4)
+                uart2_putc(hex[(RCC->CFGR >> s) & 0x0Fu]);
+        }
+        uart2_print("\r\n");
         return;
     }
 
-    if (strcmp(cmd, "ram") == 0)
+    if (strcmp(cmd, "codec") == 0)
     {
-        uart2_print("RAM = 20 KB\r\n");
+        uart2_print("TLV320ADC3101 @ 0x18: ");
+        uart2_print(i2c2_probe(TLV320ADC3101_I2C_ADDR) ? "ACK\r\n" : "NO ACK\r\n");
         return;
     }
 
@@ -47,24 +63,22 @@ static void execute(char *cmd)
         uint32_t *uid = (uint32_t *)0x1FFFF7E8;
         char buf[80];
 
-        sprintf(buf,
-                "%08lX %08lX %08lX\r\n",
+        sprintf(buf, "%08lX %08lX %08lX\r\n",
                 uid[0], uid[1], uid[2]);
-
         uart2_print(buf);
         return;
     }
 
     if (strcmp(cmd, "led on") == 0)
     {
-        GPIO_ResetBits(GPIOB, GPIO_Pin_2);
+        GPIO_SetBits(GPIOB, GPIO_Pin_2);
         uart2_print("LED ON\r\n");
         return;
     }
 
     if (strcmp(cmd, "led off") == 0)
     {
-        GPIO_SetBits(GPIOB, GPIO_Pin_2);
+        GPIO_ResetBits(GPIOB, GPIO_Pin_2);
         uart2_print("LED OFF\r\n");
         return;
     }
@@ -102,7 +116,6 @@ void cli_task(void)
             uart2_print("\r\n");
             execute(line);
             uart2_print("> ");
-
             line_index = 0;
         }
         else if (line_index < 63)
