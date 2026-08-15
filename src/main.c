@@ -5,7 +5,7 @@
 /*
  * Clock diagnostic for the STM32F103RCT6 board.
  *
- * PA8 is the STM32F1 MCO pin.  The test deliberately selects the raw HSE
+ * PA8 is the STM32F1 MCO pin. The test deliberately selects the raw HSE
  * (the external 8 MHz ceramic resonator) so the signal can be measured with
  * the logic analyzer without any PLL/divider ambiguity.
  *
@@ -31,9 +31,14 @@ static uint8_t clock_test_mco_hse(void)
     gpio.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOA, &gpio);
 
-    /* MCO = raw HSE. */
+    /*
+     * IMPORTANT: RCC_MCO_HSE is the StdPeriph driver's byte-sized value
+     * (0x06), intended for RCC_MCOConfig(). It must NOT be ORed directly
+     * into RCC->CFGR. For direct register access the value is
+     * RCC_CFGR_MCO_HSE = 0x06000000.
+     */
     RCC->CFGR &= ~RCC_CFGR_MCO;
-    RCC->CFGR |= RCC_MCO_HSE;
+    RCC->CFGR |= RCC_CFGR_MCO_HSE;
 
     return ((RCC->CR & RCC_CR_HSERDY) != 0u) ? 1u : 0u;
 }
@@ -78,7 +83,7 @@ static void print_clock_status(uint8_t hse_ok)
 
     uart2_print("MCO field: 0x");
     uart_hex32(RCC->CFGR & RCC_CFGR_MCO);
-    uart2_print(" (expected HSE selection)\r\n");
+    uart2_print(" (expected 0x06000000 = HSE)\r\n");
 
     uart2_print("Connect PA8 -> PA0 and GND -> GND.\r\n");
     uart2_print("Expected PA8/PA0 frequency: approximately 8 MHz.\r\n");
