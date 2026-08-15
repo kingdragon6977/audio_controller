@@ -1,46 +1,13 @@
 #include "stm32f10x.h"
 #include "board.h"
 #include "uart.h"
+#include "i2c.h"
+#include "cli.h"
 
-/*
- * Clock diagnostic for the STM32F103RCT6 board.
- *
- * PA8 is the STM32F1 MCO pin. The test deliberately selects the raw HSE
- * (the external 8 MHz ceramic resonator) so the signal can be measured with
- * the logic analyzer without any PLL/divider ambiguity.
- *
- * USART2 (PA2/PA3) reports the RCC state so we can distinguish:
- *   1. HSE/resonator not starting,
- *   2. HSE running but MCO not configured,
- *   3. MCO running but PA0/analyzer wiring being wrong.
- */
-static uint8_t clock_test_mco_hse(void)
+static void delay(uint32_t d)
 {
-    GPIO_InitTypeDef gpio;
-    uint32_t timeout = 1000000u;
-
-    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-
-    /* Make sure HSE is enabled before selecting it on MCO. */
-    RCC->CR |= RCC_CR_HSEON;
-    while (((RCC->CR & RCC_CR_HSERDY) == 0u) && --timeout)
-        ;
-
-    gpio.GPIO_Pin   = GPIO_Pin_8;
-    gpio.GPIO_Mode  = GPIO_Mode_AF_PP;
-    gpio.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_Init(GPIOA, &gpio);
-
-    /*
-     * IMPORTANT: RCC_MCO_HSE is the StdPeriph driver's byte-sized value
-     * (0x06), intended for RCC_MCOConfig(). It must NOT be ORed directly
-     * into RCC->CFGR. For direct register access the value is
-     * RCC_CFGR_MCO_HSE = 0x06000000.
-     */
-    RCC->CFGR &= ~RCC_CFGR_MCO;
-    RCC->CFGR |= RCC_CFGR_MCO_HSE;
-
-    return ((RCC->CR & RCC_CR_HSERDY) != 0u) ? 1u : 0u;
+    while (d--)
+        __asm__("nop");
 }
 
 static void uart_hex32(uint32_t value)
@@ -52,72 +19,72 @@ static void uart_hex32(uint32_t value)
         uart2_putc(hex[(value >> shift) & 0x0Fu]);
 }
 
-static void print_clock_status(uint8_t hse_ok)
+static void print_clock_status(void)
 {
-    uart2_print("\r\n=== STM32F103RCT6 CLOCK / MCO DIAGNOSTIC ===\r\n");
-    uart2_print("PA8: MCO = HSE (raw external clock)\r\n");
-    uart2_print("PA2: USART2 TX / PA3: USART2 RX\r\n");
+    uint32_t cfgr = RCC->CFGR;
+    uint32_t cr = RCC->CR;
 
-    uart2_print("RCC->CR   = 0x");
-    uart_hex32(RCC->CR);
+    uart2_print("\r\nCLOCK:\r\n");
+    uart2_print("  RCC->CR   = 0x");
+    uart_hex32(cr);
     uart2_print("\r\n");
-
-    uart2_print("RCC->CFGR = 0x");
-    uart_hex32(RCC->CFGR);
+    uart2_print("  RCC->CFGR = 0x");
+    uart_hex32(cfgr);
     uart2_print("\r\n");
-
-    uart2_print("GPIOA->CRH = 0x");
-    uart_hex32(GPIOA->CRH);
-    uart2_print("\r\n");
-
-    uart2_print("GPIOA->ODR = 0x");
-    uart_hex32(GPIOA->ODR);
-    uart2_print("\r\n");
-
-    uart2_print("HSI ready: ");
-    uart2_print((RCC->CR & RCC_CR_HSIRDY) ? "YES\r\n" : "NO\r\n");
-    uart2_print("HSE ready: ");
-    uart2_print(hse_ok ? "YES\r\n" : "NO\r\n");
-    uart2_print("PLL ready: ");
-    uart2_print((RCC->CR & RCC_CR_PLLRDY) ? "YES\r\n" : "NO\r\n");
-
-    uart2_print("MCO field: 0x");
-    uart_hex32(RCC->CFGR & RCC_CFGR_MCO);
-    uart2_print(" (expected 0x06000000 = HSE)\r\n");
-
-    uart2_print("Connect PA8 -> PA0 and GND -> GND.\r\n");
-    uart2_print("Expected PA8/PA0 frequency: approximately 8 MHz.\r\n");
-    uart2_print("==============================================\r\n");
+    uart2_print("  HSI ready = ");
+    uart2_print((cr & RCC_CR_HSIRDY) ? "YES\r\n" : "NO\r\n");
+    uart2_print("  HSE ready = ");
+    uart2_print((cr & RCC_CR_HSERDY) ? "YES\r\n" : "NO\r\n");
+    uart2_print("  PLL ready = ");
+    uart2_print((cr & RCC_CR_PLLRDY) ? "YES\r\n" : "NO\r\n");
 }
 
-static void delay(uint32_t d)
+static void codec_probe(void)
 {
-    while (d--)
-        __asm__("nop");
+    uart2_print("\r\nTLV320ADC3101:\r\n");
+    uart2_print("  I2C2: PB10=SCL PB11=SDA\r\n");
+    uart2_print("  Address: 0x18 (7-bit)\r\n");
+
+    if (i2c2_probe(TLV320ADC3101_I2C_ADDR))
+    {
+        uart2_print("  Probe: ACK - codec responded\r\n");
+    }
+    else
+    {
+        uart2_print("  Probe: NO ACK\r\n");
+        uart2_print("  Check codec power, I2C pull-ups, ADR0/ADR1, and wiring.\r\n");
+    }
 }
 
 int main(void)
 {
-    uint8_t hse_ok;
-
     board_init();
     uart2_init();
+    cli_init();
 
-    uart2_print("\r\nBOOT: audio_controller RCT6 clock test\r\n");
+    uart2_print("\r\n========================================\r\n");
+    uart2_print(" audio_controller - RCT6 bring-up\r\n");
+    uart2_print("========================================\r\n");
+    uart2_print("USART2: PA2=TX PA3=RX 115200 8N1\r\n");
+    uart2_print("System clock: 72 MHz target\r\n");
 
-    hse_ok = clock_test_mco_hse();
-    print_clock_status(hse_ok);
+    print_clock_status();
 
-    /*
-     * LED is only a status indicator; PA8 remains the measurement output.
-     * HSE good = slow heartbeat.
-     * HSE bad  = fast heartbeat.
-     */
+    /* First real peripheral checkpoint: I2C2 -> TLV320ADC3101. */
+    i2c2_init();
+    codec_probe();
+
+    uart2_print("\r\nBring-up complete. CLI ready.\r\n");
+    uart2_print("> ");
+
     while (1)
     {
+        cli_task();
+
+        /* Slow heartbeat; peripherals remain available while CLI runs. */
         led_on();
-        delay(hse_ok ? 500000u : 150000u);
+        delay(120000u);
         led_off();
-        delay(hse_ok ? 500000u : 150000u);
+        delay(120000u);
     }
 }
