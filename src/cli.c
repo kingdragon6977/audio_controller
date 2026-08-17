@@ -2,6 +2,7 @@
 #include "stm32f10x.h"
 #include "uart.h"
 #include "i2c.h"
+#include "codec.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -18,6 +19,8 @@ static void execute(char *cmd)
         uart2_print(" uid\r\n");
         uart2_print(" clock\r\n");
         uart2_print(" codec\r\n");
+        uart2_print(" codec dump\r\n");
+        uart2_print(" codec apply\r\n");
         uart2_print(" reboot\r\n");
         uart2_print(" led on\r\n");
         uart2_print(" led off\r\n");
@@ -55,6 +58,30 @@ static void execute(char *cmd)
     {
         uart2_print("TLV320ADC3101 @ 0x18: ");
         uart2_print(i2c2_probe(TLV320ADC3101_I2C_ADDR) ? "ACK\r\n" : "NO ACK\r\n");
+        return;
+    }
+
+    if (strcmp(cmd, "codec dump") == 0)
+    {
+        if (!i2c2_probe(TLV320ADC3101_I2C_ADDR))
+        {
+            uart2_print("TLV320ADC3101 @ 0x18: NO ACK\r\n");
+            return;
+        }
+
+        codec_dump_profile();
+        return;
+    }
+
+    if (strcmp(cmd, "codec apply") == 0)
+    {
+        uart2_print("Applying captured AV6301 TLV320ADC3101 Page-0 profile...\r\n");
+        uart2_print("WARNING: this drives the shared I2C bus; use only after isolating the AV6301.\r\n");
+
+        if (codec_apply_av6301_profile())
+            uart2_print("Codec profile applied successfully.\r\n");
+        else
+            uart2_print("Codec profile FAILED (I2C timeout/NACK).\r\n");
         return;
     }
 
