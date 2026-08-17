@@ -32,6 +32,7 @@ SRC := \
     src/board.c \
     src/uart.c \
     src/i2c.c \
+    src/codec.c \
     src/cli.c \
     src/syscalls.c \
     src/system_stm32f10x.c \
