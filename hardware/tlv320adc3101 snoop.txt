@@ -1,0 +1,1046 @@
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 279                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1393                                                                     
+START #2 @ 2021                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3024                                                                     
+START #3 @ 3655                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4796                                                                     
+START #4 @ 5425                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6428                                                                     
+START #5 @ 7057                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 8060                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 5                                                                      
+Bytes  : 15                                                                     
+ACKs   : 15                                                                     
+NACKs  : 0                                                                      
+Transitions: 356                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 0                                                                      
+STOPs  : 0                                                                      
+Bytes  : 0                                                                      
+ACKs   : 0                                                                      
+NACKs  : 0                                                                      
+Transitions: 0                                                                  
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 302                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1409                                                                     
+START #2 @ 2040                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3041                                                                     
+START #3 @ 3671                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4813                                                                     
+START #4 @ 5443                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6444                                                                     
+START #5 @ 7075                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 8076                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 5                                                                      
+Bytes  : 15                                                                     
+ACKs   : 15                                                                     
+NACKs  : 0                                                                      
+Transitions: 356                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 447                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1588                                                                     
+START #2 @ 2217                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3220                                                                     
+START #3 @ 3849                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4992                                                                     
+START #4 @ 5627                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6627                                                                     
+START #5 @ 7258                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 4                                                                      
+Bytes  : 14                                                                     
+ACKs   : 14                                                                     
+NACKs  : 0                                                                      
+Transitions: 338                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 0                                                                      
+STOPs  : 0                                                                      
+Bytes  : 0                                                                      
+ACKs   : 0                                                                      
+NACKs  : 0                                                                      
+Transitions: 1000                                                               
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 0                                                                      
+STOPs  : 0                                                                      
+Bytes  : 0                                                                      
+ACKs   : 0                                                                      
+NACKs  : 0                                                                      
+Transitions: 0                                                                  
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 444                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1585                                                                     
+START #2 @ 2214                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3217                                                                     
+START #3 @ 3848                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4989                                                                     
+START #4 @ 5618                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6620                                                                     
+START #5 @ 7249                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 4                                                                      
+Bytes  : 14                                                                     
+ACKs   : 14                                                                     
+NACKs  : 0                                                                      
+Transitions: 340                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 0                                                                      
+STOPs  : 0                                                                      
+Bytes  : 0                                                                      
+ACKs   : 0                                                                      
+NACKs  : 0                                                                      
+Transitions: 0                                                                  
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 439                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1581                                                                     
+START #2 @ 2209                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3212                                                                     
+START #3 @ 3843                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4984                                                                     
+START #4 @ 5613                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6616                                                                     
+START #5 @ 7245                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 4                                                                      
+Bytes  : 14                                                                     
+ACKs   : 14                                                                     
+NACKs  : 0                                                                      
+Transitions: 341                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 311                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1424                                                                     
+START #2 @ 2055                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3056                                                                     
+START #3 @ 3687                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4828                                                                     
+START #4 @ 5457                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6460                                                                     
+START #5 @ 7090                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 8091                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 5                                                                      
+Bytes  : 15                                                                     
+ACKs   : 15                                                                     
+NACKs  : 0                                                                      
+Transitions: 356                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 1743                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 2746                                                                     
+START #2 @ 3377                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4528                                                                     
+START #3 @ 5159                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6160                                                                     
+START #4 @ 6791                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 7794                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 4                                                                      
+STOPs  : 4                                                                      
+Bytes  : 12                                                                     
+ACKs   : 12                                                                     
+NACKs  : 0                                                                      
+Transitions: 347                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 1753                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 2756                                                                     
+START #2 @ 3387                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4538                                                                     
+START #3 @ 5169                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6170                                                                     
+START #4 @ 6801                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 7804                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 4                                                                      
+STOPs  : 4                                                                      
+Bytes  : 12                                                                     
+ACKs   : 12                                                                     
+NACKs  : 0                                                                      
+Transitions: 349                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 442                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1583                                                                     
+START #2 @ 2214                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3215                                                                     
+START #3 @ 3846                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4987                                                                     
+START #4 @ 5616                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6619                                                                     
+START #5 @ 7250                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 4                                                                      
+Bytes  : 14                                                                     
+ACKs   : 14                                                                     
+NACKs  : 0                                                                      
+Transitions: 340                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 0                                                                      
+STOPs  : 0                                                                      
+Bytes  : 0                                                                      
+ACKs   : 0                                                                      
+NACKs  : 0                                                                      
+Transitions: 0                                                                  
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 585                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1726                                                                     
+START #2 @ 2355                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3358                                                                     
+START #3 @ 3987                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 5130                                                                     
+START #4 @ 5765                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6766                                                                     
+START #5 @ 7397                                                                 
+ADDR 0x18 W ACK                                                                 
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 4                                                                      
+Bytes  : 13                                                                     
+ACKs   : 13                                                                     
+NACKs  : 0                                                                      
+Transitions: 321                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 307                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1420                                                                     
+START #2 @ 2051                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3052                                                                     
+START #3 @ 3683                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4824                                                                     
+START #4 @ 5453                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6456                                                                     
+START #5 @ 7087                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 8087                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 5                                                                      
+Bytes  : 15                                                                     
+ACKs   : 15                                                                     
+NACKs  : 0                                                                      
+Transitions: 356                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ trigger                                                              
+ADDR 0x23 W NACK                                                                
+DATA 0x13 NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x47 ACK                                                                   
+DATA 0x17 ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x47 ACK                                                                   
+DATA 0x12 NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x47 NACK                                                                  
+DATA 0x1A ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x47 NACK                                                                  
+DATA 0x0F NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x48 ACK                                                                   
+DATA 0x08 NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x48 ACK                                                                   
+DATA 0x21 ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x48 NACK                                                                  
+DATA 0x07 NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x48 NACK                                                                  
+DATA 0x22 ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x49 ACK                                                                   
+DATA 0x1A NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x49 ACK                                                                   
+DATA 0x0F ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x49 NACK                                                                  
+DATA 0x18 ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x49 NACK                                                                  
+DATA 0x11 NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x4A ACK                                                                   
+DATA 0x09 NACK                                                                  
+DATA 0x01 NACK                                                                  
+DATA 0x4A ACK                                                                   
+DATA 0x20 ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x4A NACK                                                                  
+DATA 0x19 ACK                                                                   
+DATA 0x01 NACK                                                                  
+DATA 0x4A NACK                                                                  
+DATA 0x10 NACK                                                                  
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 1                                                                      
+STOPs  : 0                                                                      
+Bytes  : 50                                                                     
+ACKs   : 16                                                                     
+NACKs  : 34                                                                     
+Transitions: 1152                                                               
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START timeout: no SDA falling edge with SCL HIGH.                           
+Check CH0=SDA, CH1=SCL, common GND, pull-ups, and reset/wake the master.        
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 0                                                                      
+STOPs  : 0                                                                      
+Bytes  : 0                                                                      
+ACKs   : 0                                                                      
+NACKs  : 0                                                                      
+Transitions: 0                                                                  
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 303                                                                  
+ADDR 0x18 W ACK                                                                 
+DATA 0x13 ACK                                                                   
+DATA 0x84 ACK                                                                   
+STOP @ 1410                                                                     
+START #2 @ 2041                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1B ACK                                                                   
+DATA 0x0C ACK                                                                   
+STOP @ 3041                                                                     
+START #3 @ 3672                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x14 ACK                                                                   
+DATA 0x80 ACK                                                                   
+STOP @ 4814                                                                     
+START #4 @ 5444                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1D ACK                                                                   
+DATA 0x06 ACK                                                                   
+STOP @ 6445                                                                     
+START #5 @ 7076                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x1E ACK                                                                   
+DATA 0x88 ACK                                                                   
+STOP @ 8077                                                                     
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 5                                                                      
+STOPs  : 5                                                                      
+Bytes  : 15                                                                     
+ACKs   : 15                                                                     
+NACKs  : 0                                                                      
+Transitions: 356                                                                
+                                                                                
+DONE                                                                            
+                                                                                
+====================================                                            
+STM32 Logic Analyzer v1.0                                                       
+====================================                                            
+Samples: 8192                                                                   
+Rate: 4000000 Hz                                                                
+Waiting for I2C START: SDA(CH0) falling while SCL(CH1) HIGH...                  
+Reset/wake the AV6301 now; timeout is 5 seconds.                                
+I2C START detected                                                              
+Capture Started                                                                 
+Hardware DMA sampler running...                                                 
+DMA sampling complete                                                           
+                                                                                
+I2C PASSIVE SNOOP                                                               
+CH0=SDA PA0  CH1=SCL PA1  CH2/CH3=aux                                           
+Capture rate: 4000000 Hz                                                        
+No SDA/SCL drive is performed.                                                  
+                                                                                
+START #1 @ 6071                                                                 
+ADDR 0x18 W ACK                                                                 
+DATA 0x00 ACK                                                                   
+DATA 0x2F ACK                                                                   
+STOP @ 7073                                                                     
+START #2 @ 7704                                                                 
+ADDR 0x18 W ACK                                                                 
+                                                                                
+I2C SUMMARY                                                                     
+STARTs : 2                                                                      
+STOPs  : 1                                                                      
+Bytes  : 4                                                                      
+ACKs   : 4                                                                      
+NACKs  : 0                                                                      
+Transitions: 756                                                                
+                                                                                
+DONE         
