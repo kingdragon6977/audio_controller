@@ -70,8 +70,14 @@ int main(void)
 
     print_clock_status();
 
-    /* First real peripheral checkpoint: I2C2 -> TLV320ADC3101. */
+    /* Configure PB10/PB11 for I2C2 as AF open-drain.  Do not drive either
+     * line push-pull here: the TLV320ADC3101 bus is open-drain and relies on
+     * external pull-ups. */
     i2c2_init();
+
+    /* Give the codec time to finish power/reset settling before its first
+     * I2C transaction.  This is intentionally before the first probe. */
+    delay(500000u);
     codec_probe();
 
     uart2_print("\r\nBring-up complete. CLI ready.\r\n");
