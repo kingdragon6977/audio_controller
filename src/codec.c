@@ -50,12 +50,12 @@ int codec_apply_av6301_profile(void)
     unsigned int i;
 
     /* All captured registers are on Page 0. */
-    if (!i2c2_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
+    if (!i2c1_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
         return 0;
 
     for (i = 0; i < sizeof(av6301_profile) / sizeof(av6301_profile[0]); ++i)
     {
-        if (!i2c2_write(TLV320ADC3101_ADDR,
+        if (!i2c1_write(TLV320ADC3101_ADDR,
                         av6301_profile[i][0],
                         av6301_profile[i][1]))
             return 0;
@@ -84,7 +84,7 @@ void codec_dump_profile(void)
     uart2_print("Expected captured AV6301 values:\r\n");
     uart2_print("  13=84  1B=0C  14=80  1D=06  1E=88\r\n");
 
-    if (!i2c2_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
+    if (!i2c1_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
     {
         uart2_print("  ERROR: cannot select Page 0\r\n");
         return;
@@ -92,7 +92,7 @@ void codec_dump_profile(void)
 
     for (i = 0; i < sizeof(regs) / sizeof(regs[0]); ++i)
     {
-        if (i2c2_read(TLV320ADC3101_ADDR, regs[i], &value))
+        if (i2c1_read(TLV320ADC3101_ADDR, regs[i], &value))
         {
             uart2_print("  0x");
             print_hex8(regs[i]);

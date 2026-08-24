@@ -57,13 +57,13 @@ static void execute(char *cmd)
     if (strcmp(cmd, "codec") == 0)
     {
         uart2_print("TLV320ADC3101 @ 0x18: ");
-        uart2_print(i2c2_probe(TLV320ADC3101_I2C_ADDR) ? "ACK\r\n" : "NO ACK\r\n");
+        uart2_print(i2c1_probe(TLV320ADC3101_ADDR) ? "ACK\r\n" : "NO ACK\r\n");
         return;
     }
 
     if (strcmp(cmd, "codec dump") == 0)
     {
-        if (!i2c2_probe(TLV320ADC3101_I2C_ADDR))
+        if (!i2c1_probe(TLV320ADC3101_ADDR))
         {
             uart2_print("TLV320ADC3101 @ 0x18: NO ACK\r\n");
             return;
