@@ -77,6 +77,7 @@ static int codec_probe(void)
     int result;
 
     uart2_print("\r\nTLV320ADC3101:\r\n");
+    uart2_print("  RESET: PB14 active-low hardware reset\r\n");
     uart2_print("  I2C1: PB6=SCL PB7=SDA\r\n");
     uart2_print("  Address: 0x18 (7-bit)\r\n");
     uart2_print("  Probing... ");
@@ -113,10 +114,15 @@ int main(void)
     print_i2c_status();
 
     /*
-     * The codec may be disconnected during bring-up. A missing ACK must
-     * return cleanly; do not attempt codec register writes unless the device
-     * actually responds.
+     * TLV320ADC3101 requires a hardware reset after its supplies are valid.
+     * This must happen before the first I2C transaction. PB14 is dedicated
+     * to the codec RESET input on this board.
      */
+    uart2_print("\r\nResetting TLV320ADC3101 on PB14...\r\n");
+    codec_reset();
+    uart2_print("TLV320 reset released.\r\n");
+
+    /* Probe only after the hardware reset has completed. */
     codec_present = codec_probe();
     print_i2c_status();
 
