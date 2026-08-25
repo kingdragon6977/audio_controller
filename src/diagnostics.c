@@ -38,7 +38,7 @@ static void dec32(uint32_t value)
 
 static uint32_t ahb_div(uint32_t cfgr)
 {
-    static const uint8_t divs[] = {1,1,1,1,1,1,1,1,2,4,8,16,64,128,256,512};
+    static const uint16_t divs[] = {1,1,1,1,1,1,1,1,2,4,8,16,64,128,256,512};
     return divs[(cfgr >> 4) & 0x0Fu];
 }
 
