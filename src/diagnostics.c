@@ -38,13 +38,15 @@ static void dec32(uint32_t value)
 
 static uint32_t ahb_div(uint32_t cfgr)
 {
+    /* HPRE encoding: 0000..0111 = /1, then /2,/4,/8,/16,/64,/128,/256,/512. */
     static const uint16_t divs[] = {1,1,1,1,1,1,1,1,2,4,8,16,64,128,256,512};
     return divs[(cfgr >> 4) & 0x0Fu];
 }
 
 static uint32_t apb_div(uint32_t cfgr, unsigned int shift)
 {
-    static const uint8_t divs[] = {1,1,1,1,1,1,1,1,2,4,8,16,16,16,16,16};
+    /* PPRE encoding: 000..011 = /1, 100=/2, 101=/4, 110=/8, 111=/16. */
+    static const uint8_t divs[] = {1,1,1,1,2,4,8,16};
     return divs[(cfgr >> shift) & 0x07u];
 }
 
@@ -169,9 +171,12 @@ void diagnostics_print_clock(void)
     uint32_t cr = RCC->CR;
     uint32_t cfgr = RCC->CFGR;
     uint32_t sys = sysclk_hz(cfgr);
-    uint32_t hclk = sys / ahb_div(cfgr);
-    uint32_t pclk1 = hclk / apb_div(cfgr, 8u);
-    uint32_t pclk2 = hclk / apb_div(cfgr, 11u);
+    uint32_t ahb = ahb_div(cfgr);
+    uint32_t apb1 = apb_div(cfgr, 8u);
+    uint32_t apb2 = apb_div(cfgr, 11u);
+    uint32_t hclk = sys / ahb;
+    uint32_t pclk1 = hclk / apb1;
+    uint32_t pclk2 = hclk / apb2;
 
     uart2_print("\r\nCLOCK TREE:\r\n");
     uart2_print("  RCC->CR     = 0x"); hex32(cr); uart2_print("\r\n");
@@ -189,9 +194,11 @@ void diagnostics_print_clock(void)
     else
         uart2_print("HSI/2\r\n");
     uart2_print("  PLL MULT    = x"); dec32(pll_multiplier(cfgr)); uart2_print("\r\n");
-    uart2_print("  AHB DIV     = "); dec32(ahb_div(cfgr)); uart2_print("\r\n");
-    uart2_print("  APB1 DIV    = "); dec32(apb_div(cfgr, 8u)); uart2_print("\r\n");
-    uart2_print("  APB2 DIV    = "); dec32(apb_div(cfgr, 11u)); uart2_print("\r\n");
+    uart2_print("  AHB DIV     = "); dec32(ahb); uart2_print("\r\n");
+    uart2_print("  APB1 DIV    = "); dec32(apb1); uart2_print("\r\n");
+    uart2_print("  APB2 DIV    = "); dec32(apb2); uart2_print("\r\n");
+    uart2_print("  APB1 LIMIT  = ");
+    uart2_print((pclk1 <= 36000000u) ? "PASS (<=36 MHz)\r\n" : "FAIL (>36 MHz)\r\n");
     uart2_print("  RCC_APB1ENR = 0x"); hex32(RCC->APB1ENR); uart2_print("\r\n");
     uart2_print("  RCC_APB2ENR = 0x"); hex32(RCC->APB2ENR); uart2_print("\r\n");
 }
