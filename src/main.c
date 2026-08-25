@@ -87,7 +87,13 @@ int main(void)
         uart2_print("\r\nCodec probe SKIPPED for safety.\r\n");
     }
 
-    if (codec_present)
+    /* Re-read the pins at the point where codec I2S output could be enabled. */
+    i2s_safe = diagnostics_i2s2_safe();
+    uart2_print("I2S PRE-ACTIVATION SAFETY: ");
+    uart2_print(i2s_safe ? "PASS\r\n"
+                         : "FAIL - codec I2S activation BLOCKED\r\n");
+
+    if (codec_present && i2s_safe)
     {
         uart2_print("Applying AV6301 codec profile...\r\n");
         if (codec_apply_av6301_profile())
@@ -100,6 +106,10 @@ int main(void)
         {
             uart2_print("Codec profile write failed.\r\n");
         }
+    }
+    else if (!i2s_safe)
+    {
+        uart2_print("Codec profile NOT applied: I2S pins are not in a safe input state.\r\n");
     }
     else
     {
