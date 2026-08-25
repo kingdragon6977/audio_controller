@@ -3,22 +3,67 @@
 #include "i2c.h"
 #include "uart.h"
 
-#define CODEC_REG_MADC        0x13u
-#define CODEC_REG_AOSR        0x14u
-#define CODEC_REG_IFACE       0x1Bu
-#define CODEC_REG_IFACE2      0x1Du
-#define CODEC_REG_BCLK_DIV    0x1Eu
+/* TLV320ADC3101 Page-0 clock / serial-interface registers. */
+#define CODEC_REG_CLKMUX       0x04u
+#define CODEC_REG_PLLPR        0x05u
+#define CODEC_REG_PLLJ         0x06u
+#define CODEC_REG_PLLD_MSB     0x07u
+#define CODEC_REG_PLLD_LSB     0x08u
+#define CODEC_REG_NADC         0x12u
+#define CODEC_REG_MADC         0x13u
+#define CODEC_REG_AOSR         0x14u
+#define CODEC_REG_IADC         0x15u
+#define CODEC_REG_IFACE        0x1Bu
+#define CODEC_REG_IFACE2       0x1Du
+#define CODEC_REG_BCLK_DIV     0x1Eu
+#define CODEC_REG_DOUT         0x35u
+#define CODEC_REG_ADC_POWER    0x51u
+#define CODEC_REG_ADC_MUTE     0x52u
+#define CODEC_REG_ADC_PRB      0x3Du
 
 /* TLV320ADC3101 RESET is active low on STM32 PB14. */
 #define CODEC_RESET_PORT      GPIOB
 #define CODEC_RESET_PIN       GPIO_Pin_14
 
+/*
+ * Known-good 16-MHz MCLK / 48-kHz / 16-bit I2S master configuration.
+ *
+ * PLL: 16 MHz * 6.144 = 98.304 MHz
+ *   P=1, R=1, J=6, D=1440
+ * ADC: 98.304 MHz / 8 / 2 / 128 = 48 kHz
+ * BCLK: ADC_MOD_CLK / 4 = 1.536 MHz = 32 * 48 kHz
+ *
+ * Register 0x1B = 0x0C selects I2S, 16-bit and ADC master mode.
+ * Register 0x1E = 0x84 selects BCLK divider N=4.
+ *
+ * The previous AV6301 profile only programmed a handful of interface
+ * dividers. It did not enable the PLL, select the MCLK clock path, or
+ * power the ADCs, so the codec could ACK I2C while producing no BCLK/WCLK.
+ */
 static const uint8_t av6301_profile[][2] = {
-    { CODEC_REG_MADC,     0x84u },
-    { CODEC_REG_IFACE,    0x0Cu },
-    { CODEC_REG_AOSR,     0x80u },
-    { CODEC_REG_IFACE2,   0x06u },
-    { CODEC_REG_BCLK_DIV, 0x88u }
+    { 0x00u, 0x00u },       /* Page 0 */
+
+    { CODEC_REG_ADC_MUTE, 0x88u }, /* Mute ADCs while clocks/power start */
+    { CODEC_REG_ADC_POWER, 0x00u }, /* ADCs off during clock programming */
+
+    { CODEC_REG_CLKMUX,   0x03u }, /* MCLK -> PLL, PLL -> CODEC_CLK */
+    { CODEC_REG_PLLPR,    0x91u }, /* PLL on, P=1, R=1 */
+    { CODEC_REG_PLLJ,     0x06u }, /* J=6 */
+    { CODEC_REG_PLLD_MSB, 0x05u }, /* D=1440 = 0x05A0 */
+    { CODEC_REG_PLLD_LSB, 0xA0u },
+
+    { CODEC_REG_NADC,     0x88u }, /* NADC=8, enabled */
+    { CODEC_REG_MADC,     0x82u }, /* MADC=2, enabled */
+    { CODEC_REG_AOSR,     0x80u }, /* AOSR=128 */
+    { CODEC_REG_IADC,     0x80u }, /* IADC=128 */
+
+    { CODEC_REG_IFACE,    0x0Cu }, /* I2S, 16-bit, ADC master */
+    { CODEC_REG_IFACE2,   0x02u }, /* BCLK divider input = ADC_CLK */
+    { CODEC_REG_BCLK_DIV, 0x84u }, /* BCLK divider N=4 */
+    { CODEC_REG_DOUT,     0x02u }, /* primary DOUT enabled */
+
+    { CODEC_REG_ADC_POWER, 0xC2u }, /* power up both ADC channels */
+    { CODEC_REG_ADC_MUTE,  0x00u }  /* unmute, 0 dB digital gain */
 };
 
 static void codec_delay(uint32_t count)
@@ -30,7 +75,7 @@ static void codec_delay(uint32_t count)
 /*
  * TLV320ADC3101 hardware reset.
  * TI requires RESET low for at least 10 ns after the codec supplies are
- * valid. We use millisecond-scale margins for bring-up reliability.
+ * valid. We use large margins for bring-up reliability.
  */
 void codec_reset(void)
 {
@@ -60,9 +105,6 @@ int codec_apply_av6301_profile(void)
 {
     unsigned int i;
 
-    if (!i2c1_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
-        return 0;
-
     for (i = 0; i < sizeof(av6301_profile) / sizeof(av6301_profile[0]); ++i)
     {
         if (!i2c1_write(TLV320ADC3101_ADDR,
@@ -84,15 +126,32 @@ static void print_hex8(uint8_t value)
 void codec_dump_profile(void)
 {
     static const uint8_t regs[] = {
-        0x00u, CODEC_REG_MADC, CODEC_REG_IFACE, CODEC_REG_AOSR,
-        CODEC_REG_IFACE2, CODEC_REG_BCLK_DIV, 0x12u, 0x51u, 0x52u
+        0x00u,
+        CODEC_REG_CLKMUX,
+        CODEC_REG_PLLPR,
+        CODEC_REG_PLLJ,
+        CODEC_REG_PLLD_MSB,
+        CODEC_REG_PLLD_LSB,
+        CODEC_REG_NADC,
+        CODEC_REG_MADC,
+        CODEC_REG_AOSR,
+        CODEC_REG_IADC,
+        CODEC_REG_IFACE,
+        0x1Cu,
+        CODEC_REG_IFACE2,
+        CODEC_REG_BCLK_DIV,
+        0x1Fu,
+        0x20u,
+        0x21u,
+        CODEC_REG_ADC_PRB,
+        CODEC_REG_DOUT,
+        CODEC_REG_ADC_POWER,
+        CODEC_REG_ADC_MUTE
     };
     unsigned int i;
     uint8_t value;
 
-    uart2_print("\r\nTLV320ADC3101 Page-0 register dump\r\n");
-    uart2_print("Expected captured AV6301 values:\r\n");
-    uart2_print("  13=84  1B=0C  14=80  1D=06  1E=88\r\n");
+    uart2_print("\r\nTLV320ADC3101 Page-0 clock/interface dump\r\n");
 
     if (!i2c1_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
     {
