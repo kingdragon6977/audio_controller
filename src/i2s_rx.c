@@ -4,22 +4,28 @@
 
 static uint16_t rx_buffer[I2S_RX_SAMPLES];
 static uint32_t dma_error_flags;
+static i2s_rx_debug_t debug_state;
 
 int i2s_rx_start_capture(void)
 {
     DMA_InitTypeDef dma;
     I2S_InitTypeDef i2s;
+    volatile uint16_t dummy_dr;
+    volatile uint16_t dummy_sr;
 
     dma_error_flags = 0u;
+    debug_state.sr_before = SPI2->SR;
+    debug_state.sr_after_enable = 0u;
+    debug_state.sr_after_capture = 0u;
+    debug_state.dr_after_capture = 0u;
+    debug_state.dma_isr_after_capture = 0u;
+    debug_state.dma_cndtr_after_capture = 0u;
 
     /* Never activate the MCU I2S receiver unless its external-master pins
      * have already passed the GPIO safety gate. */
     if (!diagnostics_i2s2_safe())
         return 0;
 
-    /* External codec remains the clock master. Enabling these clocks does not
-     * configure PB12/PB13/PB15 as MCU outputs; they remain GPIO inputs until
-     * the STM32 peripheral takes ownership of the I2S input function. */
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
@@ -28,6 +34,14 @@ int i2s_rx_start_capture(void)
     DMA_Cmd(DMA1_Channel4, DISABLE);
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
+
+    /* Clear a stale RXNE/OVR condition before the new capture. On STM32F1,
+     * an overrun is cleared by reading DR followed by SR. Do this while I2S
+     * is disabled so an old status bit cannot contaminate the new capture. */
+    dummy_dr = SPI2->DR;
+    dummy_sr = SPI2->SR;
+    (void)dummy_dr;
+    (void)dummy_sr;
 
     /* SPI2 RX is DMA1 Channel 4 on STM32F1. One DMA item is one 16-bit I2S
      * slot. Normal mode gives us a deterministic finite capture. */
@@ -58,13 +72,22 @@ int i2s_rx_start_capture(void)
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, ENABLE);
     DMA_Cmd(DMA1_Channel4, ENABLE);
     I2S_Cmd(SPI2, ENABLE);
+    debug_state.sr_after_enable = SPI2->SR;
 
     return 1;
 }
 
 int i2s_rx_capture_complete(void)
 {
-    return DMA_GetFlagStatus(DMA1_FLAG_TC4) ? 1 : 0;
+    if (DMA_GetFlagStatus(DMA1_FLAG_TC4))
+    {
+        debug_state.sr_after_capture = SPI2->SR;
+        debug_state.dr_after_capture = SPI2->DR;
+        debug_state.dma_isr_after_capture = DMA1->ISR;
+        debug_state.dma_cndtr_after_capture = DMA1_Channel4->CNDTR;
+        return 1;
+    }
+    return 0;
 }
 
 uint32_t i2s_rx_error_flags(void)
@@ -77,6 +100,12 @@ uint32_t i2s_rx_error_flags(void)
 const uint16_t *i2s_rx_buffer(void)
 {
     return rx_buffer;
+}
+
+void i2s_rx_get_debug(i2s_rx_debug_t *debug)
+{
+    if (debug)
+        *debug = debug_state;
 }
 
 void i2s_rx_stop(void)
