@@ -47,12 +47,6 @@
  *                    when the codec is otherwise powered down
  *   P0:0x1E = 0x88 -> BCLK divider enabled, N = 8
  *
- * The earlier 0x1D=0x02 / 0x1E=0x84 combination was incorrect for this
- * clock tree: it selects the same ADC_CLK source but divides by 4, which
- * would request a 24.576-MHz BCLK from a 98.304-MHz ADC clock and exceeds
- * the TLV320ADC3101 BCLK limit. The original AV6301 snoop explicitly showed
- * 0x1D=0x06 followed by 0x1E=0x88.
- *
  * Register 0x1B = 0x0C selects I2S, 16-bit and ADC master mode.
  * Register 0x35 = 0x12 selects primary DOUT and disables its bus keeper.
  *
@@ -62,35 +56,27 @@
  */
 static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE, 0x00u },
-
-    /* Page 1: physical IN1L(P), pin 8 -> left PGA, single-ended, 0 dB. */
     { CODEC_REG_PAGE,       0x01u },
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
     { CODEC_REG_LEFT_PGA,   0x00u },
-
-    /* Return to page 0 for clock / digital interface configuration. */
     { CODEC_REG_PAGE,       0x00u },
-    { CODEC_REG_ADC_MUTE,   0x88u }, /* Mute ADCs while clocks/power start */
-    { CODEC_REG_ADC_POWER,  0x00u }, /* ADCs off during clock programming */
-
-    { CODEC_REG_CLKMUX,   0x03u }, /* MCLK -> PLL, PLL -> CODEC_CLK */
-    { CODEC_REG_PLLPR,    0x91u }, /* PLL on, P=1, R=1 */
-    { CODEC_REG_PLLJ,     0x06u }, /* J=6 */
-    { CODEC_REG_PLLD_MSB, 0x05u }, /* D=1440 = 0x05A0 */
-    { CODEC_REG_PLLD_LSB, 0xA0u },
-
-    { CODEC_REG_NADC,     0x88u }, /* NADC=8, enabled */
-    { CODEC_REG_MADC,     0x82u }, /* MADC=2, enabled */
-    { CODEC_REG_AOSR,     0x80u }, /* AOSR=128 */
-    { CODEC_REG_IADC,     0x80u }, /* IADC=128 */
-
-    { CODEC_REG_IFACE,    0x0Cu }, /* I2S, 16-bit, ADC master */
-    { CODEC_REG_IFACE2,   0x06u }, /* recovered: ADC_CLK + clocks active */
-    { CODEC_REG_BCLK_DIV, 0x88u }, /* recovered: BCLK divider N=8 */
-    { CODEC_REG_DOUT,     0x12u }, /* primary DOUT, bus keeper disabled */
-
-    { CODEC_REG_ADC_POWER, 0xC2u }, /* power up both ADC channels */
-    { CODEC_REG_ADC_MUTE,  0x00u }  /* unmute, 0 dB digital gain */
+    { CODEC_REG_ADC_MUTE,   0x88u },
+    { CODEC_REG_ADC_POWER,  0x00u },
+    { CODEC_REG_CLKMUX,     0x03u },
+    { CODEC_REG_PLLPR,      0x91u },
+    { CODEC_REG_PLLJ,       0x06u },
+    { CODEC_REG_PLLD_MSB,   0x05u },
+    { CODEC_REG_PLLD_LSB,   0xA0u },
+    { CODEC_REG_NADC,       0x88u },
+    { CODEC_REG_MADC,       0x82u },
+    { CODEC_REG_AOSR,       0x80u },
+    { CODEC_REG_IADC,       0x80u },
+    { CODEC_REG_IFACE,      0x0Cu },
+    { CODEC_REG_IFACE2,     0x06u },
+    { CODEC_REG_BCLK_DIV,   0x88u },
+    { CODEC_REG_DOUT,       0x12u },
+    { CODEC_REG_ADC_POWER,  0xC2u },
+    { CODEC_REG_ADC_MUTE,   0x00u }
 };
 
 static void codec_delay(uint32_t count)
@@ -99,11 +85,6 @@ static void codec_delay(uint32_t count)
         __asm__("nop");
 }
 
-/*
- * TLV320ADC3101 hardware reset.
- * TI requires RESET low for at least 10 ns after the codec supplies are
- * valid. We use large margins for bring-up reliability.
- */
 void codec_reset(void)
 {
     GPIO_InitTypeDef gpio;
@@ -115,32 +96,12 @@ void codec_reset(void)
     gpio.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(CODEC_RESET_PORT, &gpio);
 
-    /* Allow already-powered codec supplies to settle. */
     GPIO_SetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(720000u);
-
-    /* Active-low reset pulse. */
     GPIO_ResetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(72000u);
-
-    /* Release reset and allow codec startup. */
     GPIO_SetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(720000u);
-}
-
-int codec_apply_av6301_profile(void)
-{
-    unsigned int i;
-
-    for (i = 0; i < sizeof(av6301_profile) / sizeof(av6301_profile[0]); ++i)
-    {
-        if (!i2c1_write(TLV320ADC3101_ADDR,
-                        av6301_profile[i][0],
-                        av6301_profile[i][1]))
-            return 0;
-    }
-
-    return 1;
 }
 
 static void print_hex8(uint8_t value)
@@ -148,6 +109,56 @@ static void print_hex8(uint8_t value)
     static const char hex[] = "0123456789ABCDEF";
     uart2_putc(hex[(value >> 4) & 0x0Fu]);
     uart2_putc(hex[value & 0x0Fu]);
+}
+
+int codec_apply_av6301_profile(void)
+{
+    unsigned int i;
+    uint8_t actual;
+
+    for (i = 0; i < sizeof(av6301_profile) / sizeof(av6301_profile[0]); ++i)
+    {
+        uint8_t reg = av6301_profile[i][0];
+        uint8_t expected = av6301_profile[i][1];
+
+        if (!i2c1_write(TLV320ADC3101_ADDR, reg, expected))
+        {
+            uart2_print("Codec profile I2C WRITE FAIL at reg 0x");
+            print_hex8(reg);
+            uart2_print(" expected 0x");
+            print_hex8(expected);
+            uart2_print("\r\n");
+            return 0;
+        }
+
+        /* Verify every profile write immediately. This distinguishes an I2C
+         * transaction that completed electrically from a codec register that
+         * actually accepted the value. Page 0/1 writes are included so the
+         * first failing register is unambiguous. */
+        if (!i2c1_read(TLV320ADC3101_ADDR, reg, &actual))
+        {
+            uart2_print("Codec profile READBACK FAIL at reg 0x");
+            print_hex8(reg);
+            uart2_print(" after writing 0x");
+            print_hex8(expected);
+            uart2_print("\r\n");
+            return 0;
+        }
+
+        if (actual != expected)
+        {
+            uart2_print("Codec profile VERIFY FAIL at reg 0x");
+            print_hex8(reg);
+            uart2_print(" wrote 0x");
+            print_hex8(expected);
+            uart2_print(" read 0x");
+            print_hex8(actual);
+            uart2_print("\r\n");
+            return 0;
+        }
+    }
+
+    return 1;
 }
 
 static void codec_dump_registers(const char *title,
@@ -181,35 +192,16 @@ static void codec_dump_registers(const char *title,
 void codec_dump_profile(void)
 {
     static const uint8_t page0_regs[] = {
-        0x00u,
-        CODEC_REG_CLKMUX,
-        CODEC_REG_PLLPR,
-        CODEC_REG_PLLJ,
-        CODEC_REG_PLLD_MSB,
-        CODEC_REG_PLLD_LSB,
-        CODEC_REG_NADC,
-        CODEC_REG_MADC,
-        CODEC_REG_AOSR,
-        CODEC_REG_IADC,
-        CODEC_REG_IFACE,
-        0x1Cu,
-        CODEC_REG_IFACE2,
-        CODEC_REG_BCLK_DIV,
-        0x1Fu,
-        0x20u,
-        0x21u,
-        CODEC_REG_ADC_FLAG,
-        CODEC_REG_ADC_PRB,
-        CODEC_REG_DOUT,
-        CODEC_REG_ADC_POWER,
-        CODEC_REG_ADC_MUTE
+        0x00u, CODEC_REG_CLKMUX, CODEC_REG_PLLPR, CODEC_REG_PLLJ,
+        CODEC_REG_PLLD_MSB, CODEC_REG_PLLD_LSB, CODEC_REG_NADC,
+        CODEC_REG_MADC, CODEC_REG_AOSR, CODEC_REG_IADC, CODEC_REG_IFACE,
+        0x1Cu, CODEC_REG_IFACE2, CODEC_REG_BCLK_DIV, 0x1Fu, 0x20u,
+        0x21u, CODEC_REG_ADC_FLAG, CODEC_REG_ADC_PRB, CODEC_REG_DOUT,
+        CODEC_REG_ADC_POWER, CODEC_REG_ADC_MUTE
     };
     static const uint8_t page1_regs[] = {
-        CODEC_REG_MICBIAS,
-        CODEC_REG_IN1L_ROUTE,
-        CODEC_REG_IN1R_ROUTE,
-        CODEC_REG_LEFT_PGA,
-        CODEC_REG_RIGHT_PGA
+        CODEC_REG_MICBIAS, CODEC_REG_IN1L_ROUTE, CODEC_REG_IN1R_ROUTE,
+        CODEC_REG_LEFT_PGA, CODEC_REG_RIGHT_PGA
     };
 
     if (!i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u))
@@ -233,6 +225,5 @@ void codec_dump_profile(void)
     codec_dump_registers("", page1_regs,
                          sizeof(page1_regs) / sizeof(page1_regs[0]));
 
-    /* Leave the codec on Page 0 for subsequent operations. */
     (void)i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u);
 }
