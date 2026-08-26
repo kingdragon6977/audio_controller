@@ -21,6 +21,11 @@
 #define CODEC_REG_ADC_MUTE     0x52u
 #define CODEC_REG_ADC_PRB      0x3Du
 
+/* Page-1 analog input routing/gain registers. */
+#define CODEC_REG_PAGE         0x00u
+#define CODEC_REG_IN1L_ROUTE   0x34u
+#define CODEC_REG_LEFT_PGA     0x3Bu
+
 /* TLV320ADC3101 RESET is active low on STM32 PB14. */
 #define CODEC_RESET_PORT      GPIOB
 #define CODEC_RESET_PIN       GPIO_Pin_14
@@ -36,15 +41,22 @@
  * Register 0x1B = 0x0C selects I2S, 16-bit and ADC master mode.
  * Register 0x1E = 0x84 selects BCLK divider N=4.
  *
- * The previous AV6301 profile only programmed a handful of interface
- * dividers. It did not enable the PLL, select the MCLK clock path, or
- * power the ADCs, so the codec could ACK I2C while producing no BCLK/WCLK.
+ * The original AV6301 traffic was captured with the project's logic analyzer.
+ * This profile preserves the recovered clock/interface settings and adds the
+ * missing explicit IN1L(P) pin-8 analog input path for the isolated TLV320.
  */
 static const uint8_t av6301_profile[][2] = {
-    { 0x00u, 0x00u },       /* Page 0 */
+    { CODEC_REG_PAGE, 0x00u },
 
-    { CODEC_REG_ADC_MUTE, 0x88u }, /* Mute ADCs while clocks/power start */
-    { CODEC_REG_ADC_POWER, 0x00u }, /* ADCs off during clock programming */
+    /* Page 1: physical IN1L(P), pin 8 -> left PGA, single-ended, 0 dB. */
+    { CODEC_REG_PAGE,       0x01u },
+    { CODEC_REG_IN1L_ROUTE, 0xFCu },
+    { CODEC_REG_LEFT_PGA,   0x00u },
+
+    /* Return to page 0 for clock / digital interface configuration. */
+    { CODEC_REG_PAGE,       0x00u },
+    { CODEC_REG_ADC_MUTE,   0x88u }, /* Mute ADCs while clocks/power start */
+    { CODEC_REG_ADC_POWER,  0x00u }, /* ADCs off during clock programming */
 
     { CODEC_REG_CLKMUX,   0x03u }, /* MCLK -> PLL, PLL -> CODEC_CLK */
     { CODEC_REG_PLLPR,    0x91u }, /* PLL on, P=1, R=1 */
