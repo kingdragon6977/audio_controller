@@ -44,6 +44,7 @@
  *
  * Register 0x1B = 0x0C selects I2S, 16-bit and ADC master mode.
  * Register 0x1E = 0x84 selects BCLK divider N=4.
+ * Register 0x35 = 0x12 routes DOUT to the primary codec interface.
  *
  * The original AV6301 traffic was captured with the project's logic analyzer.
  * This profile preserves the recovered clock/interface settings and adds the
@@ -76,7 +77,7 @@ static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_IFACE,    0x0Cu }, /* I2S, 16-bit, ADC master */
     { CODEC_REG_IFACE2,   0x02u }, /* BCLK divider input = ADC_CLK */
     { CODEC_REG_BCLK_DIV, 0x84u }, /* BCLK divider N=4 */
-    { CODEC_REG_DOUT,     0x02u }, /* primary DOUT enabled */
+    { CODEC_REG_DOUT,     0x12u }, /* primary DOUT, bus keeper disabled */
 
     { CODEC_REG_ADC_POWER, 0xC2u }, /* power up both ADC channels */
     { CODEC_REG_ADC_MUTE,  0x00u }  /* unmute, 0 dB digital gain */
@@ -211,7 +212,6 @@ void codec_dump_profile(void)
     codec_dump_registers("", page0_regs,
                          sizeof(page0_regs) / sizeof(page0_regs[0]));
 
-    /* Explicitly verify the analog routing we just added. */
     if (!i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x01u))
     {
         uart2_print("TLV320ADC3101 DIAGNOSTIC DUMP: ERROR selecting Page 1\r\n");
@@ -223,6 +223,6 @@ void codec_dump_profile(void)
     codec_dump_registers("", page1_regs,
                          sizeof(page1_regs) / sizeof(page1_regs[0]));
 
-    /* Leave the codec on Page 0, as expected by the rest of the firmware. */
+    /* Leave the codec on Page 0 for subsequent operations. */
     (void)i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u);
 }
