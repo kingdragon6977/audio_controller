@@ -170,6 +170,41 @@ void diagnostics_print_i2s2(void)
     uart2_print("  SR         = 0x"); hex32(SPI2->SR); uart2_print("\r\n");
     uart2_print("  I2SCFGR    = 0x"); hex32(SPI2->I2SCFGR); uart2_print("\r\n");
     uart2_print("  I2SPR      = 0x"); hex32(SPI2->I2SPR); uart2_print("\r\n");
+    uart2_print("  ROLE        = CODEC MASTER / STM32 OBSERVER\r\n");
+    uart2_print("  MCU I2S     = DISABLED (intentional)\r\n");
+}
+
+void diagnostics_print_i2s_clock_ownership(void)
+{
+    uart2_print("\r\nI2S CLOCK OWNERSHIP:\r\n");
+    uart2_print("  MASTER      = TLV320ADC3101\r\n");
+    uart2_print("  STM32 ROLE  = I2S SLAVE / OBSERVER\r\n");
+    uart2_print("  WCLK PB12   = CODEC OUTPUT -> MCU INPUT\r\n");
+    uart2_print("  BCLK PB13   = CODEC OUTPUT -> MCU INPUT\r\n");
+    uart2_print("  DOUT PB15   = CODEC OUTPUT -> MCU INPUT\r\n");
+    uart2_print("  EXPECTED    = 48 kHz WCLK, 3.072 MHz BCLK\r\n");
+    uart2_print("  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS\r\n");
+}
+
+int diagnostics_i2s_clock_pins_active(void)
+{
+    uint32_t initial;
+    uint32_t changed = 0u;
+    uint32_t i;
+
+    if (!diagnostics_i2s2_safe()) return 0;
+
+    /* This is deliberately only a coarse activity check. It is not a
+     * frequency measurement; the logic analyzer remains authoritative for
+     * exact WCLK/BCLK timing. WCLK is slow enough to be observable by polling. */
+    initial = GPIOB->IDR & GPIO_Pin_12;
+    for (i = 0u; i < 200000u; ++i) {
+        if ((GPIOB->IDR & GPIO_Pin_12) != initial) {
+            changed = 1u;
+            break;
+        }
+    }
+    return changed ? 1 : 0;
 }
 
 int diagnostics_i2c1_safe(void)
