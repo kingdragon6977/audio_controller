@@ -17,6 +17,7 @@ int main(void)
     int codec_present = 0;
     int i2c_safe;
     int i2s_safe;
+    int i2s_clock_active = 0;
 
     /*
      * Bring-up order is deliberate:
@@ -41,6 +42,7 @@ int main(void)
     diagnostics_print_mcu();
     diagnostics_print_clock();
     diagnostics_print_audio_pins();
+    diagnostics_print_i2s_clock_ownership();
 
     i2s_safe = diagnostics_i2s2_safe();
     uart2_print("\r\nI2S PIN SAFETY: ");
@@ -101,6 +103,14 @@ int main(void)
             uart2_print("Codec profile applied.\r\n");
             uart2_print("Read-back trail follows:\r\n");
             codec_dump_profile();
+
+            diagnostics_print_i2s_clock_ownership();
+            uart2_print("\r\nI2S CLOCK ACTIVITY CHECK: ");
+            i2s_clock_active = diagnostics_i2s_clock_pins_active();
+            uart2_print(i2s_clock_active
+                        ? "PASS - WCLK activity observed on PB12\r\n"
+                        : "WARN - no WCLK transition observed by coarse MCU poll\r\n");
+            uart2_print("  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.\r\n");
         }
         else
         {
