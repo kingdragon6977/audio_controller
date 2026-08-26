@@ -39,6 +39,7 @@ int main(void)
     uint32_t timeout;
     unsigned int i;
     const uint16_t *samples;
+    i2s_rx_debug_t i2s_debug;
 
     /*
      * Bring-up order is deliberate:
@@ -82,17 +83,11 @@ int main(void)
     uart2_print(i2c_safe ? "PASS - AF open-drain and SDA/SCL released HIGH\r\n"
                          : "FAIL - refusing I2C transaction because pin/bus state is unsafe\r\n");
 
-    /*
-     * TLV320ADC3101 requires a hardware reset after its supplies are valid.
-     * This must happen before the first I2C transaction. PB14 is dedicated
-     * to the codec RESET input on this board.
-     */
     uart2_print("\r\nResetting TLV320ADC3101 on PB14...\r\n");
     codec_reset();
     uart2_print("TLV320 reset released.\r\n");
     diagnostics_print_audio_pins();
 
-    /* Never probe a bus whose electrical state failed the preflight check. */
     if (i2c_safe)
     {
         uart2_print("\r\nTLV320ADC3101:\r\n");
@@ -111,7 +106,6 @@ int main(void)
         uart2_print("\r\nCodec probe SKIPPED for safety.\r\n");
     }
 
-    /* Re-read the pins at the point where codec I2S output could be enabled. */
     i2s_safe = diagnostics_i2s2_safe();
     uart2_print("I2S PRE-ACTIVATION SAFETY: ");
     uart2_print(i2s_safe ? "PASS\r\n"
@@ -134,8 +128,6 @@ int main(void)
                         : "WARN - no WCLK transition observed by coarse MCU poll\r\n");
             uart2_print("  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.\r\n");
 
-            /* The codec is now demonstrably producing its clocks. Only now
-             * may the STM32 take I2S peripheral ownership as a slave RX. */
             if (i2s_clock_active && diagnostics_i2s2_safe())
             {
                 uart2_print("\r\nI2S RX DMA ACTIVATION PRE-FLIGHT: PASS\r\n");
@@ -232,6 +224,31 @@ int main(void)
                         uart2_print("  ODD SLOT SUM     = 0x");
                         print_hex32(odd_sum);
                         uart2_print("\r\n");
+
+                        /* Snapshot the peripheral/DMA state at the exact point
+                         * where the finite transfer completed. These values
+                         * distinguish a real I2S RX stream from stale RX data,
+                         * overrun, or a DMA configuration problem. */
+                        i2s_rx_get_debug(&i2s_debug);
+                        uart2_print("\r\nI2S RX DEBUG SNAPSHOT:\r\n");
+                        uart2_print("  SPI2 SR BEFORE  = 0x");
+                        print_hex32(i2s_debug.sr_before);
+                        uart2_print("\r\n");
+                        uart2_print("  SPI2 SR ENABLED = 0x");
+                        print_hex32(i2s_debug.sr_after_enable);
+                        uart2_print("\r\n");
+                        uart2_print("  SPI2 SR COMPLETE= 0x");
+                        print_hex32(i2s_debug.sr_after_capture);
+                        uart2_print("\r\n");
+                        uart2_print("  SPI2 DR LAST    = 0x");
+                        print_hex32(i2s_debug.dr_after_capture);
+                        uart2_print("\r\n");
+                        uart2_print("  DMA1 ISR        = 0x");
+                        print_hex32(i2s_debug.dma_isr_after_capture);
+                        uart2_print("\r\n");
+                        uart2_print("  DMA1 CH4 CNDTR  = 0x");
+                        print_hex16(i2s_debug.dma_cndtr_after_capture);
+                        uart2_print("\r\n");
                     }
 
                     i2s_rx_stop();
@@ -257,7 +274,6 @@ int main(void)
         uart2_print("Codec profile NOT applied because no ACK was received.\r\n");
     }
 
-    /* Leave a final hardware-state breadcrumb after the receiver test. */
     diagnostics_print_i2s2();
     diagnostics_print_audio_pins();
 
@@ -268,11 +284,6 @@ int main(void)
 
     while (1)
     {
-        cli_task();
-
-        led_on();
-        delay(120000u);
-        led_off();
-        delay(120000u);
+        cli_poll();
     }
 }
