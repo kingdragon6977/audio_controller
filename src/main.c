@@ -22,6 +22,12 @@ static void print_hex16(uint16_t value)
     uart2_putc(hex[value & 0x0Fu]);
 }
 
+static void print_hex32(uint32_t value)
+{
+    print_hex16((uint16_t)(value >> 16));
+    print_hex16((uint16_t)value);
+}
+
 int main(void)
 {
     int codec_present = 0;
@@ -170,6 +176,7 @@ int main(void)
 
                         uart2_print("I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured\r\n");
 
+                        samples = i2s_rx_buffer();
                         for (i = 0u; i < I2S_RX_SAMPLES; ++i)
                         {
                             uint16_t sample = samples[i];
@@ -207,23 +214,23 @@ int main(void)
                         uart2_print("  MAX SAMPLE       = 0x");
                         print_hex16(max_sample);
                         uart2_print("\r\n");
-                        uart2_print("  ZERO COUNT       = ");
-                        uart2_print_u32(zero_count);
+                        uart2_print("  ZERO COUNT       = 0x");
+                        print_hex32(zero_count);
                         uart2_print("\r\n");
-                        uart2_print("  0x8000 COUNT     = ");
-                        uart2_print_u32(min_count);
+                        uart2_print("  0x8000 COUNT     = 0x");
+                        print_hex32(min_count);
                         uart2_print("\r\n");
-                        uart2_print("  0xFFFF COUNT     = ");
-                        uart2_print_u32(max_count);
+                        uart2_print("  0xFFFF COUNT     = 0x");
+                        print_hex32(max_count);
                         uart2_print("\r\n");
-                        uart2_print("  IDENTICAL PAIRS  = ");
-                        uart2_print_u32(identical_pairs);
+                        uart2_print("  IDENTICAL PAIRS  = 0x");
+                        print_hex32(identical_pairs);
                         uart2_print("\r\n");
-                        uart2_print("  EVEN SLOT SUM    = ");
-                        uart2_print_u32(even_sum);
+                        uart2_print("  EVEN SLOT SUM    = 0x");
+                        print_hex32(even_sum);
                         uart2_print("\r\n");
-                        uart2_print("  ODD SLOT SUM     = ");
-                        uart2_print_u32(odd_sum);
+                        uart2_print("  ODD SLOT SUM     = 0x");
+                        print_hex32(odd_sum);
                         uart2_print("\r\n");
                     }
 
