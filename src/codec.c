@@ -55,7 +55,7 @@
  * missing explicit IN1L(P) pin-8 analog input path for the isolated TLV320.
  */
 static const uint8_t av6301_profile[][2] = {
-    { CODEC_REG_PAGE, 0x00u },
+    { CODEC_REG_PAGE,       0x00u },
     { CODEC_REG_PAGE,       0x01u },
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
     { CODEC_REG_LEFT_PGA,   0x00u },
@@ -111,12 +111,41 @@ static void print_hex8(uint8_t value)
     uart2_putc(hex[value & 0x0Fu]);
 }
 
+static int codec_verify_register(uint8_t reg, uint8_t expected)
+{
+    uint8_t actual;
+
+    if (!i2c1_read(TLV320ADC3101_ADDR, reg, &actual))
+    {
+        uart2_print("Codec profile READBACK FAIL at reg 0x");
+        print_hex8(reg);
+        uart2_print(" after writing 0x");
+        print_hex8(expected);
+        uart2_print("\r\n");
+        return 0;
+    }
+
+    if (actual != expected)
+    {
+        uart2_print("Codec profile VERIFY FAIL at reg 0x");
+        print_hex8(reg);
+        uart2_print(" wrote 0x");
+        print_hex8(expected);
+        uart2_print(" read 0x");
+        print_hex8(actual);
+        uart2_print("\r\n");
+        return 0;
+    }
+
+    return 1;
+}
+
 int codec_apply_av6301_profile(void)
 {
     unsigned int i;
-    uint8_t actual;
+    const unsigned int count = sizeof(av6301_profile) / sizeof(av6301_profile[0]);
 
-    for (i = 0; i < sizeof(av6301_profile) / sizeof(av6301_profile[0]); ++i)
+    for (i = 0; i < count; ++i)
     {
         uint8_t reg = av6301_profile[i][0];
         uint8_t expected = av6301_profile[i][1];
@@ -131,31 +160,39 @@ int codec_apply_av6301_profile(void)
             return 0;
         }
 
-        /* Verify every profile write immediately. This distinguishes an I2C
-         * transaction that completed electrically from a codec register that
-         * actually accepted the value. Page 0/1 writes are included so the
-         * first failing register is unambiguous. */
-        if (!i2c1_read(TLV320ADC3101_ADDR, reg, &actual))
+        /*
+         * Page 0 register 7 is a special case in the TLV320ADC3101.
+         * Its D[13:8] value is only committed when register 8 is written
+         * immediately afterward. Therefore it is invalid to read register 7
+         * between the two writes. Verify the pair only after register 8.
+         */
+        if (reg == CODEC_REG_PLLD_MSB &&
+            (i + 1u) < count &&
+            av6301_profile[i + 1u][0] == CODEC_REG_PLLD_LSB)
         {
-            uart2_print("Codec profile READBACK FAIL at reg 0x");
-            print_hex8(reg);
-            uart2_print(" after writing 0x");
-            print_hex8(expected);
-            uart2_print("\r\n");
-            return 0;
+            uint8_t lsb_reg = av6301_profile[i + 1u][0];
+            uint8_t lsb_expected = av6301_profile[i + 1u][1];
+
+            if (!i2c1_write(TLV320ADC3101_ADDR, lsb_reg, lsb_expected))
+            {
+                uart2_print("Codec profile I2C WRITE FAIL at reg 0x");
+                print_hex8(lsb_reg);
+                uart2_print(" expected 0x");
+                print_hex8(lsb_expected);
+                uart2_print("\r\n");
+                return 0;
+            }
+
+            if (!codec_verify_register(reg, expected) ||
+                !codec_verify_register(lsb_reg, lsb_expected))
+                return 0;
+
+            ++i;
+            continue;
         }
 
-        if (actual != expected)
-        {
-            uart2_print("Codec profile VERIFY FAIL at reg 0x");
-            print_hex8(reg);
-            uart2_print(" wrote 0x");
-            print_hex8(expected);
-            uart2_print(" read 0x");
-            print_hex8(actual);
-            uart2_print("\r\n");
+        if (!codec_verify_register(reg, expected))
             return 0;
-        }
     }
 
     return 1;
