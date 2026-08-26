@@ -35,6 +35,7 @@ SRC := \
     src/codec.c \
     src/cli.c \
     src/diagnostics.c \
+    src/i2s_rx.c \
     src/syscalls.c \
     src/system_stm32f10x.c \
     lib/STM32F10x_StdPeriph_Lib_V3.6.0/Libraries/STM32F10x_StdPeriph_Driver/src/misc.c \
