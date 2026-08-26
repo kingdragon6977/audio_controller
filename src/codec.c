@@ -16,15 +16,19 @@
 #define CODEC_REG_IFACE        0x1Bu
 #define CODEC_REG_IFACE2       0x1Du
 #define CODEC_REG_BCLK_DIV     0x1Eu
+#define CODEC_REG_ADC_FLAG     0x24u
 #define CODEC_REG_DOUT         0x35u
+#define CODEC_REG_ADC_PRB      0x3Du
 #define CODEC_REG_ADC_POWER    0x51u
 #define CODEC_REG_ADC_MUTE     0x52u
-#define CODEC_REG_ADC_PRB      0x3Du
 
 /* Page-1 analog input routing/gain registers. */
 #define CODEC_REG_PAGE         0x00u
+#define CODEC_REG_MICBIAS      0x33u
 #define CODEC_REG_IN1L_ROUTE   0x34u
+#define CODEC_REG_IN1R_ROUTE   0x37u
 #define CODEC_REG_LEFT_PGA     0x3Bu
+#define CODEC_REG_RIGHT_PGA    0x3Cu
 
 /* TLV320ADC3101 RESET is active low on STM32 PB14. */
 #define CODEC_RESET_PORT      GPIOB
@@ -135,9 +139,37 @@ static void print_hex8(uint8_t value)
     uart2_putc(hex[value & 0x0Fu]);
 }
 
+static void codec_dump_registers(const char *title,
+                                  const uint8_t *regs,
+                                  unsigned int count)
+{
+    unsigned int i;
+    uint8_t value;
+
+    uart2_print(title);
+
+    for (i = 0; i < count; ++i)
+    {
+        if (i2c1_read(TLV320ADC3101_ADDR, regs[i], &value))
+        {
+            uart2_print("  0x");
+            print_hex8(regs[i]);
+            uart2_print(" = 0x");
+            print_hex8(value);
+            uart2_print("\r\n");
+        }
+        else
+        {
+            uart2_print("  0x");
+            print_hex8(regs[i]);
+            uart2_print(" = READ ERROR\r\n");
+        }
+    }
+}
+
 void codec_dump_profile(void)
 {
-    static const uint8_t regs[] = {
+    static const uint8_t page0_regs[] = {
         0x00u,
         CODEC_REG_CLKMUX,
         CODEC_REG_PLLPR,
@@ -155,37 +187,42 @@ void codec_dump_profile(void)
         0x1Fu,
         0x20u,
         0x21u,
+        CODEC_REG_ADC_FLAG,
         CODEC_REG_ADC_PRB,
         CODEC_REG_DOUT,
         CODEC_REG_ADC_POWER,
         CODEC_REG_ADC_MUTE
     };
-    unsigned int i;
-    uint8_t value;
+    static const uint8_t page1_regs[] = {
+        CODEC_REG_MICBIAS,
+        CODEC_REG_IN1L_ROUTE,
+        CODEC_REG_IN1R_ROUTE,
+        CODEC_REG_LEFT_PGA,
+        CODEC_REG_RIGHT_PGA
+    };
 
-    uart2_print("\r\nTLV320ADC3101 Page-0 clock/interface dump\r\n");
-
-    if (!i2c1_write(TLV320ADC3101_ADDR, 0x00u, 0x00u))
+    if (!i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u))
     {
-        uart2_print("  ERROR: cannot select Page 0\r\n");
+        uart2_print("\r\nTLV320ADC3101 DIAGNOSTIC DUMP: ERROR selecting Page 0\r\n");
         return;
     }
 
-    for (i = 0; i < sizeof(regs) / sizeof(regs[0]); ++i)
+    uart2_print("\r\nTLV320ADC3101 Page-0 clock/interface/ADC dump\r\n");
+    codec_dump_registers("", page0_regs,
+                         sizeof(page0_regs) / sizeof(page0_regs[0]));
+
+    /* Explicitly verify the analog routing we just added. */
+    if (!i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x01u))
     {
-        if (i2c1_read(TLV320ADC3101_ADDR, regs[i], &value))
-        {
-            uart2_print("  0x");
-            print_hex8(regs[i]);
-            uart2_print(" = 0x");
-            print_hex8(value);
-            uart2_print("\r\n");
-        }
-        else
-        {
-            uart2_print("  0x");
-            print_hex8(regs[i]);
-            uart2_print(" = READ ERROR\r\n");
-        }
+        uart2_print("TLV320ADC3101 DIAGNOSTIC DUMP: ERROR selecting Page 1\r\n");
+        (void)i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u);
+        return;
     }
+
+    uart2_print("\r\nTLV320ADC3101 Page-1 analog-input dump\r\n");
+    codec_dump_registers("", page1_regs,
+                         sizeof(page1_regs) / sizeof(page1_regs[0]));
+
+    /* Leave the codec on Page 0, as expected by the rest of the firmware. */
+    (void)i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u);
 }
