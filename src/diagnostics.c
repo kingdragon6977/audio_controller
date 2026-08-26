@@ -163,15 +163,18 @@ void diagnostics_print_i2c1(void)
 
 void diagnostics_print_i2s2(void)
 {
+    uint32_t i2scfgr = SPI2->I2SCFGR;
+    uint32_t dma_rx = (SPI2->CR2 & SPI_I2S_DMAReq_Rx) ? 1u : 0u;
     uart2_print("\r\nSTM32 SPI2/I2S HARDWARE STATE:\r\n");
     uart2_print("  APB1 CLOCK = "); uart2_print((RCC->APB1ENR & RCC_APB1Periph_SPI2) ? "ON\r\n" : "OFF\r\n");
     uart2_print("  CR1        = 0x"); hex32(SPI2->CR1); uart2_print("\r\n");
     uart2_print("  CR2        = 0x"); hex32(SPI2->CR2); uart2_print("\r\n");
     uart2_print("  SR         = 0x"); hex32(SPI2->SR); uart2_print("\r\n");
-    uart2_print("  I2SCFGR    = 0x"); hex32(SPI2->I2SCFGR); uart2_print("\r\n");
+    uart2_print("  I2SCFGR    = 0x"); hex32(i2scfgr); uart2_print("\r\n");
     uart2_print("  I2SPR      = 0x"); hex32(SPI2->I2SPR); uart2_print("\r\n");
-    uart2_print("  ROLE        = CODEC MASTER / STM32 OBSERVER\r\n");
-    uart2_print("  MCU I2S     = DISABLED (intentional)\r\n");
+    uart2_print("  ROLE       = CODEC MASTER / STM32 SLAVE RX\r\n");
+    uart2_print("  MCU I2S    = "); uart2_print((i2scfgr & SPI_I2SCFGR_I2SE) ? "ENABLED\r\n" : "DISABLED\r\n");
+    uart2_print("  DMA RX     = "); uart2_print(dma_rx ? "ENABLED\r\n" : "DISABLED\r\n");
 }
 
 void diagnostics_print_i2s_clock_ownership(void)
@@ -182,7 +185,7 @@ void diagnostics_print_i2s_clock_ownership(void)
     uart2_print("  WCLK PB12   = CODEC OUTPUT -> MCU INPUT\r\n");
     uart2_print("  BCLK PB13   = CODEC OUTPUT -> MCU INPUT\r\n");
     uart2_print("  DOUT PB15   = CODEC OUTPUT -> MCU INPUT\r\n");
-    uart2_print("  EXPECTED    = 48 kHz WCLK, 3.072 MHz BCLK\r\n");
+    uart2_print("  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK\r\n");
     uart2_print("  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS\r\n");
 }
 
