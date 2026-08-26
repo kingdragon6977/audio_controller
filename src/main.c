@@ -284,6 +284,6 @@ int main(void)
 
     while (1)
     {
-        cli_poll();
+        cli_task();
     }
 }
