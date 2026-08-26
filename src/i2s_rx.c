@@ -24,7 +24,7 @@ int i2s_rx_start_capture(void)
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
     /* Keep the receiver disabled while DMA is prepared. */
-    SPI_I2S_Cmd(SPI2, DISABLE);
+    I2S_Cmd(SPI2, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
@@ -52,12 +52,12 @@ int i2s_rx_start_capture(void)
     i2s.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
     i2s.I2S_AudioFreq = I2S_AudioFreq_48k;
     i2s.I2S_CPOL = I2S_CPOL_Low;
-    SPI_I2S_Init(SPI2, &i2s);
+    I2S_Init(SPI2, &i2s);
 
     /* DMA must be ready before I2S is allowed to observe the live clock. */
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, ENABLE);
     DMA_Cmd(DMA1_Channel4, ENABLE);
-    SPI_I2S_Cmd(SPI2, ENABLE);
+    I2S_Cmd(SPI2, ENABLE);
 
     return 1;
 }
@@ -83,6 +83,6 @@ void i2s_rx_stop(void)
 {
     /* Disable DMA request before stopping the peripheral. */
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
-    SPI_I2S_Cmd(SPI2, DISABLE);
+    I2S_Cmd(SPI2, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
 }
