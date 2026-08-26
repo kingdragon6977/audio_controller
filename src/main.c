@@ -5,11 +5,21 @@
 #include "cli.h"
 #include "codec.h"
 #include "diagnostics.h"
+#include "i2s_rx.h"
 
 static void delay(uint32_t d)
 {
     while (d--)
         __asm__("nop");
+}
+
+static void print_hex16(uint16_t value)
+{
+    static const char hex[] = "0123456789ABCDEF";
+    uart2_putc(hex[(value >> 12) & 0x0Fu]);
+    uart2_putc(hex[(value >> 8) & 0x0Fu]);
+    uart2_putc(hex[(value >> 4) & 0x0Fu]);
+    uart2_putc(hex[value & 0x0Fu]);
 }
 
 int main(void)
@@ -18,6 +28,11 @@ int main(void)
     int i2c_safe;
     int i2s_safe;
     int i2s_clock_active = 0;
+    int i2s_capture_started = 0;
+    int i2s_capture_complete = 0;
+    uint32_t timeout;
+    unsigned int i;
+    const uint16_t *samples;
 
     /*
      * Bring-up order is deliberate:
@@ -29,6 +44,7 @@ int main(void)
      *   5. verify I2C electrical/configuration state
      *   6. only then touch the codec
      *   7. configure/verify codec I2S clocking
+     *   8. only after live clock verification, enable MCU I2S RX + DMA
      */
     board_init();
     uart2_init();
@@ -111,6 +127,58 @@ int main(void)
                         ? "PASS - WCLK activity observed on PB12\r\n"
                         : "WARN - no WCLK transition observed by coarse MCU poll\r\n");
             uart2_print("  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.\r\n");
+
+            /* The codec is now demonstrably producing its clocks. Only now
+             * may the STM32 take I2S peripheral ownership as a slave RX. */
+            if (i2s_clock_active && diagnostics_i2s2_safe())
+            {
+                uart2_print("\r\nI2S RX DMA ACTIVATION PRE-FLIGHT: PASS\r\n");
+                uart2_print("  DMA1 CH4 = SPI2/I2S RX\r\n");
+                uart2_print("  FORMAT   = Philips I2S, 16-bit, slave RX\r\n");
+                uart2_print("  BUFFER   = 256 x 16-bit slots\r\n");
+
+                i2s_capture_started = i2s_rx_start_capture();
+                uart2_print(i2s_capture_started
+                            ? "I2S RX DMA START: PASS\r\n"
+                            : "I2S RX DMA START: FAIL - activation refused\r\n");
+
+                if (i2s_capture_started)
+                {
+                    timeout = 2000000u;
+                    while (!i2s_rx_capture_complete() && timeout--)
+                        __asm__("nop");
+
+                    i2s_capture_complete = i2s_rx_capture_complete();
+                    if (i2s_rx_error_flags())
+                    {
+                        uart2_print("I2S RX DMA CAPTURE: FAIL - DMA transfer error\r\n");
+                    }
+                    else if (!i2s_capture_complete)
+                    {
+                        uart2_print("I2S RX DMA CAPTURE: FAIL - timeout waiting for 256 slots\r\n");
+                    }
+                    else
+                    {
+                        uart2_print("I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured\r\n");
+                        samples = i2s_rx_buffer();
+                        uart2_print("  FIRST SAMPLES: ");
+                        for (i = 0u; i < 8u; ++i)
+                        {
+                            uart2_print("0x");
+                            print_hex16(samples[i]);
+                            if (i != 7u) uart2_print(" ");
+                        }
+                        uart2_print("\r\n");
+                    }
+
+                    i2s_rx_stop();
+                    uart2_print("I2S RX DMA STOP: SAFE\r\n");
+                }
+            }
+            else
+            {
+                uart2_print("I2S RX DMA ACTIVATION: BLOCKED - live clock/safety prerequisite failed\r\n");
+            }
         }
         else
         {
@@ -126,9 +194,7 @@ int main(void)
         uart2_print("Codec profile NOT applied because no ACK was received.\r\n");
     }
 
-    /* SPI2/I2S is currently the MCU-side observation point; the TLV320 is
-     * configured as the I2S clock master. Keep this report even when SPI2 is
-     * disabled so its state cannot be mistaken for the codec's I2S clock. */
+    /* Leave a final hardware-state breadcrumb after the receiver test. */
     diagnostics_print_i2s2();
     diagnostics_print_audio_pins();
 
