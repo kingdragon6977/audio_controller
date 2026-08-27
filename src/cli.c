@@ -3,6 +3,7 @@
 #include "uart.h"
 #include "i2c.h"
 #include "codec.h"
+#include "i2s_rx.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -21,6 +22,7 @@ static void execute(char *cmd)
         uart2_print(" codec\r\n");
         uart2_print(" codec dump\r\n");
         uart2_print(" codec apply\r\n");
+        uart2_print(" i2s capture\r\n");
         uart2_print(" reboot\r\n");
         uart2_print(" led on\r\n");
         uart2_print(" led off\r\n");
@@ -75,13 +77,52 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "codec apply") == 0)
     {
-        uart2_print("Applying captured AV6301 TLV320ADC3101 Page-0 profile...\r\n");
+        uart2_print("Applying captured AV6301 TLV320ADC3101 profile...\r\n");
         uart2_print("WARNING: this drives the shared I2C bus; use only after isolating the AV6301.\r\n");
 
         if (codec_apply_av6301_profile())
             uart2_print("Codec profile applied successfully.\r\n");
         else
             uart2_print("Codec profile FAILED (I2C timeout/NACK).\r\n");
+        return;
+    }
+
+    if (strcmp(cmd, "i2s capture") == 0)
+    {
+        uint32_t timeout = 3000000u;
+
+        uart2_print("Starting frame-aligned I2S capture...\r\n");
+
+        if (!i2s_rx_start_capture())
+        {
+            uart2_print("I2S capture FAILED to start (pin safety or WCLK sync).\r\n");
+            i2s_rx_stop();
+            return;
+        }
+
+        while (!i2s_rx_capture_complete() && timeout != 0u)
+        {
+            timeout--;
+            __asm__("nop");
+        }
+
+        if (i2s_rx_error_flags())
+        {
+            uart2_print("I2S capture FAILED - DMA transfer error.\r\n");
+            i2s_rx_stop();
+            return;
+        }
+
+        if (!i2s_rx_capture_complete())
+        {
+            uart2_print("I2S capture FAILED - timeout.\r\n");
+            i2s_rx_stop();
+            return;
+        }
+
+        uart2_print("I2S capture PASS.\r\n");
+        i2s_rx_print_analysis();
+        i2s_rx_stop();
         return;
     }
 
