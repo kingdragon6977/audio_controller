@@ -48,7 +48,7 @@
  *
  * The original AV6301 traffic was captured with the project's logic analyzer.
  * This profile preserves the recovered clock/interface settings and adds the
- * missing explicit IN1L(P) pin-8 analog input path for the isolated TLV320.
+ * explicit IN1L(P) and IN1R(M) single-ended analog input paths.
  */
 static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE, 0x00u },
@@ -57,6 +57,10 @@ static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE,       0x01u },
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
     { CODEC_REG_LEFT_PGA,   0x00u },
+
+    /* Page 1: physical IN1R(M) -> right PGA, single-ended, 0 dB. */
+    { CODEC_REG_IN1R_ROUTE, 0xFCu },
+    { CODEC_REG_RIGHT_PGA,  0x00u },
 
     /* Return to page 0 for clock / digital interface configuration. */
     { CODEC_REG_PAGE,       0x00u },
