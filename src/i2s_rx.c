@@ -43,29 +43,48 @@ static void print_s32_local(int32_t value)
         uart2_putc(buf[--n]);
 }
 
-static int wait_for_ws_falling_edge(void)
+static void drain_spi2_rx(void)
+{
+    volatile uint16_t value;
+
+    if ((SPI2->SR & SPI_SR_RXNE) != 0u)
+    {
+        value = SPI2->DR;
+        (void)value;
+    }
+
+    /* Clear OVR, if present, using the STM32F1-required DR then SR sequence. */
+    if ((SPI2->SR & SPI_SR_OVR) != 0u)
+    {
+        value = SPI2->DR;
+        value = SPI2->SR;
+        (void)value;
+    }
+}
+
+static int wait_for_ws_falling_edge_live(void)
 {
     uint32_t timeout;
 
-    /* Philips I2S uses WS low for the left channel. Waiting for a complete
-     * high-to-low transition gives the receiver a repeatable left-frame
-     * boundary before SPI2 is enabled. */
-    timeout = 200000u;
+    /* SPI2 is already enabled here so the slave receiver can lock to the
+     * continuously-running codec clocks. Drain RXNE while waiting so the
+     * peripheral cannot enter an overrun state before DMA takes ownership. */
+    timeout = 400000u;
     while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
     {
+        drain_spi2_rx();
         if (timeout == 0u)
             return 0;
         timeout--;
-        __asm__("nop");
     }
 
-    timeout = 200000u;
+    timeout = 400000u;
     while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
     {
+        drain_spi2_rx();
         if (timeout == 0u)
             return 0;
         timeout--;
-        __asm__("nop");
     }
 
     return 1;
@@ -96,6 +115,7 @@ int i2s_rx_start_capture(void)
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
     I2S_Cmd(SPI2, DISABLE);
+    SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
@@ -126,16 +146,16 @@ int i2s_rx_start_capture(void)
     i2s.I2S_CPOL = I2S_CPOL_Low;
     I2S_Init(SPI2, &i2s);
 
-    /* Arm DMA first. No requests can occur while I2S is disabled. */
-    SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, ENABLE);
-    DMA_Cmd(DMA1_Channel4, ENABLE);
+    /* Let the STM32 I2S slave receiver see the live external clocks BEFORE
+     * DMA is armed. This is more robust than enabling the peripheral exactly
+     * on a WS edge: SPI2 gets time to synchronize internally to BCLK/WS while
+     * firmware drains any received words. */
+    I2S_Cmd(SPI2, ENABLE);
+    debug_state.sr_after_enable = SPI2->SR;
 
-    /* Start on a known WS falling edge so even/odd DMA slots are repeatable
-     * across reset, power-cycle, and CLI reboot tests. */
-    if (!wait_for_ws_falling_edge())
+    if (!wait_for_ws_falling_edge_live())
     {
-        SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
-        DMA_Cmd(DMA1_Channel4, DISABLE);
+        I2S_Cmd(SPI2, DISABLE);
         return 0;
     }
 
@@ -143,8 +163,15 @@ int i2s_rx_start_capture(void)
     debug_state.ws_level_at_enable =
         (GPIOB->IDR & GPIO_Pin_12) ? 1u : 0u;
 
-    I2S_Cmd(SPI2, ENABLE);
-    debug_state.sr_after_enable = SPI2->SR;
+    /* Drop any pre-capture word/overrun, then hand the already-synchronized
+     * receiver to DMA. DMA is enabled before the peripheral request bit so no
+     * request can be lost during the handoff. */
+    drain_spi2_rx();
+    DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
+                  DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
+    DMA_SetCurrDataCounter(DMA1_Channel4, I2S_RX_SAMPLES);
+    DMA_Cmd(DMA1_Channel4, ENABLE);
+    SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, ENABLE);
 
     return 1;
 }
@@ -178,10 +205,9 @@ void i2s_rx_print_analysis(void)
     int32_t peak_b = 0;
     int64_t sum_a = 0;
     int64_t sum_b = 0;
+    int64_t alternating_a = 0;
+    int64_t alternating_b = 0;
 
-    /* Discard the first captured stereo pair from statistics. Even with a
-     * synchronized WS edge, this keeps startup latency from contaminating the
-     * measurements. All remaining pairs preserve even/odd slot phase. */
     for (i = 2u; i + 1u < I2S_RX_SAMPLES; i += 2u)
     {
         int32_t a = (int16_t)rx_buffer[i];
@@ -197,14 +223,29 @@ void i2s_rx_print_analysis(void)
         if (abs_b > peak_b) peak_b = abs_b;
         sum_a += a;
         sum_b += b;
+
+        /* Correlation against +1,-1,+1,-1... highlights energy at Fs/2.
+         * A large value here helps distinguish analog clock-coupled alternation
+         * from ordinary low-frequency audio/noise. */
+        if ((pair_count & 1u) == 0u)
+        {
+            alternating_a += a;
+            alternating_b += b;
+        }
+        else
+        {
+            alternating_a -= a;
+            alternating_b -= b;
+        }
+
         pair_count++;
     }
 
     uart2_print("\r\nI2S FRAME-ALIGNED CHANNEL ANALYSIS\r\n");
     uart2_print("  WS sync     = ");
-    uart2_print(debug_state.ws_sync_ok ? "PASS (falling edge before enable)\r\n"
+    uart2_print(debug_state.ws_sync_ok ? "PASS (receiver live before DMA)\r\n"
                                        : "FAIL\r\n");
-    uart2_print("  WS at enable= ");
+    uart2_print("  WS at DMA   = ");
     uart2_print(debug_state.ws_level_at_enable ? "HIGH\r\n" : "LOW\r\n");
     uart2_print("  Slot phase   = even stream A, odd stream B\r\n");
     uart2_print("  Statistics exclude first captured A/B pair\r\n");
@@ -213,24 +254,24 @@ void i2s_rx_print_analysis(void)
     print_s32_local(min_a);
     uart2_print(" / ");
     print_s32_local(max_a);
-    uart2_print("\r\n");
-    uart2_print("  STREAM A MEAN    = ");
+    uart2_print("\r\n  STREAM A MEAN    = ");
     print_s32_local(pair_count ? (int32_t)(sum_a / pair_count) : 0);
-    uart2_print("\r\n");
-    uart2_print("  STREAM A PEAK    = ");
+    uart2_print("\r\n  STREAM A PEAK    = ");
     print_s32_local(peak_a);
+    uart2_print("\r\n  STREAM A FS/2    = ");
+    print_s32_local(pair_count ? (int32_t)(alternating_a / pair_count) : 0);
     uart2_print("\r\n");
 
     uart2_print("  STREAM B MIN/MAX = ");
     print_s32_local(min_b);
     uart2_print(" / ");
     print_s32_local(max_b);
-    uart2_print("\r\n");
-    uart2_print("  STREAM B MEAN    = ");
+    uart2_print("\r\n  STREAM B MEAN    = ");
     print_s32_local(pair_count ? (int32_t)(sum_b / pair_count) : 0);
-    uart2_print("\r\n");
-    uart2_print("  STREAM B PEAK    = ");
+    uart2_print("\r\n  STREAM B PEAK    = ");
     print_s32_local(peak_b);
+    uart2_print("\r\n  STREAM B FS/2    = ");
+    print_s32_local(pair_count ? (int32_t)(alternating_b / pair_count) : 0);
     uart2_print("\r\n");
 
     uart2_print("  FIRST 12 RAW FRAMES:\r\n");
