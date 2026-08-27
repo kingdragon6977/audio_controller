@@ -47,16 +47,19 @@
  * Register 0x35 = 0x12 routes DOUT to the primary codec interface.
  *
  * The original AV6301 traffic was captured with the project's logic analyzer.
- * This profile preserves the recovered clock/interface settings and adds the
- * missing explicit IN1L(P) pin-8 analog input path for the isolated TLV320.
+ * This profile preserves the recovered clock/interface settings and explicitly
+ * routes and enables BOTH IN1L(P) and IN1R(P) ADC inputs for stereo capture.
  */
 static const uint8_t av6301_profile[][2] = {
-    { CODEC_REG_PAGE, 0x00u },
+    { CODEC_REG_PAGE,       0x01u },
 
     /* Page 1: physical IN1L(P), pin 8 -> left PGA, single-ended, 0 dB. */
-    { CODEC_REG_PAGE,       0x01u },
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
     { CODEC_REG_LEFT_PGA,   0x00u },
+
+    /* Page 1: physical IN1R(P), pin 7 -> right PGA, single-ended, 0 dB. */
+    { CODEC_REG_IN1R_ROUTE, 0xFCu },
+    { CODEC_REG_RIGHT_PGA,  0x00u },
 
     /* Return to page 0 for clock / digital interface configuration. */
     { CODEC_REG_PAGE,       0x00u },
@@ -89,11 +92,6 @@ static void codec_delay(uint32_t count)
         __asm__("nop");
 }
 
-/*
- * TLV320ADC3101 hardware reset.
- * TI requires RESET low for at least 10 ns after the codec supplies are
- * valid. We use large margins for bring-up reliability.
- */
 void codec_reset(void)
 {
     GPIO_InitTypeDef gpio;
@@ -105,15 +103,12 @@ void codec_reset(void)
     gpio.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(CODEC_RESET_PORT, &gpio);
 
-    /* Allow already-powered codec supplies to settle. */
     GPIO_SetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(720000u);
 
-    /* Active-low reset pulse. */
     GPIO_ResetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(72000u);
 
-    /* Release reset and allow codec startup. */
     GPIO_SetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(720000u);
 }
@@ -223,6 +218,5 @@ void codec_dump_profile(void)
     codec_dump_registers("", page1_regs,
                          sizeof(page1_regs) / sizeof(page1_regs[0]));
 
-    /* Leave the codec on Page 0 for subsequent operations. */
     (void)i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u);
 }
