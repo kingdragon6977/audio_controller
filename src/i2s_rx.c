@@ -1,10 +1,125 @@
 #include "stm32f10x.h"
 #include "i2s_rx.h"
 #include "diagnostics.h"
+#include "uart.h"
 
 static uint16_t rx_buffer[I2S_RX_SAMPLES];
 static uint32_t dma_error_flags;
 static i2s_rx_debug_t debug_state;
+
+static void print_hex16_local(uint16_t value)
+{
+    static const char hex[] = "0123456789ABCDEF";
+    uart2_putc(hex[(value >> 12) & 0x0Fu]);
+    uart2_putc(hex[(value >> 8) & 0x0Fu]);
+    uart2_putc(hex[(value >> 4) & 0x0Fu]);
+    uart2_putc(hex[value & 0x0Fu]);
+}
+
+static void print_s32_local(int32_t value)
+{
+    uint32_t magnitude;
+    char buf[12];
+    unsigned int n = 0u;
+
+    if (value < 0)
+    {
+        uart2_putc('-');
+        magnitude = (uint32_t)(-(value + 1)) + 1u;
+    }
+    else
+    {
+        magnitude = (uint32_t)value;
+    }
+
+    do
+    {
+        buf[n++] = (char)('0' + (magnitude % 10u));
+        magnitude /= 10u;
+    } while (magnitude != 0u);
+
+    while (n != 0u)
+        uart2_putc(buf[--n]);
+}
+
+static void print_channel_stats(void)
+{
+    unsigned int i;
+    int32_t min_l = 32767;
+    int32_t max_l = -32768;
+    int32_t min_r = 32767;
+    int32_t max_r = -32768;
+    int32_t peak_l = 0;
+    int32_t peak_r = 0;
+    int64_t sum_l = 0;
+    int64_t sum_r = 0;
+
+    /* DMA slot 0,2,4... and 1,3,5... are kept separate. Do not assume
+     * left/right naming until the codec's WS phase is correlated with the
+     * captured stream; report both streams independently first. */
+    for (i = 0u; i + 1u < I2S_RX_SAMPLES; i += 2u)
+    {
+        int32_t left = (int16_t)rx_buffer[i];
+        int32_t right = (int16_t)rx_buffer[i + 1u];
+        int32_t abs_left = (left < 0) ? -left : left;
+        int32_t abs_right = (right < 0) ? -right : right;
+
+        if (left < min_l) min_l = left;
+        if (left > max_l) max_l = left;
+        if (right < min_r) min_r = right;
+        if (right > max_r) max_r = right;
+        if (abs_left > peak_l) peak_l = abs_left;
+        if (abs_right > peak_r) peak_r = abs_right;
+        sum_l += left;
+        sum_r += right;
+    }
+
+    uart2_print("\r\nI2S CHANNEL ANALYSIS (RAW DMA SLOT STREAM)\r\n");
+    uart2_print("  Even slots = stream A; odd slots = stream B\r\n");
+    uart2_print("  Channel naming intentionally not assumed yet.\r\n");
+
+    uart2_print("  STREAM A MIN/MAX = ");
+    print_s32_local(min_l);
+    uart2_print(" / ");
+    print_s32_local(max_l);
+    uart2_print("\r\n");
+    uart2_print("  STREAM A MEAN    = ");
+    print_s32_local((int32_t)(sum_l / (I2S_RX_SAMPLES / 2u)));
+    uart2_print("\r\n");
+    uart2_print("  STREAM A PEAK    = ");
+    print_s32_local(peak_l);
+    uart2_print("\r\n");
+
+    uart2_print("  STREAM B MIN/MAX = ");
+    print_s32_local(min_r);
+    uart2_print(" / ");
+    print_s32_local(max_r);
+    uart2_print("\r\n");
+    uart2_print("  STREAM B MEAN    = ");
+    print_s32_local((int32_t)(sum_r / (I2S_RX_SAMPLES / 2u)));
+    uart2_print("\r\n");
+    uart2_print("  STREAM B PEAK    = ");
+    print_s32_local(peak_r);
+    uart2_print("\r\n");
+
+    uart2_print("  STREAM A FIRST 16: ");
+    for (i = 0u; i < 16u && (2u * i) < I2S_RX_SAMPLES; ++i)
+    {
+        uart2_print("0x");
+        print_hex16_local(rx_buffer[2u * i]);
+        if (i != 15u) uart2_print(" ");
+    }
+    uart2_print("\r\n");
+
+    uart2_print("  STREAM B FIRST 16: ");
+    for (i = 0u; i < 16u && (2u * i + 1u) < I2S_RX_SAMPLES; ++i)
+    {
+        uart2_print("0x");
+        print_hex16_local(rx_buffer[2u * i + 1u]);
+        if (i != 15u) uart2_print(" ");
+    }
+    uart2_print("\r\n");
+}
 
 int i2s_rx_start_capture(void)
 {
@@ -85,6 +200,7 @@ int i2s_rx_capture_complete(void)
         debug_state.dr_after_capture = SPI2->DR;
         debug_state.dma_isr_after_capture = DMA1->ISR;
         debug_state.dma_cndtr_after_capture = DMA1_Channel4->CNDTR;
+        print_channel_stats();
         return 1;
     }
     return 0;
