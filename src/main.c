@@ -28,6 +28,56 @@ static void print_hex32(uint32_t value)
     print_hex16((uint16_t)value);
 }
 
+static int codec_probe_with_recovery(void)
+{
+    unsigned int attempt;
+
+    for (attempt = 0u; attempt < 3u; ++attempt)
+    {
+        if (i2c1_probe(TLV320ADC3101_ADDR))
+            return 1;
+
+        if (attempt == 2u)
+            break;
+
+        uart2_print("  Probe retry: reinitializing I2C1 and hard-resetting codec...\r\n");
+        i2c1_init();
+        delay(100000u);
+        codec_reset();
+        delay(100000u);
+    }
+
+    return 0;
+}
+
+static int codec_apply_profile_with_recovery(void)
+{
+    unsigned int attempt;
+
+    for (attempt = 0u; attempt < 3u; ++attempt)
+    {
+        if (codec_apply_av6301_profile())
+            return 1;
+
+        if (attempt == 2u)
+            break;
+
+        uart2_print("Codec profile write failed; resetting I2C1 + codec and retrying...\r\n");
+        i2c1_init();
+        delay(100000u);
+        codec_reset();
+        delay(100000u);
+
+        if (!codec_probe_with_recovery())
+        {
+            uart2_print("Codec did not ACK during profile recovery.\r\n");
+            continue;
+        }
+    }
+
+    return 0;
+}
+
 int main(void)
 {
     int codec_present = 0;
@@ -84,9 +134,9 @@ int main(void)
         uart2_print("  Address: 0x18 (7-bit)\r\n");
         uart2_print("  Probing... ");
 
-        codec_present = i2c1_probe(TLV320ADC3101_ADDR);
+        codec_present = codec_probe_with_recovery();
         uart2_print(codec_present ? "ACK - codec responded\r\n"
-                                   : "NO ACK / ERROR\r\n");
+                                   : "NO ACK / ERROR after retries\r\n");
         diagnostics_print_i2c1();
     }
     else
@@ -102,7 +152,7 @@ int main(void)
     if (codec_present && i2s_safe)
     {
         uart2_print("Applying AV6301 codec profile...\r\n");
-        if (codec_apply_av6301_profile())
+        if (codec_apply_profile_with_recovery())
         {
             uart2_print("Codec profile applied.\r\n");
             uart2_print("Read-back trail follows:\r\n");
@@ -121,7 +171,7 @@ int main(void)
                 uart2_print("\r\nI2S RX DMA ACTIVATION PRE-FLIGHT: PASS\r\n");
                 uart2_print("  DMA1 CH4 = SPI2/I2S RX\r\n");
                 uart2_print("  FORMAT   = Philips I2S, 16-bit, slave RX\r\n");
-                uart2_print("  SYNC     = arm DMA, then enable SPI2 at PB12 falling edge\r\n");
+                uart2_print("  SYNC     = receiver live first; DMA handoff at PB12 falling edge\r\n");
                 uart2_print("  BUFFER   = 256 x 16-bit slots\r\n");
 
                 i2s_capture_started = i2s_rx_start_capture();
@@ -212,16 +262,13 @@ int main(void)
                         print_hex32(odd_sum);
                         uart2_print("\r\n");
 
-                        /* Print the channel/frame interpretation exactly once,
-                         * after DMA completion rather than as a side effect of
-                         * polling the TC flag. */
                         i2s_rx_print_analysis();
 
                         i2s_rx_get_debug(&i2s_debug);
                         uart2_print("\r\nI2S RX DEBUG SNAPSHOT:\r\n");
                         uart2_print("  WS SYNC         = ");
                         uart2_print(i2s_debug.ws_sync_ok ? "PASS\r\n" : "FAIL\r\n");
-                        uart2_print("  WS AT ENABLE    = ");
+                        uart2_print("  WS AT DMA       = ");
                         uart2_print(i2s_debug.ws_level_at_enable ? "HIGH\r\n" : "LOW\r\n");
                         uart2_print("  SPI2 SR BEFORE  = 0x");
                         print_hex32(i2s_debug.sr_before);
@@ -254,7 +301,7 @@ int main(void)
         }
         else
         {
-            uart2_print("Codec profile write failed.\r\n");
+            uart2_print("Codec profile write failed after retries.\r\n");
         }
     }
     else if (!i2s_safe)
