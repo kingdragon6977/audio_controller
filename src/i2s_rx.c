@@ -51,16 +51,24 @@ static int wait_for_ws_falling_edge(void)
      * high-to-low transition gives the receiver a repeatable left-frame
      * boundary before SPI2 is enabled. */
     timeout = 200000u;
-    while (((GPIOB->IDR & GPIO_Pin_12) == 0u) && timeout--)
+    while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
+    {
+        if (timeout == 0u)
+            return 0;
+        timeout--;
         __asm__("nop");
-    if (timeout == 0u)
-        return 0;
+    }
 
     timeout = 200000u;
-    while (((GPIOB->IDR & GPIO_Pin_12) != 0u) && timeout--)
+    while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
+    {
+        if (timeout == 0u)
+            return 0;
+        timeout--;
         __asm__("nop");
+    }
 
-    return (timeout != 0u) ? 1 : 0;
+    return 1;
 }
 
 int i2s_rx_start_capture(void)
