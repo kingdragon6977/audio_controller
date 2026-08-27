@@ -41,18 +41,6 @@ int main(void)
     const uint16_t *samples;
     i2s_rx_debug_t i2s_debug;
 
-    /*
-     * Bring-up order is deliberate:
-     *
-     *   1. board safe state
-     *   2. debug UART
-     *   3. hardware identity/clock/pin evidence
-     *   4. configure I2C
-     *   5. verify I2C electrical/configuration state
-     *   6. only then touch the codec
-     *   7. configure/verify codec I2S clocking
-     *   8. only after live clock verification, enable MCU I2S RX + DMA
-     */
     board_init();
     uart2_init();
     cli_init();
@@ -133,20 +121,27 @@ int main(void)
                 uart2_print("\r\nI2S RX DMA ACTIVATION PRE-FLIGHT: PASS\r\n");
                 uart2_print("  DMA1 CH4 = SPI2/I2S RX\r\n");
                 uart2_print("  FORMAT   = Philips I2S, 16-bit, slave RX\r\n");
+                uart2_print("  SYNC     = arm DMA, then enable SPI2 at PB12 falling edge\r\n");
                 uart2_print("  BUFFER   = 256 x 16-bit slots\r\n");
 
                 i2s_capture_started = i2s_rx_start_capture();
                 uart2_print(i2s_capture_started
                             ? "I2S RX DMA START: PASS\r\n"
-                            : "I2S RX DMA START: FAIL - activation refused\r\n");
+                            : "I2S RX DMA START: FAIL - activation/frame sync refused\r\n");
 
                 if (i2s_capture_started)
                 {
                     timeout = 2000000u;
-                    while (!i2s_rx_capture_complete() && timeout--)
+                    while (timeout--)
+                    {
+                        if (i2s_rx_capture_complete())
+                        {
+                            i2s_capture_complete = 1;
+                            break;
+                        }
                         __asm__("nop");
+                    }
 
-                    i2s_capture_complete = i2s_rx_capture_complete();
                     if (i2s_rx_error_flags())
                     {
                         uart2_print("I2S RX DMA CAPTURE: FAIL - DMA transfer error\r\n");
@@ -173,22 +168,14 @@ int main(void)
                         {
                             uint16_t sample = samples[i];
 
-                            if (sample < min_sample)
-                                min_sample = sample;
-                            if (sample > max_sample)
-                                max_sample = sample;
-                            if (sample == 0x0000u)
-                                zero_count++;
-                            if (sample == 0x8000u)
-                                min_count++;
-                            if (sample == 0xFFFFu)
-                                max_count++;
-                            if (i != 0u && sample == samples[i - 1u])
-                                identical_pairs++;
-                            if ((i & 1u) == 0u)
-                                even_sum += sample;
-                            else
-                                odd_sum += sample;
+                            if (sample < min_sample) min_sample = sample;
+                            if (sample > max_sample) max_sample = sample;
+                            if (sample == 0x0000u) zero_count++;
+                            if (sample == 0x8000u) min_count++;
+                            if (sample == 0xFFFFu) max_count++;
+                            if (i != 0u && sample == samples[i - 1u]) identical_pairs++;
+                            if ((i & 1u) == 0u) even_sum += sample;
+                            else odd_sum += sample;
                         }
 
                         uart2_print("  FIRST 32 SAMPLES: ");
@@ -225,12 +212,17 @@ int main(void)
                         print_hex32(odd_sum);
                         uart2_print("\r\n");
 
-                        /* Snapshot the peripheral/DMA state at the exact point
-                         * where the finite transfer completed. These values
-                         * distinguish a real I2S RX stream from stale RX data,
-                         * overrun, or a DMA configuration problem. */
+                        /* Print the channel/frame interpretation exactly once,
+                         * after DMA completion rather than as a side effect of
+                         * polling the TC flag. */
+                        i2s_rx_print_analysis();
+
                         i2s_rx_get_debug(&i2s_debug);
                         uart2_print("\r\nI2S RX DEBUG SNAPSHOT:\r\n");
+                        uart2_print("  WS SYNC         = ");
+                        uart2_print(i2s_debug.ws_sync_ok ? "PASS\r\n" : "FAIL\r\n");
+                        uart2_print("  WS AT ENABLE    = ");
+                        uart2_print(i2s_debug.ws_level_at_enable ? "HIGH\r\n" : "LOW\r\n");
                         uart2_print("  SPI2 SR BEFORE  = 0x");
                         print_hex32(i2s_debug.sr_before);
                         uart2_print("\r\n");
@@ -283,7 +275,5 @@ int main(void)
     uart2_print("> ");
 
     while (1)
-    {
         cli_task();
-    }
 }
