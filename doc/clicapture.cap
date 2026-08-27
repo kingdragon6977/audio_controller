@@ -1,0 +1,1314 @@
+help
+
+Commands:
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture
+ reboot
+ led on
+ led off
+ esp test
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 217 / 229
+  STREAM A MEAN    = 223
+  STREAM A PEAK    = 229
+  STREAM A FS/2    = 5
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00DA (218) B=0x0000 (0)
+    F01 A=0x00E2 (226) B=0x0000 (0)
+    F02 A=0x00DC (220) B=0x0000 (0)
+    F03 A=0x00E3 (227) B=0x0000 (0)
+    F04 A=0x00DC (220) B=0x0000 (0)
+    F05 A=0x00E4 (228) B=0x0000 (0)
+    F06 A=0x00DB (219) B=0x0000 (0)
+    F07 A=0x00E4 (228) B=0x0000 (0)
+    F08 A=0x00DB (219) B=0x0000 (0)
+    F09 A=0x00E4 (228) B=0x0000 (0)
+    F10 A=0x00DC (220) B=0x0000 (0)
+    F11 A=0x00E4 (228) B=0x0000 (0)
+> rebootÿ
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F3
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F3
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000042F3
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... NO ACK / ERROR
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Codec profile NOT applied because no ACK was received.
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = OFF
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000000
+  I2SCFGR    = 0x00000000
+  I2SPR      = 0x00000000
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000042F3
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture FAILED to start (pin safety or WCLK sync).
+> 
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000082F3
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000082F3
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C2F3
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile write failed.
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = OFF
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000000
+  I2SCFGR    = 0x00000000
+  I2SPR      = 0x00000000
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C2F3
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture FAILED to start (pin safety or WCLK sync).
+> 
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=0
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x00000273
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000002
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=0
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x00000273
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: FAIL - refusing I2C transaction because pin/bus state is unsafe
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C2F3
+  GPIOB->ODR = 0x00004010
+
+Codec probe SKIPPED for safety.
+I2S PRE-ACTIVATION SAFETY: PASS
+Codec profile NOT applied because no ACK was received.
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = OFF
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000000
+  I2SCFGR    = 0x00000000
+  I2SPR      = 0x00000000
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C2F3
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> 
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000003F3
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000003F3
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C3F3
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile write failed.
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = OFF
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000000
+  I2SCFGR    = 0x00000000
+  I2SPR      = 0x00000000
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C3F3
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> 
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F3
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F3
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C2F3
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile applied.
+Read-back trail follows:
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x06
+  0x07 = 0x05
+  0x08 = 0xA0
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x84
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFC
+  0x3B = 0x00
+  0x3C = 0x00
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S CLOCK ACTIVITY CHECK: PASS - WCLK activity observed on PB12
+  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.
+
+I2S RX DMA ACTIVATION PRE-FLIGHT: PASS
+  DMA1 CH4 = SPI2/I2S RX
+  FORMAT   = Philips I2S, 16-bit, slave RX
+  SYNC     = arm DMA, then enable SPI2 at PB12 falling edge
+  BUFFER   = 256 x 16-bit slots
+I2S RX DMA START: PASS
+I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured
+  FIRST 32 SAMPLES: 0xE669 0x0000 0xE522 0x0000 0xE66C 0x0000 0xE525 0x0000 0xE673 0x0000 0xE52C 0x0000 0xE677 0x0000 0xE531 0x0000 0xE67B 0x0000 0xE536 0x0000 0xE680 0x0000 0xE53B 0x0000 0xE684 0x0000 0xE53F 0x0000 0xE686 0x0000 0xE543 0x0000
+  MIN SAMPLE       = 0x0000
+  MAX SAMPLE       = 0xE780
+  ZERO COUNT       = 0x00000080
+  0x8000 COUNT     = 0x00000000
+  0xFFFF COUNT     = 0x00000000
+  IDENTICAL PAIRS  = 0x00000000
+  EVEN SLOT SUM    = 0x00732ADF
+  ODD SLOT SUM     = 0x00000000
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -6878 / -6272
+  STREAM A MEAN    = -6570
+  STREAM A PEAK    = 6878
+  STREAM A FS/2    = -212
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0xE669 (-6551) B=0x0000 (0)
+    F01 A=0xE522 (-6878) B=0x0000 (0)
+    F02 A=0xE66C (-6548) B=0x0000 (0)
+    F03 A=0xE525 (-6875) B=0x0000 (0)
+    F04 A=0xE673 (-6541) B=0x0000 (0)
+    F05 A=0xE52C (-6868) B=0x0000 (0)
+    F06 A=0xE677 (-6537) B=0x0000 (0)
+    F07 A=0xE531 (-6863) B=0x0000 (0)
+    F08 A=0xE67B (-6533) B=0x0000 (0)
+    F09 A=0xE536 (-6858) B=0x0000 (0)
+    F10 A=0xE680 (-6528) B=0x0000 (0)
+    F11 A=0xE53B (-6853) B=0x0000 (0)
+
+I2S RX DEBUG SNAPSHOT:
+  WS SYNC         = PASS
+  WS AT ENABLE    = LOW
+  SPI2 SR BEFORE  = 0x00000000
+  SPI2 SR ENABLED = 0x00000002
+  SPI2 SR COMPLETE= 0x00000086
+  SPI2 DR LAST    = 0x00000000
+  DMA1 ISR        = 0x00007000
+  DMA1 CH4 CNDTR  = 0x0000
+I2S RX DMA STOP: SAFE
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000047
+  I2SCFGR    = 0x00000900
+  I2SPR      = 0x00000117
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=1
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C2F3
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 110 / 114
+  STREAM A MEAN    = 111
+  STREAM A PEAK    = 114
+  STREAM A FS/2    = 2
+  STREAM B MIN/MAX = -32768 / 0
+  STREAM B MEAN    = -14964
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = 516
+  FIRST 12 RAW FRAMES:
+    F00 A=0x006F (111) B=0x0000 (0)
+    F01 A=0x0071 (113) B=0x0000 (0)
+    F02 A=0x006F (111) B=0x0000 (0)
+    F03 A=0x0071 (113) B=0x0000 (0)
+    F04 A=0x006E (110) B=0x8000 (-32768)
+    F05 A=0x0071 (113) B=0x0000 (0)
+    F06 A=0x006F (111) B=0x0000 (0)
+    F07 A=0x0071 (113) B=0x0000 (0)
+    F08 A=0x006E (110) B=0x8000 (-32768)
+    F09 A=0x0072 (114) B=0x0000 (0)
+    F10 A=0x006F (111) B=0x0000 (0)
+    F11 A=0x0071 (113) B=0x0000 (0)
+> i2sca
+Unknown command
+> i2c
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 6 / 7
+  STREAM A MEAN    = 6
+  STREAM A PEAK    = 7
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -4096 / 10240
+  STREAM B MEAN    = 3176
+  STREAM B PEAK    = 10240
+  STREAM B FS/2    = 4595
+  FIRST 12 RAW FRAMES:
+    F00 A=0x0006 (6) B=0xF000 (-4096)
+    F01 A=0x0007 (7) B=0x2000 (8192)
+    F02 A=0x0006 (6) B=0xF800 (-2048)
+    F03 A=0x0007 (7) B=0x1000 (4096)
+    F04 A=0x0006 (6) B=0xF000 (-4096)
+    F05 A=0x0007 (7) B=0x2000 (8192)
+    F06 A=0x0006 (6) B=0xF800 (-2048)
+    F07 A=0x0007 (7) B=0x2000 (8192)
+    F08 A=0x0006 (6) B=0xF800 (-2048)
+    F09 A=0x0007 (7) B=0x1000 (4096)
+    F10 A=0x0006 (6) B=0xF000 (-4096)
+    F11 A=0x0007 (7) B=0x1800 (6144)
+> i2s capter
+Unknown command
+> i2sc
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 0 / 0
+  STREAM A MEAN    = 0
+  STREAM A PEAK    = 0
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = 440 / 464
+  STREAM B MEAN    = 451
+  STREAM B PEAK    = 464
+  STREAM B FS/2    = 12
+  FIRST 12 RAW FRAMES:
+    F00 A=0x0000 (0) B=0x01B8 (440)
+    F01 A=0x0000 (0) B=0x01CE (462)
+    F02 A=0x0000 (0) B=0x01BA (442)
+    F03 A=0x0000 (0) B=0x01D0 (464)
+    F04 A=0x0000 (0) B=0x01BC (444)
+    F05 A=0x0000 (0) B=0x01CC (460)
+    F06 A=0x0000 (0) B=0x01BA (442)
+    F07 A=0x0000 (0) B=0x01CA (458)
+    F08 A=0x0000 (0) B=0x01BA (442)
+    F09 A=0x0000 (0) B=0x01CA (458)
+    F10 A=0x0000 (0) B=0x01BC (444)
+    F11 A=0x0000 (0) B=0x01CC (460)
+> i3
+Unknown command
+> o
+Unknown command
+> o2
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 221 / 228
+  STREAM A MEAN    = 224
+  STREAM A PEAK    = 228
+  STREAM A FS/2    = 3
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00DE (222) B=0x0000 (0)
+    F01 A=0x00E3 (227) B=0x0000 (0)
+    F02 A=0x00DE (222) B=0x0000 (0)
+    F03 A=0x00E4 (228) B=0x0000 (0)
+    F04 A=0x00DF (223) B=0x0000 (0)
+    F05 A=0x00E3 (227) B=0x0000 (0)
+    F06 A=0x00DF (223) B=0x0000 (0)
+    F07 A=0x00E4 (228) B=0x0000 (0)
+    F08 A=0x00DF (223) B=0x0000 (0)
+    F09 A=0x00E2 (226) B=0x0000 (0)
+    F10 A=0x00DF (223) B=0x0000 (0)
+    F11 A=0x00E3 (227) B=0x0000 (0)
+> rebp
+Unknown command
+> rebootÿ
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F3
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F3
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000042F3
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile applied.
+Read-back trail follows:
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x06
+  0x07 = 0x05
+  0x08 = 0xA0
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x84
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFC
+  0x3B = 0x00
+  0x3C = 0x00
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S CLOCK ACTIVITY CHECK: PASS - WCLK activity observed on PB12
+  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.
+
+I2S RX DMA ACTIVATION PRE-FLIGHT: PASS
+  DMA1 CH4 = SPI2/I2S RX
+  FORMAT   = Philips I2S, 16-bit, slave RX
+  SYNC     = arm DMA, then enable SPI2 at PB12 falling edge
+  BUFFER   = 256 x 16-bit slots
+I2S RX DMA START: PASS
+I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured
+  FIRST 32 SAMPLES: 0x3FF2 0x0000 0x3FFD 0xC000 0x3FF1 0xC000 0x3FFE 0x0000 0x3FF2 0x4000 0x3FFE 0x0000 0x3FF2 0x8000 0x3FFD 0xC000 0x3FF2 0x4000 0x3FFD 0xC000 0x3FF2 0xC000 0x3FFE 0x0000 0x3FF2 0x0000 0x3FFE 0x0000 0x3FF2 0x4000 0x3FFE 0x4000
+  MIN SAMPLE       = 0x0000
+  MAX SAMPLE       = 0xC000
+  ZERO COUNT       = 0x00000037
+  0x8000 COUNT     = 0x00000016
+  0xFFFF COUNT     = 0x00000000
+  IDENTICAL PAIRS  = 0x00000010
+  EVEN SLOT SUM    = 0x0019FCAB
+  ODD SLOT SUM     = 0x002C4000
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 0 / 16383
+  STREAM A MEAN    = 13281
+  STREAM A PEAK    = 16383
+  STREAM A FS/2    = -2961
+  STREAM B MIN/MAX = -32768 / 16384
+  STREAM B MEAN    = -3999
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = -387
+  FIRST 12 RAW FRAMES:
+    F00 A=0x3FF2 (16370) B=0x0000 (0)
+    F01 A=0x3FFD (16381) B=0xC000 (-16384)
+    F02 A=0x3FF1 (16369) B=0xC000 (-16384)
+    F03 A=0x3FFE (16382) B=0x0000 (0)
+    F04 A=0x3FF2 (16370) B=0x4000 (16384)
+    F05 A=0x3FFE (16382) B=0x0000 (0)
+    F06 A=0x3FF2 (16370) B=0x8000 (-32768)
+    F07 A=0x3FFD (16381) B=0xC000 (-16384)
+    F08 A=0x3FF2 (16370) B=0x4000 (16384)
+    F09 A=0x3FFD (16381) B=0xC000 (-16384)
+    F10 A=0x3FF2 (16370) B=0xC000 (-16384)
+    F11 A=0x3FFE (16382) B=0x0000 (0)
+
+I2S RX DEBUG SNAPSHOT:
+  WS SYNC         = PASS
+  WS AT ENABLE    = LOW
+  SPI2 SR BEFORE  = 0x00000000
+  SPI2 SR ENABLED = 0x00000002
+  SPI2 SR COMPLETE= 0x00000086
+  SPI2 DR LAST    = 0x00004000
+  DMA1 ISR        = 0x00007000
+  DMA1 CH4 CNDTR  = 0x0000
+I2S RX DMA STOP: SAFE
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000043
+  I2SCFGR    = 0x00000900
+  I2SPR      = 0x00000117
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000062F3
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 3 / 3
+  STREAM A MEAN    = 3
+  STREAM A PEAK    = 3
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -31744 / -24576
+  STREAM B MEAN    = -28317
+  STREAM B PEAK    = 31744
+  STREAM B FS/2    = 564
+  FIRST 12 RAW FRAMES:
+    F00 A=0x0003 (3) B=0x8800 (-30720)
+    F01 A=0x0003 (3) B=0x8C00 (-29696)
+    F02 A=0x0003 (3) B=0x8800 (-30720)
+    F03 A=0x0003 (3) B=0x9400 (-27648)
+    F04 A=0x0003 (3) B=0x8800 (-30720)
+    F05 A=0x0003 (3) B=0x9000 (-28672)
+    F06 A=0x0003 (3) B=0x8800 (-30720)
+    F07 A=0x0003 (3) B=0x9000 (-28672)
+    F08 A=0x0003 (3) B=0x8400 (-31744)
+    F09 A=0x0003 (3) B=0x9000 (-28672)
+    F10 A=0x0003 (3) B=0x8800 (-30720)
+    F11 A=0x0003 (3) B=0x9000 (-28672)
+> i2s cat
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 224 / 231
+  STREAM A MEAN    = 227
+  STREAM A PEAK    = 231
+  STREAM A FS/2    = 3
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00E1 (225) B=0x0000 (0)
+    F01 A=0x00E5 (229) B=0x0000 (0)
+    F02 A=0x00E1 (225) B=0x0000 (0)
+    F03 A=0x00E5 (229) B=0x0000 (0)
+    F04 A=0x00E1 (225) B=0x0000 (0)
+    F05 A=0x00E5 (229) B=0x0000 (0)
+    F06 A=0x00E1 (225) B=0x0000 (0)
+    F07 A=0x00E6 (230) B=0x0000 (0)
+    F08 A=0x00E2 (226) B=0x0000 (0)
+    F09 A=0x00E5 (229) B=0x0000 (0)
+    F10 A=0x00E2 (226) B=0x0000 (0)
+    F11 A=0x00E4 (228) B=0x0000 (0)
+> 
