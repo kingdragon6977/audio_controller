@@ -1,0 +1,837 @@
+i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 188 / 225
+  STREAM A MEAN    = 207
+  STREAM A PEAK    = 225
+  STREAM A FS/2    = 18
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00C0 (192) B=0x0000 (0)
+    F01 A=0x00DF (223) B=0x0000 (0)
+    F02 A=0x00BE (190) B=0x0000 (0)
+    F03 A=0x00E0 (224) B=0x0000 (0)
+    F04 A=0x00BC (188) B=0x0000 (0)
+    F05 A=0x00E0 (224) B=0x0000 (0)
+    F06 A=0x00BD (189) B=0x0000 (0)
+    F07 A=0x00E0 (224) B=0x0000 (0)
+    F08 A=0x00BE (190) B=0x0000 (0)
+    F09 A=0x00E0 (224) B=0x0000 (0)
+    F10 A=0x00BF (191) B=0x0000 (0)
+    F11 A=0x00DF (223) B=0x0000 (0)
+> i2s capth
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 190 / 230
+  STREAM A MEAN    = 209
+  STREAM A PEAK    = 230
+  STREAM A FS/2    = 19
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00BF (191) B=0x0000 (0)
+    F01 A=0x00E4 (228) B=0x0000 (0)
+    F02 A=0x00BE (190) B=0x0000 (0)
+    F03 A=0x00E3 (227) B=0x0000 (0)
+    F04 A=0x00C0 (192) B=0x0000 (0)
+    F05 A=0x00E2 (226) B=0x0000 (0)
+    F06 A=0x00BF (191) B=0x0000 (0)
+    F07 A=0x00E4 (228) B=0x0000 (0)
+    F08 A=0x00BF (191) B=0x0000 (0)
+    F09 A=0x00E3 (227) B=0x0000 (0)
+    F10 A=0x00C0 (192) B=0x0000 (0)
+    F11 A=0x00E3 (227) B=0x0000 (0)
+> is2 capture
+Unknown command
+> is2
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 188 / 225
+  STREAM A MEAN    = 206
+  STREAM A PEAK    = 225
+  STREAM A FS/2    = 18
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00BE (190) B=0x0000 (0)
+    F01 A=0x00E0 (224) B=0x0000 (0)
+    F02 A=0x00BE (190) B=0x0000 (0)
+    F03 A=0x00E0 (224) B=0x0000 (0)
+    F04 A=0x00BE (190) B=0x0000 (0)
+    F05 A=0x00E0 (224) B=0x0000 (0)
+    F06 A=0x00BE (190) B=0x0000 (0)
+    F07 A=0x00DE (222) B=0x0000 (0)
+    F08 A=0x00BD (189) B=0x0000 (0)
+    F09 A=0x00DF (223) B=0x0000 (0)
+    F10 A=0x00BD (189) B=0x0000 (0)
+    F11 A=0x00E0 (224) B=0x0000 (0)
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 189 / 228
+  STREAM A MEAN    = 208
+  STREAM A PEAK    = 228
+  STREAM A FS/2    = 19
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00BD (189) B=0x0000 (0)
+    F01 A=0x00E0 (224) B=0x0000 (0)
+    F02 A=0x00BF (191) B=0x0000 (0)
+    F03 A=0x00E1 (225) B=0x0000 (0)
+    F04 A=0x00BD (189) B=0x0000 (0)
+    F05 A=0x00E1 (225) B=0x0000 (0)
+    F06 A=0x00BE (190) B=0x0000 (0)
+    F07 A=0x00E1 (225) B=0x0000 (0)
+    F08 A=0x00BE (190) B=0x0000 (0)
+    F09 A=0x00E2 (226) B=0x0000 (0)
+    F10 A=0x00BE (190) B=0x0000 (0)
+    F11 A=0x00E3 (227) B=0x0000 (0)
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 189 / 226
+  STREAM A MEAN    = 207
+  STREAM A PEAK    = 226
+  STREAM A FS/2    = 18
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00BD (189) B=0x0000 (0)
+    F01 A=0x00E0 (224) B=0x0000 (0)
+    F02 A=0x00BE (190) B=0x0000 (0)
+    F03 A=0x00DF (223) B=0x0000 (0)
+    F04 A=0x00BD (189) B=0x0000 (0)
+    F05 A=0x00DE (222) B=0x0000 (0)
+    F06 A=0x00BD (189) B=0x0000 (0)
+    F07 A=0x00DF (223) B=0x0000 (0)
+    F08 A=0x00BF (191) B=0x0000 (0)
+    F09 A=0x00DF (223) B=0x0000 (0)
+    F10 A=0x00BE (190) B=0x0000 (0)
+    F11 A=0x00E0 (224) B=0x0000 (0)
+> rebootÿ
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000003F2
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000003F2
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000043F2
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile applied.
+Read-back trail follows:
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x06
+  0x07 = 0x05
+  0x08 = 0xA0
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x84
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFC
+  0x3B = 0x00
+  0x3C = 0x00
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S CLOCK ACTIVITY CHECK: PASS - WCLK activity observed on PB12
+  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.
+
+I2S RX DMA ACTIVATION PRE-FLIGHT: PASS
+  DMA1 CH4 = SPI2/I2S RX
+  FORMAT   = Philips I2S, 16-bit, slave RX
+  SYNC     = receiver live first; DMA handoff at PB12 falling edge
+  BUFFER   = 256 x 16-bit slots
+I2S RX DMA START: PASS
+I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured
+  FIRST 32 SAMPLES: 0xFF92 0x0000 0x0006 0x0000 0xFF91 0x0000 0x0006 0x0000 0xFF95 0x0000 0x0006 0x0000 0xFF91 0x0000 0x0006 0x0000 0xFF92 0x0000 0x0007 0x0000 0xFF95 0x0000 0x0007 0x0000 0xFF91 0x0000 0x0006 0x0000 0xFF95 0x0000 0x0007 0x0000
+  MIN SAMPLE       = 0x0000
+  MAX SAMPLE       = 0xFFA3
+  ZERO COUNT       = 0x00000080
+  0x8000 COUNT     = 0x00000000
+  0xFFFF COUNT     = 0x00000000
+  IDENTICAL PAIRS  = 0x00000000
+  EVEN SLOT SUM    = 0x003FE954
+  ODD SLOT SUM     = 0x00000000
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -111 / 18
+  STREAM A MEAN    = -44
+  STREAM A PEAK    = 111
+  STREAM A FS/2    = 56
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFF92 (-110) B=0x0000 (0)
+    F01 A=0x0006 (6) B=0x0000 (0)
+    F02 A=0xFF91 (-111) B=0x0000 (0)
+    F03 A=0x0006 (6) B=0x0000 (0)
+    F04 A=0xFF95 (-107) B=0x0000 (0)
+    F05 A=0x0006 (6) B=0x0000 (0)
+    F06 A=0xFF91 (-111) B=0x0000 (0)
+    F07 A=0x0006 (6) B=0x0000 (0)
+    F08 A=0xFF92 (-110) B=0x0000 (0)
+    F09 A=0x0007 (7) B=0x0000 (0)
+    F10 A=0xFF95 (-107) B=0x0000 (0)
+    F11 A=0x0007 (7) B=0x0000 (0)
+
+I2S RX DEBUG SNAPSHOT:
+  WS SYNC         = PASS
+  WS AT DMA       = LOW
+  SPI2 SR BEFORE  = 0x00000000
+  SPI2 SR ENABLED = 0x00000002
+  SPI2 SR COMPLETE= 0x00000086
+  SPI2 DR LAST    = 0x00000000
+  DMA1 ISR        = 0x00007000
+  DMA1 CH4 CNDTR  = 0x0000
+I2S RX DMA STOP: SAFE
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000047
+  I2SCFGR    = 0x00000900
+  I2SPR      = 0x00000117
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=1
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000062F2
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> i12
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 192 / 227
+  STREAM A MEAN    = 209
+  STREAM A PEAK    = 227
+  STREAM A FS/2    = 18
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00C2 (194) B=0x0000 (0)
+    F01 A=0x00E1 (225) B=0x0000 (0)
+    F02 A=0x00C2 (194) B=0x0000 (0)
+    F03 A=0x00E1 (225) B=0x0000 (0)
+    F04 A=0x00C1 (193) B=0x0000 (0)
+    F05 A=0x00E3 (227) B=0x0000 (0)
+    F06 A=0x00C0 (192) B=0x0000 (0)
+    F07 A=0x00E2 (226) B=0x0000 (0)
+    F08 A=0x00C0 (192) B=0x0000 (0)
+    F09 A=0x00E2 (226) B=0x0000 (0)
+    F10 A=0x00C0 (192) B=0x0000 (0)
+    F11 A=0x00E1 (225) B=0x0000 (0)
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 191 / 228
+  STREAM A MEAN    = 209
+  STREAM A PEAK    = 228
+  STREAM A FS/2    = 18
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00C0 (192) B=0x0000 (0)
+    F01 A=0x00E2 (226) B=0x0000 (0)
+    F02 A=0x00C1 (193) B=0x0000 (0)
+    F03 A=0x00E3 (227) B=0x0000 (0)
+    F04 A=0x00C0 (192) B=0x0000 (0)
+    F05 A=0x00E3 (227) B=0x0000 (0)
+    F06 A=0x00C0 (192) B=0x0000 (0)
+    F07 A=0x00E2 (226) B=0x0000 (0)
+    F08 A=0x00C1 (193) B=0x0000 (0)
+    F09 A=0x00E2 (226) B=0x0000 (0)
+    F10 A=0x00C0 (192) B=0x0000 (0)
+    F11 A=0x00E2 (226) B=0x0000 (0)
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 191 / 226
+  STREAM A MEAN    = 208
+  STREAM A PEAK    = 226
+  STREAM A FS/2    = 17
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00BF (191) B=0x0000 (0)
+    F01 A=0x00E1 (225) B=0x0000 (0)
+    F02 A=0x00C1 (193) B=0x0000 (0)
+    F03 A=0x00DF (223) B=0x0000 (0)
+    F04 A=0x00C1 (193) B=0x0000 (0)
+    F05 A=0x00E0 (224) B=0x0000 (0)
+    F06 A=0x00C1 (193) B=0x0000 (0)
+    F07 A=0x00E2 (226) B=0x0000 (0)
+    F08 A=0x00C0 (192) B=0x0000 (0)
+    F09 A=0x00E0 (224) B=0x0000 (0)
+    F10 A=0x00C0 (192) B=0x0000 (0)
+    F11 A=0x00DF (223) B=0x0000 (0)
+> 
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000000C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F0
+  GPIOB->ODR = 0x00000010
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=0
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000002F0
+  GPIOB->ODR = 0x00000010
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000042F0
+  GPIOB->ODR = 0x00004010
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile applied.
+Read-back trail follows:
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x06
+  0x07 = 0x05
+  0x08 = 0xA0
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x84
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFC
+  0x3B = 0x00
+  0x3C = 0x00
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S CLOCK ACTIVITY CHECK: PASS - WCLK activity observed on PB12
+  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.
+
+I2S RX DMA ACTIVATION PRE-FLIGHT: PASS
+  DMA1 CH4 = SPI2/I2S RX
+  FORMAT   = Philips I2S, 16-bit, slave RX
+  SYNC     = receiver live first; DMA handoff at PB12 falling edge
+  BUFFER   = 256 x 16-bit slots
+I2S RX DMA START: PASS
+I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured
+  FIRST 32 SAMPLES: 0x0007 0xFB80 0x0000 0x0018 0x0007 0xFB90 0x0000 0x0020 0x0007 0xFB88 0x0000 0x0018 0x0007 0xFB88 0x0000 0x0010 0x0007 0xFB80 0x0000 0x0018 0x0007 0xFB88 0x0000 0x0010 0x0007 0xFB90 0x0000 0x0018 0x0007 0xFB98 0x0000 0x0020
+  MIN SAMPLE       = 0x0000
+  MAX SAMPLE       = 0xFC18
+  ZERO COUNT       = 0x00000040
+  0x8000 COUNT     = 0x00000000
+  0xFFFF COUNT     = 0x00000000
+  IDENTICAL PAIRS  = 0x00000000
+  EVEN SLOT SUM    = 0x000001C0
+  ODD SLOT SUM     = 0x003F0368
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 0 / 7
+  STREAM A MEAN    = 3
+  STREAM A PEAK    = 7
+  STREAM A FS/2    = -3
+  STREAM B MIN/MAX = -1152 / 120
+  STREAM B MEAN    = -500
+  STREAM B PEAK    = 1152
+  STREAM B FS/2    = 566
+  FIRST 12 RAW FRAMES:
+    F00 A=0x0007 (7) B=0xFB80 (-1152)
+    F01 A=0x0000 (0) B=0x0018 (24)
+    F02 A=0x0007 (7) B=0xFB90 (-1136)
+    F03 A=0x0000 (0) B=0x0020 (32)
+    F04 A=0x0007 (7) B=0xFB88 (-1144)
+    F05 A=0x0000 (0) B=0x0018 (24)
+    F06 A=0x0007 (7) B=0xFB88 (-1144)
+    F07 A=0x0000 (0) B=0x0010 (16)
+    F08 A=0x0007 (7) B=0xFB80 (-1152)
+    F09 A=0x0000 (0) B=0x0018 (24)
+    F10 A=0x0007 (7) B=0xFB88 (-1144)
+    F11 A=0x0000 (0) B=0x0010 (16)
+
+I2S RX DEBUG SNAPSHOT:
+  WS SYNC         = PASS
+  WS AT DMA       = LOW
+  SPI2 SR BEFORE  = 0x00000000
+  SPI2 SR ENABLED = 0x00000002
+  SPI2 SR COMPLETE= 0x00000006
+  SPI2 DR LAST    = 0x00000070
+  DMA1 ISR        = 0x00007000
+  DMA1 CH4 CNDTR  = 0x0000
+I2S RX DMA STOP: SAFE
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000043
+  I2SCFGR    = 0x00000900
+  I2SPR      = 0x00000117
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=1
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x000042F0
+  GPIOB->ODR = 0x00004010
+
+Bring-up complete. CLI ready.
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 0 / 0
+  STREAM A MEAN    = 0
+  STREAM A PEAK    = 0
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = 24832 / 29184
+  STREAM B MEAN    = 27016
+  STREAM B PEAK    = 29184
+  STREAM B FS/2    = 2266
+  FIRST 12 RAW FRAMES:
+    F00 A=0x0000 (0) B=0x6180 (24960)
+    F01 A=0x0000 (0) B=0x7180 (29056)
+    F02 A=0x0000 (0) B=0x6180 (24960)
+    F03 A=0x0000 (0) B=0x7180 (29056)
+    F04 A=0x0000 (0) B=0x6180 (24960)
+    F05 A=0x0000 (0) B=0x7100 (28928)
+    F06 A=0x0000 (0) B=0x6100 (24832)
+    F07 A=0x0000 (0) B=0x7180 (29056)
+    F08 A=0x0000 (0) B=0x6100 (24832)
+    F09 A=0x0000 (0) B=0x7080 (28800)
+    F10 A=0x0000 (0) B=0x6100 (24832)
+    F11 A=0x0000 (0) B=0x7080 (28800)
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 192 / 229
+  STREAM A MEAN    = 210
+  STREAM A PEAK    = 229
+  STREAM A FS/2    = 18
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00C1 (193) B=0x0000 (0)
+    F01 A=0x00E2 (226) B=0x0000 (0)
+    F02 A=0x00C1 (193) B=0x0000 (0)
+    F03 A=0x00E5 (229) B=0x0000 (0)
+    F04 A=0x00C1 (193) B=0x0000 (0)
+    F05 A=0x00E4 (228) B=0x0000 (0)
+    F06 A=0x00C1 (193) B=0x0000 (0)
+    F07 A=0x00E4 (228) B=0x0000 (0)
+    F08 A=0x00C2 (194) B=0x0000 (0)
+    F09 A=0x00E3 (227) B=0x0000 (0)
+    F10 A=0x00C2 (194) B=0x0000 (0)
+    F11 A=0x00E2 (226) B=0x0000 (0)
+> i2s captuer
+Unknown command
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (receiver live before DMA)
+  WS at DMA   = LOW
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = 192 / 226
+  STREAM A MEAN    = 208
+  STREAM A PEAK    = 226
+  STREAM A FS/2    = 17
+  STREAM B MIN/MAX = 0 / 0
+  STREAM B MEAN    = 0
+  STREAM B PEAK    = 0
+  STREAM B FS/2    = 0
+  FIRST 12 RAW FRAMES:
+    F00 A=0x00C0 (192) B=0x0000 (0)
+    F01 A=0x00E0 (224) B=0x0000 (0)
+    F02 A=0x00C0 (192) B=0x0000 (0)
+    F03 A=0x00DF (223) B=0x0000 (0)
+    F04 A=0x00C1 (193) B=0x0000 (0)
+    F05 A=0x00E0 (224) B=0x0000 (0)
+    F06 A=0x00C0 (192) B=0x0000 (0)
+    F07 A=0x00DF (223) B=0x0000 (0)
+    F08 A=0x00C0 (192) B=0x0000 (0)
+    F09 A=0x00E0 (224) B=0x0000 (0)
+    F10 A=0x00C1 (193) B=0x0000 (0)
+    F11 A=0x00E1 (225) B=0x0000 (0)
+> quit
+Unknown command
+> exit
+Unknown command
+> 
