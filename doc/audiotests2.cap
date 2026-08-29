@@ -1,0 +1,123 @@
+
+Welcome to minicom 2.9
+
+OPTIONS: I18n 
+Port /dev/ttyACM1, 22:15:52
+
+Press CTRL-A Z for help on special keys
+
+i1
+Unknown command
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=130 max=232 mean=181 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #2 A[min=129 max=232 mean=181 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #3 A[min=128 max=232 mean=180 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #4 A[min=126 max=233 mean=179 peak=233] B[min=0 max=0 mean=0 peak=0]
+  #5 A[min=125 max=232 mean=179 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #6 A[min=124 max=233 mean=178 peak=233] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=124 max=232 mean=178 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=123 max=232 mean=178 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #9 A[min=123 max=232 mean=178 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #10 A[min=128 max=232 mean=180 peak=232] B[min=0 max=0 mean=0 peak=0]
+Repeated capture summary: 10/10 PASS
+> i1
+Unknown command
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=127 max=228 mean=178 peak=228] B[min=0 max=0 mean=0 peak=0]
+  #2 A[min=126 max=229 mean=178 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #3 A[min=125 max=229 mean=178 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #4 A[min=125 max=229 mean=178 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #5 A[min=126 max=229 mean=178 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #6 A[min=126 max=229 mean=178 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=129 max=229 mean=179 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=130 max=230 mean=180 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #9 A[min=130 max=229 mean=180 peak=229] B[min=0 max=0 mean=0 peak=0]
+  #10 A[min=131 max=230 mean=181 peak=230] B[min=0 max=0 mean=0 peak=0]
+Repeated capture summary: 10/10 PASS
+> i1
+Unknown command
+> io2
+Unknown command
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=2 max=3 mean=2 peak=3] B[min=-28672 max=11264 mean=-9586 peak=28672]
+  #2 A[min=0 max=0 mean=0 peak=0] B[min=-31744 max=-6400 mean=-18768 peak=31744]
+  #3 A[min=134 max=231 mean=182 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #4 A[min=132 max=230 mean=181 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #5 A[min=133 max=231 mean=182 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #6 A[min=132 max=231 mean=182 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=133 max=230 mean=182 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=135 max=231 mean=183 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #9 A[min=136 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #10 A[min=137 max=230 mean=184 peak=230] B[min=0 max=0 mean=0 peak=0]
+Repeated capture summary: 10/10 PASS
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=139 max=231 mean=185 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #2 A[min=139 max=231 mean=186 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #3 A[min=140 max=231 mean=186 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #4 A[min=139 max=231 mean=185 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #5 A[min=137 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #6 A[min=136 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=135 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=135 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #9 A[min=136 max=232 mean=184 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #10 A[min=135 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]
+Repeated capture summary: 10/10 PASS
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=132 max=231 mean=183 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #2 A[min=133 max=231 mean=182 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #3 A[min=134 max=232 mean=183 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #4 A[min=136 max=232 mean=184 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #5 A[min=137 max=231 mean=185 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #6 A[min=137 max=231 mean=185 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=138 max=232 mean=185 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=138 max=232 mean=185 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #9 A[min=138 max=232 mean=185 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #10 A[min=135 max=232 mean=184 peak=232] B[min=0 max=0 mean=0 peak=0]
+Repeated capture summary: 10/10 PASS
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=134 max=230 mean=182 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #2 A[min=133 max=230 mean=182 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #3 A[min=133 max=230 mean=182 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #4 A[min=137 max=230 mean=184 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #5 A[min=138 max=230 mean=184 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #6 A[min=139 max=230 mean=185 peak=230] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=139 max=231 mean=185 peak=231] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=4 max=7 mean=5 peak=7] B[min=-32768 max=30720 mean=15448 peak=32768]
+  #9 A[min=0 max=0 mean=0 peak=0] B[min=-29952 max=-6656 mean=-18042 peak=29952]
+  #10 A[min=136 max=230 mean=183 peak=230] B[min=0 max=0 mean=0 peak=0]
+Repeated capture summary: 10/10 PASS
+> i2s capture 10
+Running 10 compact frame-aligned I2S captures...
+  #1 A[min=0 max=0 mean=0 peak=0] B[min=8896 max=14720 mean=11856 peak=14720]
+  #2 A[min=2 max=3 mean=2 peak=3] B[min=-29696 max=13312 mean=-8724 peak=29696]           
+  #3 A[min=0 max=0 mean=0 peak=0] B[min=540 max=924 mean=734 peak=924]                    
+  #4 A[min=0 max=0 mean=0 peak=0] B[min=1072 max=1840 mean=1464 peak=1840]                
+  #5 A[min=135 max=231 mean=183 peak=231] B[min=0 max=0 mean=0 peak=0]                    
+  #6 A[min=134 max=231 mean=182 peak=231] B[min=0 max=0 mean=0 peak=0]                    
+  #7 A[min=16 max=28 mean=22 peak=28] B[min=-32768 max=24576 mean=-12771 peak=32768]      
+  #8 A[min=134 max=232 mean=184 peak=232] B[min=0 max=0 mean=0 peak=0]                    
+  #9 A[min=137 max=231 mean=184 peak=231] B[min=0 max=0 mean=0 peak=0]                    
+  #10 A[min=139 max=231 mean=185 peak=231] B[min=0 max=0 mean=0 peak=0]                   
+Repeated capture summary: 10/10 PASS                                                      
+> i2s captr                                                                               
+Unknown command                                                                           
+> i2s capture 10                                                                          
+Running 10 compact frame-aligned I2S captures...                                          
+  #1 A[min=0 max=0 mean=0 peak=0] B[min=1072 max=1856 mean=1471 peak=1856]                
+  #2 A[min=1 max=1 mean=1 peak=1] B[min=-13312 max=7168 mean=-3454 peak=13312]            
+  #3 A[min=138 max=233 mean=186 peak=233] B[min=0 max=0 mean=0 peak=0]                    
+  #4 A[min=139 max=233 mean=186 peak=233] B[min=0 max=0 mean=0 peak=0]                    
+  #5 A[min=138 max=232 mean=185 peak=232] B[min=0 max=0 mean=0 peak=0]                    
+  #6 A[min=139 max=233 mean=186 peak=233] B[min=0 max=0 mean=0 peak=0]
+  #7 A[min=139 max=233 mean=186 peak=233] B[min=0 max=0 mean=0 peak=0]
+  #8 A[min=4 max=7 mean=5 peak=7] B[min=10240 max=26624 mean=18125 peak=26624]
+  #9 A[min=135 max=232 mean=184 peak=232] B[min=0 max=0 mean=0 peak=0]
+  #10 A[min=2 max=3 mean=2 peak=3] B[min=-27648 max=10240 mean=-9014 peak=27648]
+Repeated capture summary: 10/10 PASS
+
