@@ -7,6 +7,7 @@ static uint16_t rx_buffer[I2S_RX_SAMPLES];
 static uint32_t dma_error_flags;
 static i2s_rx_debug_t debug_state;
 static uint8_t capture_debug_latched;
+static uint8_t receiver_locked;
 
 static void print_hex16_local(uint16_t value)
 {
@@ -62,17 +63,13 @@ static void drain_spi2_rx(void)
     }
 }
 
-static int wait_for_ws_falling_edge_live(void)
+static int wait_for_ws_falling_edge(void)
 {
     uint32_t timeout;
 
-    /* SPI2 is already enabled here so the slave receiver can lock to the
-     * continuously-running codec clocks. Drain RXNE while waiting so the
-     * peripheral cannot enter an overrun state before DMA takes ownership. */
     timeout = 400000u;
     while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
     {
-        drain_spi2_rx();
         if (timeout == 0u)
             return 0;
         timeout--;
@@ -81,7 +78,6 @@ static int wait_for_ws_falling_edge_live(void)
     timeout = 400000u;
     while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
     {
-        drain_spi2_rx();
         if (timeout == 0u)
             return 0;
         timeout--;
@@ -90,10 +86,39 @@ static int wait_for_ws_falling_edge_live(void)
     return 1;
 }
 
+static int lock_receiver_to_frame(void)
+{
+    I2S_InitTypeDef i2s;
+
+    I2S_Cmd(SPI2, DISABLE);
+    SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
+
+    i2s.I2S_Mode = I2S_Mode_SlaveRx;
+    i2s.I2S_Standard = I2S_Standard_Phillips;
+    i2s.I2S_DataFormat = I2S_DataFormat_16b;
+    i2s.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+    i2s.I2S_AudioFreq = I2S_AudioFreq_48k;
+    i2s.I2S_CPOL = I2S_CPOL_Low;
+    I2S_Init(SPI2, &i2s);
+
+    /*
+     * The TLV320 clocks run continuously. Enabling an STM32 I2S slave in the
+     * middle of a slot can leave its internal 16-bit shifter permanently
+     * offset until the peripheral is disabled again. Wait for a known WCLK
+     * falling edge while SPI2 is disabled, then enable immediately at that
+     * frame boundary. Once locked, do NOT disable SPI2 between captures.
+     */
+    if (!wait_for_ws_falling_edge())
+        return 0;
+
+    I2S_Cmd(SPI2, ENABLE);
+    receiver_locked = 1u;
+    return 1;
+}
+
 int i2s_rx_start_capture(void)
 {
     DMA_InitTypeDef dma;
-    I2S_InitTypeDef i2s;
     volatile uint16_t dummy_dr;
     volatile uint16_t dummy_sr;
 
@@ -114,16 +139,31 @@ int i2s_rx_start_capture(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
-    I2S_Cmd(SPI2, DISABLE);
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
 
-    dummy_dr = SPI2->DR;
-    dummy_sr = SPI2->SR;
-    (void)dummy_dr;
-    (void)dummy_sr;
+    if (!receiver_locked)
+    {
+        dummy_dr = SPI2->DR;
+        dummy_sr = SPI2->SR;
+        (void)dummy_dr;
+        (void)dummy_sr;
+
+        if (!lock_receiver_to_frame())
+            return 0;
+    }
+
+    debug_state.sr_after_enable = SPI2->SR;
+    debug_state.ws_sync_ok = 1u;
+    debug_state.ws_level_at_enable =
+        (GPIOB->IDR & GPIO_Pin_12) ? 1u : 0u;
+
+    /* The receiver remains live between captures and may have RXNE/OVR set
+     * while DMA is idle. Clearing those flags does not disturb the serial
+     * shifter/frame lock. */
+    drain_spi2_rx();
 
     dma.DMA_PeripheralBaseAddr = (uint32_t)&SPI2->DR;
     dma.DMA_MemoryBaseAddr = (uint32_t)rx_buffer;
@@ -138,35 +178,6 @@ int i2s_rx_start_capture(void)
     dma.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel4, &dma);
 
-    i2s.I2S_Mode = I2S_Mode_SlaveRx;
-    i2s.I2S_Standard = I2S_Standard_Phillips;
-    i2s.I2S_DataFormat = I2S_DataFormat_16b;
-    i2s.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
-    i2s.I2S_AudioFreq = I2S_AudioFreq_48k;
-    i2s.I2S_CPOL = I2S_CPOL_Low;
-    I2S_Init(SPI2, &i2s);
-
-    /* Let the STM32 I2S slave receiver see the live external clocks BEFORE
-     * DMA is armed. This is more robust than enabling the peripheral exactly
-     * on a WS edge: SPI2 gets time to synchronize internally to BCLK/WS while
-     * firmware drains any received words. */
-    I2S_Cmd(SPI2, ENABLE);
-    debug_state.sr_after_enable = SPI2->SR;
-
-    if (!wait_for_ws_falling_edge_live())
-    {
-        I2S_Cmd(SPI2, DISABLE);
-        return 0;
-    }
-
-    debug_state.ws_sync_ok = 1u;
-    debug_state.ws_level_at_enable =
-        (GPIOB->IDR & GPIO_Pin_12) ? 1u : 0u;
-
-    /* Drop any pre-capture word/overrun, then hand the already-synchronized
-     * receiver to DMA. DMA is enabled before the peripheral request bit so no
-     * request can be lost during the handoff. */
-    drain_spi2_rx();
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
     DMA_SetCurrDataCounter(DMA1_Channel4, I2S_RX_SAMPLES);
@@ -224,9 +235,6 @@ void i2s_rx_print_analysis(void)
         sum_a += a;
         sum_b += b;
 
-        /* Correlation against +1,-1,+1,-1... highlights energy at Fs/2.
-         * A large value here helps distinguish analog clock-coupled alternation
-         * from ordinary low-frequency audio/noise. */
         if ((pair_count & 1u) == 0u)
         {
             alternating_a += a;
@@ -243,7 +251,7 @@ void i2s_rx_print_analysis(void)
 
     uart2_print("\r\nI2S FRAME-ALIGNED CHANNEL ANALYSIS\r\n");
     uart2_print("  WS sync     = ");
-    uart2_print(debug_state.ws_sync_ok ? "PASS (receiver live before DMA)\r\n"
+    uart2_print(debug_state.ws_sync_ok ? "PASS (receiver held live between captures)\r\n"
                                        : "FAIL\r\n");
     uart2_print("  WS at DMA   = ");
     uart2_print(debug_state.ws_level_at_enable ? "HIGH\r\n" : "LOW\r\n");
@@ -313,7 +321,9 @@ void i2s_rx_get_debug(i2s_rx_debug_t *debug)
 
 void i2s_rx_stop(void)
 {
+    /* Stop only the capture transport. Keep SPI2/I2S enabled so the slave
+     * receiver never loses BCLK/WCLK phase between CLI captures. */
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
-    I2S_Cmd(SPI2, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
+    drain_spi2_rx();
 }
