@@ -7,7 +7,6 @@ static uint16_t rx_buffer[I2S_RX_SAMPLES];
 static uint32_t dma_error_flags;
 static i2s_rx_debug_t debug_state;
 static uint8_t capture_debug_latched;
-static uint8_t receiver_locked;
 
 static void print_hex16_local(uint16_t value)
 {
@@ -44,7 +43,7 @@ static void print_s32_local(int32_t value)
         uart2_putc(buf[--n]);
 }
 
-static void drain_spi2_rx(void)
+static void clear_spi2_rx_state(void)
 {
     volatile uint16_t value;
 
@@ -54,13 +53,35 @@ static void drain_spi2_rx(void)
         (void)value;
     }
 
-    /* Clear OVR, if present, using the STM32F1-required DR then SR sequence. */
     if ((SPI2->SR & SPI_SR_OVR) != 0u)
     {
         value = SPI2->DR;
         value = SPI2->SR;
         (void)value;
     }
+}
+
+static int wait_for_ws_rising_edge(void)
+{
+    uint32_t timeout;
+
+    timeout = 400000u;
+    while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
+    {
+        if (timeout == 0u)
+            return 0;
+        timeout--;
+    }
+
+    timeout = 400000u;
+    while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
+    {
+        if (timeout == 0u)
+            return 0;
+        timeout--;
+    }
+
+    return 1;
 }
 
 static int wait_for_ws_falling_edge(void)
@@ -86,66 +107,73 @@ static int wait_for_ws_falling_edge(void)
     return 1;
 }
 
-static int wait_for_ws_falling_edge_live(void)
+static int sync_receiver_before_dma(void)
 {
     uint32_t timeout;
-
-    /* Keep the live receiver serviced while waiting for the right->left
-     * WCLK transition so RXNE/OVR cannot accumulate before DMA is armed. */
-    timeout = 400000u;
-    while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
-    {
-        drain_spi2_rx();
-        if (timeout == 0u)
-            return 0;
-        timeout--;
-    }
-
-    timeout = 400000u;
-    while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
-    {
-        drain_spi2_rx();
-        if (timeout == 0u)
-            return 0;
-        timeout--;
-    }
-
-    return 1;
-}
-
-static int lock_receiver_to_frame(void)
-{
-    I2S_InitTypeDef i2s;
-
-    I2S_Cmd(SPI2, DISABLE);
-    SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
-
-    i2s.I2S_Mode = I2S_Mode_SlaveRx;
-    i2s.I2S_Standard = I2S_Standard_Phillips;
-    i2s.I2S_DataFormat = I2S_DataFormat_16b;
-    i2s.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
-    i2s.I2S_AudioFreq = I2S_AudioFreq_48k;
-    i2s.I2S_CPOL = I2S_CPOL_Low;
-    I2S_Init(SPI2, &i2s);
+    uint16_t sr;
+    volatile uint16_t value;
 
     /*
-     * The TLV320 clocks run continuously. Enabling an STM32 I2S slave in the
-     * middle of a slot can leave its internal 16-bit shifter permanently
-     * offset until the peripheral is disabled again. Wait for a known WCLK
-     * falling edge while SPI2 is disabled, then enable immediately at that
-     * frame boundary. Once locked, do NOT disable SPI2 between captures.
+     * STM32F1 CHSIDE becomes unreliable after an overrun, so each capture
+     * starts with a freshly disabled/re-enabled I2S receiver instead of
+     * leaving SPI2 running while DMA is idle.
+     *
+     * Philips I2S uses WS low for left and WS high for right. Enable just
+     * after a rising WS edge (start of right slot), wait for the following
+     * falling edge, then consume the completed right word. The next RXNE is
+     * therefore the left word and DMA always starts on a known slot boundary.
      */
-    if (!wait_for_ws_falling_edge())
+    I2S_Cmd(SPI2, DISABLE);
+    clear_spi2_rx_state();
+
+    if (!wait_for_ws_rising_edge())
         return 0;
 
     I2S_Cmd(SPI2, ENABLE);
-    receiver_locked = 1u;
+
+    if (!wait_for_ws_falling_edge())
+    {
+        I2S_Cmd(SPI2, DISABLE);
+        return 0;
+    }
+
+    timeout = 400000u;
+    while ((SPI2->SR & SPI_SR_RXNE) == 0u)
+    {
+        if ((SPI2->SR & SPI_SR_OVR) != 0u)
+        {
+            clear_spi2_rx_state();
+            I2S_Cmd(SPI2, DISABLE);
+            return 0;
+        }
+
+        if (timeout == 0u)
+        {
+            I2S_Cmd(SPI2, DISABLE);
+            return 0;
+        }
+        timeout--;
+    }
+
+    sr = SPI2->SR;
+    value = SPI2->DR;
+    (void)value;
+
+    /* CHSIDE: 0 = left, 1 = right. We deliberately consume right here. */
+    if ((sr & SPI_SR_OVR) != 0u || (sr & I2S_FLAG_CHSIDE) == 0u)
+    {
+        clear_spi2_rx_state();
+        I2S_Cmd(SPI2, DISABLE);
+        return 0;
+    }
+
     return 1;
 }
 
 int i2s_rx_start_capture(void)
 {
     DMA_InitTypeDef dma;
+    I2S_InitTypeDef i2s;
     volatile uint16_t dummy_dr;
     volatile uint16_t dummy_sr;
 
@@ -166,23 +194,16 @@ int i2s_rx_start_capture(void)
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
     RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA1, ENABLE);
 
+    I2S_Cmd(SPI2, DISABLE);
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
 
-    if (!receiver_locked)
-    {
-        dummy_dr = SPI2->DR;
-        dummy_sr = SPI2->SR;
-        (void)dummy_dr;
-        (void)dummy_sr;
-
-        if (!lock_receiver_to_frame())
-            return 0;
-    }
-
-    debug_state.sr_after_enable = SPI2->SR;
+    dummy_dr = SPI2->DR;
+    dummy_sr = SPI2->SR;
+    (void)dummy_dr;
+    (void)dummy_sr;
 
     dma.DMA_PeripheralBaseAddr = (uint32_t)&SPI2->DR;
     dma.DMA_MemoryBaseAddr = (uint32_t)rx_buffer;
@@ -197,18 +218,18 @@ int i2s_rx_start_capture(void)
     dma.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel4, &dma);
 
-    /*
-     * SPI2 remains bit-locked between captures, but while DMA is idle the next
-     * unread 16-bit word could belong to either I2S slot. Re-establish slot
-     * phase for every capture: WCLK falling is the right->left boundary in
-     * Philips I2S. Service RXNE/OVR while waiting, then discard the just-
-     * completed right-slot word at the boundary. DMA is armed immediately,
-     * well before the following 16-bit left word can complete.
-     */
-    if (!wait_for_ws_falling_edge_live())
+    i2s.I2S_Mode = I2S_Mode_SlaveRx;
+    i2s.I2S_Standard = I2S_Standard_Phillips;
+    i2s.I2S_DataFormat = I2S_DataFormat_16b;
+    i2s.I2S_MCLKOutput = I2S_MCLKOutput_Disable;
+    i2s.I2S_AudioFreq = I2S_AudioFreq_48k;
+    i2s.I2S_CPOL = I2S_CPOL_Low;
+    I2S_Init(SPI2, &i2s);
+
+    if (!sync_receiver_before_dma())
         return 0;
 
-    drain_spi2_rx();
+    debug_state.sr_after_enable = SPI2->SR;
     debug_state.ws_sync_ok = 1u;
     debug_state.ws_level_at_enable =
         (GPIOB->IDR & GPIO_Pin_12) ? 1u : 0u;
@@ -286,7 +307,7 @@ void i2s_rx_print_analysis(void)
 
     uart2_print("\r\nI2S FRAME-ALIGNED CHANNEL ANALYSIS\r\n");
     uart2_print("  WS sync     = ");
-    uart2_print(debug_state.ws_sync_ok ? "PASS (DMA aligned to WCLK left slot)\r\n"
+    uart2_print(debug_state.ws_sync_ok ? "PASS (CHSIDE-aligned DMA handoff)\r\n"
                                        : "FAIL\r\n");
     uart2_print("  WS at DMA   = ");
     uart2_print(debug_state.ws_level_at_enable ? "HIGH\r\n" : "LOW\r\n");
@@ -356,9 +377,8 @@ void i2s_rx_get_debug(i2s_rx_debug_t *debug)
 
 void i2s_rx_stop(void)
 {
-    /* Stop only the capture transport. Keep SPI2/I2S enabled so the slave
-     * receiver never loses BCLK/WCLK bit phase between CLI captures. */
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
-    drain_spi2_rx();
+    I2S_Cmd(SPI2, DISABLE);
+    clear_spi2_rx_state();
 }
