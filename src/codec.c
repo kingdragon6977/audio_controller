@@ -53,9 +53,10 @@
 static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE,       0x01u },
 
-    /* Page 1: physical IN1L(P), pin 8 -> left PGA, single-ended, 0 dB. */
+    /* Page 1: physical IN1L(P), pin 8 -> left PGA, single-ended. */
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
-    { CODEC_REG_LEFT_PGA,   0x00u },
+    /* Diagnostic gain: +25 dB (0.5 dB/step, 0x32 = 50 steps). */
+    { CODEC_REG_LEFT_PGA,   0x32u },
 
     /* Page 1: physical IN1R(P), pin 7 -> right PGA, single-ended, 0 dB. */
     { CODEC_REG_IN1R_ROUTE, 0xFCu },
