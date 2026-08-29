@@ -27,6 +27,7 @@
 #define CODEC_REG_MICBIAS      0x33u
 #define CODEC_REG_IN1L_ROUTE   0x34u
 #define CODEC_REG_IN1R_ROUTE   0x37u
+#define CODEC_REG_RIGHT_X_ROUTE 0x39u
 #define CODEC_REG_LEFT_PGA     0x3Bu
 #define CODEC_REG_RIGHT_PGA    0x3Cu
 #define CODEC_REG_PGA_FLAGS    0x3Eu
@@ -49,21 +50,22 @@
  * Register 0x1E = 0x88 selects BCLK divider N=8.
  * Register 0x35 = 0x12 routes DOUT to the primary codec interface.
  *
- * The original AV6301 traffic was captured with the project's logic analyzer.
- * This profile preserves the recovered clock/interface settings and explicitly
- * routes and enables BOTH IN1L(P) and IN1R(P) ADC inputs for stereo capture.
+ * Diagnostic routing below sends the same physical IN1L(P) signal into both
+ * left and right PGAs. This isolates a left-PGA/left-ADC fault from an IN1L
+ * source/bias problem without changing the proven clock/I2S configuration.
  */
 static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE,       0x01u },
 
-    /* Page 1: physical IN1L(P), pin 8 -> left PGA, single-ended. */
+    /* Physical IN1L(P), pin 8 -> left PGA, single-ended, 0 dB. */
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
-    /* Diagnostic baseline: 0 dB left PGA to rule out gain/common-mode saturation. */
     { CODEC_REG_LEFT_PGA,   0x00u },
 
-    /* Page 1: physical IN1R(P), pin 7 -> right PGA, single-ended, 0 dB. */
-    { CODEC_REG_IN1R_ROUTE, 0xFCu },
-    { CODEC_REG_RIGHT_PGA,  0x00u },
+    /* Diagnostic cross-route: disconnect normal right inputs, then route
+     * physical IN1L(P) into the right PGA single-ended at 0 dB. */
+    { CODEC_REG_IN1R_ROUTE,  0xFFu },
+    { CODEC_REG_RIGHT_X_ROUTE, 0x3Cu },
+    { CODEC_REG_RIGHT_PGA,   0x00u },
 
     /* Return to page 0 for clock / digital interface configuration. */
     { CODEC_REG_PAGE,       0x00u },
@@ -197,6 +199,7 @@ void codec_dump_profile(void)
         CODEC_REG_MICBIAS,
         CODEC_REG_IN1L_ROUTE,
         CODEC_REG_IN1R_ROUTE,
+        CODEC_REG_RIGHT_X_ROUTE,
         CODEC_REG_LEFT_PGA,
         CODEC_REG_RIGHT_PGA,
         CODEC_REG_PGA_FLAGS
