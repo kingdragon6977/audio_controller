@@ -29,6 +29,7 @@
 #define CODEC_REG_IN1R_ROUTE   0x37u
 #define CODEC_REG_LEFT_PGA     0x3Bu
 #define CODEC_REG_RIGHT_PGA    0x3Cu
+#define CODEC_REG_PGA_FLAGS    0x3Eu
 
 /* TLV320ADC3101 RESET is active low on STM32 PB14. */
 #define CODEC_RESET_PORT      GPIOB
@@ -195,7 +196,8 @@ void codec_dump_profile(void)
         CODEC_REG_IN1L_ROUTE,
         CODEC_REG_IN1R_ROUTE,
         CODEC_REG_LEFT_PGA,
-        CODEC_REG_RIGHT_PGA
+        CODEC_REG_RIGHT_PGA,
+        CODEC_REG_PGA_FLAGS
     };
 
     if (!i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0x00u))
