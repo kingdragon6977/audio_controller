@@ -86,6 +86,33 @@ static int wait_for_ws_falling_edge(void)
     return 1;
 }
 
+static int wait_for_ws_falling_edge_live(void)
+{
+    uint32_t timeout;
+
+    /* Keep the live receiver serviced while waiting for the right->left
+     * WCLK transition so RXNE/OVR cannot accumulate before DMA is armed. */
+    timeout = 400000u;
+    while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
+    {
+        drain_spi2_rx();
+        if (timeout == 0u)
+            return 0;
+        timeout--;
+    }
+
+    timeout = 400000u;
+    while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
+    {
+        drain_spi2_rx();
+        if (timeout == 0u)
+            return 0;
+        timeout--;
+    }
+
+    return 1;
+}
+
 static int lock_receiver_to_frame(void)
 {
     I2S_InitTypeDef i2s;
@@ -156,14 +183,6 @@ int i2s_rx_start_capture(void)
     }
 
     debug_state.sr_after_enable = SPI2->SR;
-    debug_state.ws_sync_ok = 1u;
-    debug_state.ws_level_at_enable =
-        (GPIOB->IDR & GPIO_Pin_12) ? 1u : 0u;
-
-    /* The receiver remains live between captures and may have RXNE/OVR set
-     * while DMA is idle. Clearing those flags does not disturb the serial
-     * shifter/frame lock. */
-    drain_spi2_rx();
 
     dma.DMA_PeripheralBaseAddr = (uint32_t)&SPI2->DR;
     dma.DMA_MemoryBaseAddr = (uint32_t)rx_buffer;
@@ -177,6 +196,22 @@ int i2s_rx_start_capture(void)
     dma.DMA_Priority = DMA_Priority_VeryHigh;
     dma.DMA_M2M = DMA_M2M_Disable;
     DMA_Init(DMA1_Channel4, &dma);
+
+    /*
+     * SPI2 remains bit-locked between captures, but while DMA is idle the next
+     * unread 16-bit word could belong to either I2S slot. Re-establish slot
+     * phase for every capture: WCLK falling is the right->left boundary in
+     * Philips I2S. Service RXNE/OVR while waiting, then discard the just-
+     * completed right-slot word at the boundary. DMA is armed immediately,
+     * well before the following 16-bit left word can complete.
+     */
+    if (!wait_for_ws_falling_edge_live())
+        return 0;
+
+    drain_spi2_rx();
+    debug_state.ws_sync_ok = 1u;
+    debug_state.ws_level_at_enable =
+        (GPIOB->IDR & GPIO_Pin_12) ? 1u : 0u;
 
     DMA_ClearFlag(DMA1_FLAG_GL4 | DMA1_FLAG_TC4 |
                   DMA1_FLAG_HT4 | DMA1_FLAG_TE4);
@@ -251,7 +286,7 @@ void i2s_rx_print_analysis(void)
 
     uart2_print("\r\nI2S FRAME-ALIGNED CHANNEL ANALYSIS\r\n");
     uart2_print("  WS sync     = ");
-    uart2_print(debug_state.ws_sync_ok ? "PASS (receiver held live between captures)\r\n"
+    uart2_print(debug_state.ws_sync_ok ? "PASS (DMA aligned to WCLK left slot)\r\n"
                                        : "FAIL\r\n");
     uart2_print("  WS at DMA   = ");
     uart2_print(debug_state.ws_level_at_enable ? "HIGH\r\n" : "LOW\r\n");
@@ -322,7 +357,7 @@ void i2s_rx_get_debug(i2s_rx_debug_t *debug)
 void i2s_rx_stop(void)
 {
     /* Stop only the capture transport. Keep SPI2/I2S enabled so the slave
-     * receiver never loses BCLK/WCLK phase between CLI captures. */
+     * receiver never loses BCLK/WCLK bit phase between CLI captures. */
     SPI_I2S_DMACmd(SPI2, SPI_I2S_DMAReq_Rx, DISABLE);
     DMA_Cmd(DMA1_Channel4, DISABLE);
     drain_spi2_rx();
