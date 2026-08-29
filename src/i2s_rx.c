@@ -61,29 +61,6 @@ static void clear_spi2_rx_state(void)
     }
 }
 
-static int wait_for_ws_rising_edge(void)
-{
-    uint32_t timeout;
-
-    timeout = 400000u;
-    while ((GPIOB->IDR & GPIO_Pin_12) != 0u)
-    {
-        if (timeout == 0u)
-            return 0;
-        timeout--;
-    }
-
-    timeout = 400000u;
-    while ((GPIOB->IDR & GPIO_Pin_12) == 0u)
-    {
-        if (timeout == 0u)
-            return 0;
-        timeout--;
-    }
-
-    return 1;
-}
-
 static int wait_for_ws_falling_edge(void)
 {
     uint32_t timeout;
@@ -112,62 +89,65 @@ static int sync_receiver_before_dma(void)
     uint32_t timeout;
     uint16_t sr;
     volatile uint16_t value;
+    unsigned int words_seen = 0u;
 
     /*
-     * STM32F1 CHSIDE becomes unreliable after an overrun, so each capture
-     * starts with a freshly disabled/re-enabled I2S receiver instead of
-     * leaving SPI2 running while DMA is idle.
+     * Start the STM32 slave receiver on a known Philips-I2S left boundary.
+     * This establishes bit/word alignment. Then consume complete words until
+     * CHSIDE explicitly reports a right-channel word. The word immediately
+     * following that right word is left, so DMA can be armed with deterministic
+     * A=left, B=right slot order.
      *
-     * Philips I2S uses WS low for left and WS high for right. Enable just
-     * after a rising WS edge (start of right slot), wait for the following
-     * falling edge, then consume the completed right word. The next RXNE is
-     * therefore the left word and DMA always starts on a known slot boundary.
+     * Do not use CHSIDE after OVR; restart instead because STM32F1 documents
+     * CHSIDE as unreliable once an overrun has occurred.
      */
     I2S_Cmd(SPI2, DISABLE);
     clear_spi2_rx_state();
 
-    if (!wait_for_ws_rising_edge())
+    if (!wait_for_ws_falling_edge())
         return 0;
 
     I2S_Cmd(SPI2, ENABLE);
 
-    if (!wait_for_ws_falling_edge())
+    while (words_seen < 4u)
     {
-        I2S_Cmd(SPI2, DISABLE);
-        return 0;
-    }
+        timeout = 400000u;
+        while ((SPI2->SR & SPI_SR_RXNE) == 0u)
+        {
+            if ((SPI2->SR & SPI_SR_OVR) != 0u)
+            {
+                clear_spi2_rx_state();
+                I2S_Cmd(SPI2, DISABLE);
+                return 0;
+            }
 
-    timeout = 400000u;
-    while ((SPI2->SR & SPI_SR_RXNE) == 0u)
-    {
-        if ((SPI2->SR & SPI_SR_OVR) != 0u)
+            if (timeout == 0u)
+            {
+                I2S_Cmd(SPI2, DISABLE);
+                return 0;
+            }
+            timeout--;
+        }
+
+        sr = SPI2->SR;
+        value = SPI2->DR;
+        (void)value;
+        words_seen++;
+
+        if ((sr & SPI_SR_OVR) != 0u)
         {
             clear_spi2_rx_state();
             I2S_Cmd(SPI2, DISABLE);
             return 0;
         }
 
-        if (timeout == 0u)
-        {
-            I2S_Cmd(SPI2, DISABLE);
-            return 0;
-        }
-        timeout--;
+        /* CHSIDE: 0 = left, 1 = right. After consuming right, next is left. */
+        if ((sr & I2S_FLAG_CHSIDE) != 0u)
+            return 1;
     }
 
-    sr = SPI2->SR;
-    value = SPI2->DR;
-    (void)value;
-
-    /* CHSIDE: 0 = left, 1 = right. We deliberately consume right here. */
-    if ((sr & SPI_SR_OVR) != 0u || (sr & I2S_FLAG_CHSIDE) == 0u)
-    {
-        clear_spi2_rx_state();
-        I2S_Cmd(SPI2, DISABLE);
-        return 0;
-    }
-
-    return 1;
+    I2S_Cmd(SPI2, DISABLE);
+    return 0;
 }
 
 int i2s_rx_start_capture(void)
