@@ -41,10 +41,12 @@
  * PLL: 16 MHz * 6.144 = 98.304 MHz
  *   P=1, R=1, J=6, D=1440
  * ADC: 98.304 MHz / 8 / 2 / 128 = 48 kHz
- * BCLK: ADC_MOD_CLK / 4 = 1.536 MHz = 32 * 48 kHz
+ * BCLK source: ADC_CLK = 98.304 MHz / 8 = 12.288 MHz
+ * BCLK: 12.288 MHz / 8 = 1.536 MHz = 32 * 48 kHz
  *
  * Register 0x1B = 0x0C selects I2S, 16-bit and ADC master mode.
- * Register 0x1E = 0x84 selects BCLK divider N=4.
+ * Register 0x1D = 0x02 selects ADC_CLK as the BCLK divider source.
+ * Register 0x1E = 0x88 selects BCLK divider N=8.
  * Register 0x35 = 0x12 routes DOUT to the primary codec interface.
  *
  * The original AV6301 traffic was captured with the project's logic analyzer.
@@ -81,7 +83,7 @@ static const uint8_t av6301_profile[][2] = {
 
     { CODEC_REG_IFACE,    0x0Cu }, /* I2S, 16-bit, ADC master */
     { CODEC_REG_IFACE2,   0x02u }, /* BCLK divider input = ADC_CLK */
-    { CODEC_REG_BCLK_DIV, 0x84u }, /* BCLK divider N=4 */
+    { CODEC_REG_BCLK_DIV, 0x88u }, /* BCLK divider N=8 -> 1.536 MHz */
     { CODEC_REG_DOUT,     0x12u }, /* primary DOUT, bus keeper disabled */
 
     { CODEC_REG_ADC_POWER, 0xC2u }, /* power up both ADC channels */
