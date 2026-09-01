@@ -50,10 +50,9 @@
  * Register 0x1E = 0x88 selects BCLK divider N=8.
  * Register 0x35 = 0x12 routes DOUT to the primary codec interface.
  *
- * Known-good diagnostic routing sends the same physical IN1L(P) signal into
- * both left and right PGAs. Keep this while investigating the left-only input
- * bias regression; it previously produced the correct input common-mode and
- * clean 1-kHz captures.
+ * Normal analog routing uses physical IN1L(P) on the left PGA only.
+ * The right analog input paths remain disconnected while both ADC engines
+ * stay powered so the already-proven stereo I2S framing remains unchanged.
  */
 static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE,       0x01u },
@@ -62,10 +61,10 @@ static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
     { CODEC_REG_LEFT_PGA,   0x00u },
 
-    /* Known-good cross-route: disconnect normal right inputs, then route
-     * physical IN1L(P) into the right PGA single-ended at 0 dB. */
+    /* Unused right analog channel: disconnect both normal and alternate
+     * routes. Keep right PGA at 0 dB while its input is disconnected. */
     { CODEC_REG_IN1R_ROUTE,    0xFFu },
-    { CODEC_REG_RIGHT_X_ROUTE, 0x3Cu },
+    { CODEC_REG_RIGHT_X_ROUTE, 0x3Fu },
     { CODEC_REG_RIGHT_PGA,     0x00u },
 
     /* Return to page 0 for clock / digital interface configuration. */
