@@ -23,14 +23,14 @@
 #define CODEC_REG_ADC_MUTE     0x52u
 
 /* Page-1 analog input routing/gain registers. */
-#define CODEC_REG_PAGE          0x00u
-#define CODEC_REG_MICBIAS       0x33u
-#define CODEC_REG_IN1L_ROUTE    0x34u
-#define CODEC_REG_IN1R_ROUTE    0x37u
+#define CODEC_REG_PAGE         0x00u
+#define CODEC_REG_MICBIAS      0x33u
+#define CODEC_REG_IN1L_ROUTE   0x34u
+#define CODEC_REG_IN1R_ROUTE   0x37u
 #define CODEC_REG_RIGHT_X_ROUTE 0x39u
-#define CODEC_REG_LEFT_PGA      0x3Bu
-#define CODEC_REG_RIGHT_PGA     0x3Cu
-#define CODEC_REG_PGA_FLAGS     0x3Eu
+#define CODEC_REG_LEFT_PGA     0x3Bu
+#define CODEC_REG_RIGHT_PGA    0x3Cu
+#define CODEC_REG_PGA_FLAGS    0x3Eu
 
 /* TLV320ADC3101 RESET is active low on STM32 PB14. */
 #define CODEC_RESET_PORT      GPIOB
@@ -50,10 +50,10 @@
  * Register 0x1E = 0x88 selects BCLK divider N=8.
  * Register 0x35 = 0x12 routes DOUT to the primary codec interface.
  *
- * Normal analog routing uses physical IN1L(P) -> left PGA -> left ADC only.
- * The right analog input paths are disconnected. Both ADC engines remain
- * powered so the already-proven stereo I2S clock/framing remains unchanged;
- * the unused right slot is simply retained for now.
+ * Known-good diagnostic routing sends the same physical IN1L(P) signal into
+ * both left and right PGAs. Keep this while investigating the left-only input
+ * bias regression; it previously produced the correct input common-mode and
+ * clean 1-kHz captures.
  */
 static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_PAGE,       0x01u },
@@ -62,10 +62,10 @@ static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_IN1L_ROUTE, 0xFCu },
     { CODEC_REG_LEFT_PGA,   0x00u },
 
-    /* Unused right analog channel: disconnect both normal and alternate
-     * routes. Keep right PGA at 0 dB while its input is disconnected. */
+    /* Known-good cross-route: disconnect normal right inputs, then route
+     * physical IN1L(P) into the right PGA single-ended at 0 dB. */
     { CODEC_REG_IN1R_ROUTE,    0xFFu },
-    { CODEC_REG_RIGHT_X_ROUTE, 0x3Fu },
+    { CODEC_REG_RIGHT_X_ROUTE, 0x3Cu },
     { CODEC_REG_RIGHT_PGA,     0x00u },
 
     /* Return to page 0 for clock / digital interface configuration. */
@@ -89,7 +89,7 @@ static const uint8_t av6301_profile[][2] = {
     { CODEC_REG_BCLK_DIV, 0x88u }, /* BCLK divider N=8 -> 1.536 MHz */
     { CODEC_REG_DOUT,     0x12u }, /* primary DOUT, bus keeper disabled */
 
-    { CODEC_REG_ADC_POWER, 0xC2u }, /* keep both ADC engines up for stereo framing */
+    { CODEC_REG_ADC_POWER, 0xC2u }, /* power up both ADC channels */
     { CODEC_REG_ADC_MUTE,  0x00u }  /* unmute, 0 dB digital gain */
 };
 
