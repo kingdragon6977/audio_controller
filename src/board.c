@@ -19,9 +19,9 @@ void board_init(void)
 
     GPIO_Init(GPIOB, &gpio);
 
-    /* Start with LED off */
-    GPIO_ResetBits(GPIOB, GPIO_Pin_2);
-    led_state = 0;
+    /* Simple power indicator for bring-up: stay on while firmware is running. */
+    GPIO_SetBits(GPIOB, GPIO_Pin_2);
+    led_state = 1;
 }
 
 void led_on(void)
