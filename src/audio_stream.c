@@ -8,6 +8,8 @@
 #define STREAM_HALF_SLOTS      128u
 #define STREAM_PACKET_SAMPLES   64u
 #define STREAM_SAMPLE_RATE   24000u
+#define ESP_CTRL_READY         0xF0u
+#define ESP_CTRL_STOP          0xF1u
 
 static uint16_t stream_dma_buffer[STREAM_DMA_SLOTS];
 static int16_t packet_samples[STREAM_PACKET_SAMPLES];
@@ -16,7 +18,9 @@ static uint16_t packet_sequence;
 static uint32_t packet_count;
 static uint32_t dma_error_count;
 static uint8_t running;
+static uint8_t esp_ready;
 static uint8_t ws_high_at_dma;
+static uint8_t start_message_printed;
 
 static void clear_spi2_rx_state(void)
 {
@@ -116,8 +120,8 @@ static void send_packet(void)
 
     header[0] = 0xA5u;
     header[1] = 0x5Au;
-    header[2] = 0x01u; /* protocol version */
-    header[3] = 0x01u; /* mono, signed PCM16 little-endian */
+    header[2] = 0x01u;
+    header[3] = 0x01u;
     header[4] = (uint8_t)(packet_sequence & 0xFFu);
     header[5] = (uint8_t)(packet_sequence >> 8);
     header[6] = (uint8_t)(STREAM_PACKET_SAMPLES & 0xFFu);
@@ -137,12 +141,6 @@ static void process_half(unsigned int first_slot)
 {
     unsigned int frame;
 
-    /*
-     * 128 slots = 64 stereo frames. Keep every second LEFT frame to
-     * decimate the codec's 48 kHz stream to 24 kHz without interpolation.
-     * The long-meter tests proved the physical LEFT/RIGHT mapping follows
-     * the WS level observed at the DMA handoff.
-     */
     for (frame = 0u; frame < STREAM_HALF_SLOTS / 2u; frame += 2u)
     {
         unsigned int base = first_slot + frame * 2u;
@@ -168,7 +166,6 @@ int audio_stream_start(void)
     if (!diagnostics_i2s2_safe())
         return 0;
 
-    /* Ensure the diagnostic/meter receiver is fully idle first. */
     i2s_rx_stop();
 
     packet_fill = 0u;
@@ -240,13 +237,49 @@ void audio_stream_stop(void)
 
 void audio_stream_task(void)
 {
+    while (esp_uart_available())
+    {
+        uint8_t control = (uint8_t)esp_uart_getc();
+
+        if (control == ESP_CTRL_READY)
+        {
+            esp_ready = 1u;
+            start_message_printed = 0u;
+            uart2_print("ESP-01: Wi-Fi/UDP ready; enabling PCM stream.\r\n");
+        }
+        else if (control == ESP_CTRL_STOP)
+        {
+            esp_ready = 0u;
+            audio_stream_stop();
+            uart2_print("ESP-01: stream stopped by receiver.\r\n");
+        }
+    }
+
+    /* A diagnostic capture/meter may temporarily take DMA1 CH4 away. */
+    if (running && (DMA1_Channel4->CCR & 0x0001u) == 0u)
+        running = 0u;
+
     if (!running)
+    {
+        if (esp_ready)
+        {
+            if (audio_stream_start())
+            {
+                if (!start_message_printed)
+                {
+                    uart2_print("AUDIO STREAM: 24 kHz mono PCM16 -> USART1 2 Mbaud -> ESP-01.\r\n");
+                    start_message_printed = 1u;
+                }
+            }
+        }
         return;
+    }
 
     if (DMA_GetFlagStatus(DMA1_FLAG_TE4))
     {
         dma_error_count++;
         audio_stream_stop();
+        uart2_print("AUDIO STREAM: DMA error; will retry while ESP remains ready.\r\n");
         return;
     }
 
