@@ -1,0 +1,2267 @@
+
+Welcome to minicom 2.9
+
+OPTIONS: I18n 
+Port /dev/ttyACM1, 02:38:18
+
+Press CTRL-A Z for help on special keys
+
+
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A                                                      
+  HSI READY   = YES                                                             
+  HSE READY   = YES                                                             
+  PLL READY   = YES                                                             
+  SYSCLK      = 72000000 Hz                                                     
+  HCLK        = 72000000 Hz                                                     
+  PCLK1       = 36000000 Hz                                                     
+  PCLK2       = 72000000 Hz                                                     
+  PLL INPUT   = HSE                                                             
+  PLL MULT    = x9                                                              
+  AHB DIV     = 1                                                               
+  APB1 DIV    = 2                                                               
+  APB2 DIV    = 1                                                               
+  APB1 LIMIT  = PASS (<=36 MHz)                                                 
+  RCC_APB1ENR = 0x00020000                                                      
+  RCC_APB2ENR = 0x0000000C                                                      
+                                                                                
+AUDIO / BUS GPIO:                                                               
+  I2C1: PB6=SCL PB7=SDA                                                         
+  PB6  cfg=0x00000004 IN_FLOATING level=1                                       
+  PB7  cfg=0x00000004 IN_FLOATING level=1                                       
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT                                      
+  PB12 cfg=0x00000004 IN_FLOATING level=0                                       
+  PB13 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB15 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB14 cfg=0x00000004 IN_FLOATING level=1                                       
+  GPIOB->CRL = 0x44484244                                                       
+  GPIOB->CRH = 0x44444444                                                       
+  GPIOB->IDR = 0x0000E6D7                                                       
+  GPIOB->ODR = 0x00000014                                                       
+                                                                                
+I2S CLOCK OWNERSHIP:                                                            
+  MASTER      = TLV320ADC3101                                                   
+  STM32 ROLE  = I2S SLAVE / OBSERVER                                            
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT                                       
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT                                       
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT                                       
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK                                     
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS                            
+                                                                                
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs                    
+                                                                                
+Initializing I2C1...                                                            
+I2C1 initialization returned.                                                   
+                                                                                
+I2C1 HARDWARE STATE:                                                            
+  APB1 CLOCK = ON                                                               
+  CR1        = 0x00000401                                                       
+  CR2        = 0x00000024                                                       
+  OAR1       = 0x00004000                                                       
+  CCR        = 0x000000B4                                                       
+  TRISE      = 0x00000025                                                       
+  SR1        = 0x00000000                                                       
+  SR2        = 0x00000000                                                       
+                                                                                
+AUDIO / BUS GPIO:                                                               
+  I2C1: PB6=SCL PB7=SDA                                                         
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1                                      
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1                                      
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT                                      
+  PB12 cfg=0x00000004 IN_FLOATING level=0                                       
+  PB13 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB15 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB14 cfg=0x00000004 IN_FLOATING level=1                                       
+  GPIOB->CRL = 0xFF484244                                                       
+  GPIOB->CRH = 0x44444444                                                       
+  GPIOB->IDR = 0x0000E6D7                                                       
+  GPIOB->ODR = 0x00000014                                                       
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH                 
+                                                                                
+Resetting TLV320ADC3101 on PB14...                                              
+TLV320 reset released.                                                          
+                                                                                
+AUDIO / BUS GPIO:                                                               
+  I2C1: PB6=SCL PB7=SDA                                                         
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1                                      
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1                                      
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT                                      
+  PB12 cfg=0x00000004 IN_FLOATING level=0                                       
+  PB13 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB15 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB14 cfg=0x00000002 OUT_2M_PP level=1                                         
+  GPIOB->CRL = 0xFF484244                                                       
+  GPIOB->CRH = 0x42444444                                                       
+  GPIOB->IDR = 0x0000E6D7                                                       
+  GPIOB->ODR = 0x00004014                                                       
+                                                                                
+TLV320ADC3101:                                                                  
+  RESET: PB14 active-low hardware reset                                         
+  I2C1: PB6=SCL PB7=SDA                                                         
+  Address: 0x18 (7-bit)                                                         
+  Probing... ACK - codec responded                                              
+                                                                                
+I2C1 HARDWARE STATE:                                                            
+  APB1 CLOCK = ON                                                               
+  CR1        = 0x00000401                                                       
+  CR2        = 0x00000024                                                       
+  OAR1       = 0x00004000                                                       
+  CCR        = 0x000000B4                                                       
+  TRISE      = 0x00000025                                                       
+  SR1        = 0x00000000                                                       
+  SR2        = 0x00000000                                                       
+I2S PRE-ACTIVATION SAFETY: PASS                                                 
+Applying AV6301 codec profile...                                                
+Codec profile applied.                                                          
+Read-back trail follows:                                                        
+                                                                                
+TLV320ADC3101 Page-0 clock/interface/ADC dump                                   
+  0x00 = 0x00                                                                   
+  0x04 = 0x03                                                                   
+  0x05 = 0x91                                                                   
+  0x06 = 0x06                                                                   
+  0x07 = 0x05                                                                   
+  0x08 = 0xA0                                                                   
+  0x12 = 0x88                                                                   
+  0x13 = 0x82                                                                   
+  0x14 = 0x80                                                                   
+  0x15 = 0x80                                                                   
+  0x1B = 0x0C                                                                   
+  0x1C = 0x00                                                                   
+  0x1D = 0x02                                                                   
+  0x1E = 0x88                                                                   
+  0x1F = 0x00                                                                   
+  0x20 = 0x00                                                                   
+  0x21 = 0x10                                                                   
+  0x24 = 0xCC                                                                   
+  0x3D = 0x01                                                                   
+  0x35 = 0x12                                                                   
+  0x51 = 0xC2                                                                   
+  0x52 = 0x00                                                                   
+                                                                                
+TLV320ADC3101 Page-1 analog-input dump                                          
+  0x33 = 0x00                                                                   
+  0x34 = 0xFC                                                                   
+  0x37 = 0xFF                                                                   
+  0x39 = 0x3F                                                                   
+  0x3B = 0x00                                                                   
+  0x3C = 0x00                                                                   
+  0x3E = 0x03                                                                   
+                                                                                
+I2S CLOCK OWNERSHIP:                                                            
+  MASTER      = TLV320ADC3101                                                   
+  STM32 ROLE  = I2S SLAVE / OBSERVER                                            
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT                                       
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT                                       
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT                                       
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK                                     
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS                            
+                                                                                
+I2S CLOCK ACTIVITY CHECK: PASS - WCLK activity observed on PB12                 
+  NOTE: logic analyzer/scope remains authoritative for exact clock frequency an.
+                                                                                
+I2S RX DMA ACTIVATION PRE-FLIGHT: PASS                                          
+  DMA1 CH4 = SPI2/I2S RX                                                        
+  FORMAT   = Philips I2S, 16-bit, slave RX                                      
+  SYNC     = receiver live first; DMA handoff at PB12 falling edge              
+  BUFFER   = 256 x 16-bit slots                                                 
+I2S RX DMA START: PASS                                                          
+I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured                          
+  FIRST 32 SAMPLES: 0xFFE1 0xF007 0xFFE2 0xF009 0xFFE2 0xF00B 0xFFE1 0xF00C 0xF9
+  MIN SAMPLE       = 0x0000                                                     
+  MAX SAMPLE       = 0xFFFC                                                     
+  ZERO COUNT       = 0x00000002                                                 
+  0x8000 COUNT     = 0x00000000                                                 
+  0xFFFF COUNT     = 0x00000000                                                 
+  IDENTICAL PAIRS  = 0x00000000                                                 
+  EVEN SLOT SUM    = 0x00629E21                                                 
+  ODD SLOT SUM     = 0x0058BD09                                                 
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -30778 / 32766                                             
+  STREAM A MEAN    = -1745                                                      
+  STREAM A PEAK    = 32766                                                      
+  STREAM A FS/2    = 466                                                        
+  STREAM B MIN/MAX = -32569 / 28668                                             
+  STREAM B MEAN    = -4231                                                      
+  STREAM B PEAK    = 32569                                                      
+  STREAM B FS/2    = -256                                                       
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE1 (-31) B=0xF007 (-4089)                                         
+    F01 A=0xFFE2 (-30) B=0xF009 (-4087)                                         
+    F02 A=0xFFE2 (-30) B=0xF00B (-4085)                                         
+    F03 A=0xFFE1 (-31) B=0xF00C (-4084)                                         
+    F04 A=0xFFE3 (-29) B=0xF00D (-4083)                                         
+    F05 A=0xFFE1 (-31) B=0xF00E (-4082)                                         
+    F06 A=0xFFE3 (-29) B=0xF00F (-4081)                                         
+    F07 A=0xFFE3 (-29) B=0xF010 (-4080)                                         
+    F08 A=0xFFE1 (-31) B=0xF010 (-4080)                                         
+    F09 A=0xFFC7 (-57) B=0xE023 (-8157)                                         
+    F10 A=0xFFC5 (-59) B=0xE025 (-8155)                                         
+    F11 A=0xFFC5 (-59) B=0xE02D (-8147)                                         
+                                                                                
+I2S RX DEBUG SNAPSHOT:                                                          
+  WS SYNC         = PASS                                                        
+  WS AT DMA       = HIGH                                                        
+  SPI2 SR BEFORE  = 0x00000000                                                  
+  SPI2 SR ENABLED = 0x00000006                                                  
+  SPI2 SR COMPLETE= 0x00000006                                                  
+  SPI2 DR LAST    = 0x0000C8A3                                                  
+  DMA1 ISR        = 0x00007000                                                  
+  DMA1 CH4 CNDTR  = 0x0000                                                      
+I2S RX DMA STOP: SAFE                                                           
+                                                                                
+STM32 SPI2/I2S HARDWARE STATE:                                                  
+  APB1 CLOCK = ON                                                               
+  CR1        = 0x00000000                                                       
+  CR2        = 0x00000000                                                       
+  SR         = 0x00000007                                                       
+  I2SCFGR    = 0x00000900                                                       
+  I2SPR      = 0x00000117                                                       
+  ROLE       = CODEC MASTER / STM32 SLAVE RX                                    
+  MCU I2S    = DISABLED                                                         
+  DMA RX     = DISABLED                                                         
+                                                                                
+AUDIO / BUS GPIO:                                                               
+  I2C1: PB6=SCL PB7=SDA                                                         
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1                                      
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1                                      
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT                                      
+  PB12 cfg=0x00000004 IN_FLOATING level=0                                       
+  PB13 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB15 cfg=0x00000004 IN_FLOATING level=1                                       
+  PB14 cfg=0x00000002 OUT_2M_PP level=1                                         
+  GPIOB->CRL = 0xFF484244                                                       
+  GPIOB->CRH = 0x42444444                                                       
+  GPIOB->IDR = 0x000066D7                                                       
+  GPIOB->ODR = 0x00004014                                                       
+                                                                                
+Bring-up complete. CLI ready.                                                   
+> codec dump                                                                    
+                                                                                
+TLV320ADC3101 Page-0 clock/interface/ADC dump                                   
+  0x00 = 0x00                                                                   
+  0x04 = 0x03                                                                   
+  0x05 = 0x91                                                                   
+  0x06 = 0x06                                                                   
+  0x07 = 0x05                                                                   
+  0x08 = 0xA0                                                                   
+  0x12 = 0x88                                                                   
+  0x13 = 0x82                                                                   
+  0x14 = 0x80                                                                   
+  0x15 = 0x80                                                                   
+  0x1B = 0x0C                                                                   
+  0x1C = 0x00                                                                   
+  0x1D = 0x02                                                                   
+  0x1E = 0x88                                                                   
+  0x1F = 0x00                                                                   
+  0x20 = 0x00                                                                   
+  0x21 = 0x10                                                                   
+  0x24 = 0xCC                                                                   
+  0x3D = 0x01                                                                   
+  0x35 = 0x12                                                                   
+  0x51 = 0xC2                                                                   
+  0x52 = 0x00                                                                   
+                                                                                
+TLV320ADC3101 Page-1 analog-input dump                                          
+  0x33 = 0x00                                                                   
+  0x34 = 0xFC                                                                   
+  0x37 = 0xFF                                                                   
+  0x39 = 0x3F                                                                   
+  0x3B = 0x00                                                                   
+  0x3C = 0x00                                                                   
+  0x3E = 0x03                                                                   
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -2049 / -2004                                              
+  STREAM B MEAN    = -2021                                                      
+  STREAM B PEAK    = 2049                                                       
+  STREAM B FS/2    = -16                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xF80C (-2036)                                         
+    F01 A=0xFFE2 (-30) B=0xF80F (-2033)                                         
+    F02 A=0xFFE1 (-31) B=0xF80D (-2035)                                         
+    F03 A=0xFFE3 (-29) B=0xF80D (-2035)                                         
+    F04 A=0xFFE1 (-31) B=0xF80F (-2033)                                         
+    F05 A=0xFFE2 (-30) B=0xF810 (-2032)                                         
+    F06 A=0xFFE1 (-31) B=0xF813 (-2029)                                         
+    F07 A=0xFFE2 (-30) B=0xF814 (-2028)                                         
+    F08 A=0xFFE1 (-31) B=0xF817 (-2025)                                         
+    F09 A=0xFFE0 (-32) B=0xF81A (-2022)                                         
+    F10 A=0xFFE3 (-29) B=0xF819 (-2023)                                         
+    F11 A=0xFFE1 (-31) B=0xF81B (-2021)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -29                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -2065 / -1985                                              
+  STREAM B MEAN    = -2016                                                      
+  STREAM B PEAK    = 2065                                                       
+  STREAM B FS/2    = -15                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xF7EF (-2065)                                         
+    F01 A=0xFFE3 (-29) B=0xF7F0 (-2064)                                         
+    F02 A=0xFFE2 (-30) B=0xF7F0 (-2064)                                         
+    F03 A=0xFFE1 (-31) B=0xF7EF (-2065)                                         
+    F04 A=0xFFE2 (-30) B=0xF7F3 (-2061)                                         
+    F05 A=0xFFE3 (-29) B=0xF7F3 (-2061)                                         
+    F06 A=0xFFE1 (-31) B=0xF7F1 (-2063)                                         
+    F07 A=0xFFE0 (-32) B=0xF7F5 (-2059)                                         
+    F08 A=0xFFE3 (-29) B=0xF7F7 (-2057)                                         
+    F09 A=0xFFE2 (-30) B=0xF7F6 (-2058)                                         
+    F10 A=0xFFE2 (-30) B=0xF7F4 (-2060)                                         
+    F11 A=0xFFE2 (-30) B=0xF7F2 (-2062)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -29                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -1643 / -1404                                              
+  STREAM B MEAN    = -1545                                                      
+  STREAM B PEAK    = 1643                                                       
+  STREAM B FS/2    = -11                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xFA17 (-1513)                                         
+    F01 A=0xFFE1 (-31) B=0xFA0C (-1524)                                         
+    F02 A=0xFFE0 (-32) B=0xF9F8 (-1544)                                         
+    F03 A=0xFFE1 (-31) B=0xF9E3 (-1565)                                         
+    F04 A=0xFFE2 (-30) B=0xF9CF (-1585)                                         
+    F05 A=0xFFE2 (-30) B=0xF9C6 (-1594)                                         
+    F06 A=0xFFE0 (-32) B=0xF9BB (-1605)                                         
+    F07 A=0xFFE2 (-30) B=0xF9B3 (-1613)                                         
+    F08 A=0xFFE0 (-32) B=0xF9AC (-1620)                                         
+    F09 A=0xFFE1 (-31) B=0xF9A1 (-1631)                                         
+    F10 A=0xFFE2 (-30) B=0xF998 (-1640)                                         
+    F11 A=0xFFE2 (-30) B=0xF995 (-1643)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -1637 / -1433                                              
+  STREAM B MEAN    = -1543                                                      
+  STREAM B PEAK    = 1637                                                       
+  STREAM B FS/2    = -11                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xFA5B (-1445)                                         
+    F01 A=0xFFE1 (-31) B=0xFA58 (-1448)                                         
+    F02 A=0xFFE4 (-28) B=0xFA56 (-1450)                                         
+    F03 A=0xFFE2 (-30) B=0xFA57 (-1449)                                         
+    F04 A=0xFFE4 (-28) B=0xFA56 (-1450)                                         
+    F05 A=0xFFE1 (-31) B=0xFA58 (-1448)                                         
+    F06 A=0xFFE2 (-30) B=0xFA59 (-1447)                                         
+    F07 A=0xFFE3 (-29) B=0xFA55 (-1451)                                         
+    F08 A=0xFFE1 (-31) B=0xFA54 (-1452)                                         
+    F09 A=0xFFE1 (-31) B=0xFA4E (-1458)                                         
+    F10 A=0xFFE1 (-31) B=0xFA52 (-1454)                                         
+    F11 A=0xFFE1 (-31) B=0xFA57 (-1449)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -1541 / -1356                                              
+  STREAM B MEAN    = -1446                                                      
+  STREAM B PEAK    = 1541                                                       
+  STREAM B FS/2    = -11                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xFAB7 (-1353)                                         
+    F01 A=0xFFE2 (-30) B=0xFA8E (-1394)                                         
+    F02 A=0xFFE1 (-31) B=0xFA9A (-1382)                                         
+    F03 A=0xFFE2 (-30) B=0xFA8D (-1395)                                         
+    F04 A=0xFFE0 (-32) B=0xFA89 (-1399)                                         
+    F05 A=0xFFE2 (-30) B=0xFA80 (-1408)                                         
+    F06 A=0xFFE3 (-29) B=0xFA84 (-1404)                                         
+    F07 A=0xFFE2 (-30) B=0xFA7F (-1409)                                         
+    F08 A=0xFFE2 (-30) B=0xFA83 (-1405)                                         
+    F09 A=0xFFE1 (-31) B=0xFA84 (-1404)                                         
+    F10 A=0xFFE1 (-31) B=0xFA8C (-1396)                                         
+    F11 A=0xFFE2 (-30) B=0xFA8C (-1396)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -29                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -1935 / -1743                                              
+  STREAM B MEAN    = -1834                                                      
+  STREAM B PEAK    = 1935                                                       
+  STREAM B FS/2    = -14                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE1 (-31) B=0xF903 (-1789)                                         
+    F01 A=0xFFE2 (-30) B=0xF8FC (-1796)                                         
+    F02 A=0xFFE1 (-31) B=0xF8F1 (-1807)                                         
+    F03 A=0xFFE2 (-30) B=0xF8E9 (-1815)                                         
+    F04 A=0xFFE2 (-30) B=0xF8E5 (-1819)                                         
+    F05 A=0xFFE2 (-30) B=0xF8F1 (-1807)                                         
+    F06 A=0xFFE1 (-31) B=0xF8ED (-1811)                                         
+    F07 A=0xFFE2 (-30) B=0xF8EF (-1809)                                         
+    F08 A=0xFFE3 (-29) B=0xF8EB (-1813)                                         
+    F09 A=0xFFE1 (-31) B=0xF8E4 (-1820)                                         
+    F10 A=0xFFE2 (-30) B=0xF8EC (-1812)                                         
+    F11 A=0xFFE2 (-30) B=0xF8F6 (-1802)                                         
+>                                                                               
+>                                                                               
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -2157 / -173                                               
+  STREAM B MEAN    = -1791                                                      
+  STREAM B PEAK    = 2157                                                       
+  STREAM B FS/2    = -15                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xF957 (-1705)                                         
+    F01 A=0xFFE3 (-29) B=0xF95B (-1701)                                         
+    F02 A=0xFFE1 (-31) B=0xF950 (-1712)                                         
+    F03 A=0xFFE1 (-31) B=0xF93F (-1729)                                         
+    F04 A=0xFFE3 (-29) B=0xF936 (-1738)                                         
+    F05 A=0xFFE2 (-30) B=0xF939 (-1735)                                         
+    F06 A=0xFFE1 (-31) B=0xF938 (-1736)                                         
+    F07 A=0xFFE3 (-29) B=0xF924 (-1756)                                         
+    F08 A=0xFFE3 (-29) B=0xF90B (-1781)                                         
+    F09 A=0xFFE1 (-31) B=0xF900 (-1792)                                         
+    F10 A=0xFFE2 (-30) B=0xF8FF (-1793)                                         
+    F11 A=0xFFE1 (-31) B=0xF8FF (-1793)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -4290 / 24448                                              
+  STREAM A MEAN    = 1044                                                       
+  STREAM A PEAK    = 24448                                                      
+  STREAM A FS/2    = 90                                                         
+  STREAM B MIN/MAX = -32768 / 32767                                             
+  STREAM B MEAN    = -19689                                                     
+  STREAM B PEAK    = 32768                                                      
+  STREAM B FS/2    = 1130                                                       
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0x4B65 (19301) B=0x7FFF (32767)                                       
+    F01 A=0x5DCB (24011) B=0x7FFF (32767)                                       
+    F02 A=0x5715 (22293) B=0xDB69 (-9367)                                       
+    F03 A=0x0CA6 (3238) B=0x8000 (-32768)                                       
+    F04 A=0xEF68 (-4248) B=0x8000 (-32768)                                      
+    F05 A=0xFADD (-1315) B=0x8000 (-32768)                                      
+    F06 A=0xF495 (-2923) B=0x8000 (-32768)                                      
+    F07 A=0xF87C (-1924) B=0x8000 (-32768)                                      
+    F08 A=0xF6EE (-2322) B=0x8000 (-32768)                                      
+    F09 A=0xF8B1 (-1871) B=0x0D07 (3335)                                        
+    F10 A=0x05F4 (1524) B=0x7FFF (32767)                                        
+    F11 A=0x58B7 (22711) B=0x71C3 (29123)                                       
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -2306 / -1899                                              
+  STREAM B MEAN    = -2162                                                      
+  STREAM B PEAK    = 2306                                                       
+  STREAM B FS/2    = -16                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xF7A3 (-2141)                                         
+    F01 A=0xFFE2 (-30) B=0xF7BD (-2115)                                         
+    F02 A=0xFFE2 (-30) B=0xF7C1 (-2111)                                         
+    F03 A=0xFFE1 (-31) B=0xF7AB (-2133)                                         
+    F04 A=0xFFE2 (-30) B=0xF764 (-2204)                                         
+    F05 A=0xFFE2 (-30) B=0xF739 (-2247)                                         
+    F06 A=0xFFE1 (-31) B=0xF742 (-2238)                                         
+    F07 A=0xFFE1 (-31) B=0xF775 (-2187)                                         
+    F08 A=0xFFE2 (-30) B=0xF79D (-2147)                                         
+    F09 A=0xFFE2 (-30) B=0xF796 (-2154)                                         
+    F10 A=0xFFE2 (-30) B=0xF78B (-2165)                                         
+    F11 A=0xFFE3 (-29) B=0xF741 (-2239)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -7877 / -6817                                              
+  STREAM B MEAN    = -7360                                                      
+  STREAM B PEAK    = 7877                                                       
+  STREAM B FS/2    = -57                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xE19C (-7780)                                         
+    F01 A=0xFFE2 (-30) B=0xE183 (-7805)                                         
+    F02 A=0xFFE1 (-31) B=0xE192 (-7790)                                         
+    F03 A=0xFFE1 (-31) B=0xE1AB (-7765)                                         
+    F04 A=0xFFE2 (-30) B=0xE1B0 (-7760)                                         
+    F05 A=0xFFE2 (-30) B=0xE1C3 (-7741)                                         
+    F06 A=0xFFE2 (-30) B=0xE1E9 (-7703)                                         
+    F07 A=0xFFE3 (-29) B=0xE1EC (-7700)                                         
+    F08 A=0xFFE1 (-31) B=0xE1CC (-7732)                                         
+    F09 A=0xFFE1 (-31) B=0xE1E0 (-7712)                                         
+    F10 A=0xFFE1 (-31) B=0xE205 (-7675)                                         
+    F11 A=0xFFE1 (-31) B=0xE204 (-7676)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -17618 / -14705                                            
+  STREAM B MEAN    = -16162                                                     
+  STREAM B PEAK    = 17618                                                      
+  STREAM B FS/2    = -127                                                       
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE2 (-30) B=0xBBF7 (-17417)                                        
+    F01 A=0xFFE2 (-30) B=0xBB77 (-17545)                                        
+    F02 A=0xFFE2 (-30) B=0xBB2E (-17618)                                        
+    F03 A=0xFFE0 (-32) B=0xBB56 (-17578)                                        
+    F04 A=0xFFE2 (-30) B=0xBBDF (-17441)                                        
+    F05 A=0xFFE3 (-29) B=0xBCE5 (-17179)                                        
+    F06 A=0xFFE1 (-31) B=0xBD80 (-17024)                                        
+    F07 A=0xFFE2 (-30) B=0xBD05 (-17147)                                        
+    F08 A=0xFFE2 (-30) B=0xBC6E (-17298)                                        
+    F09 A=0xFFE1 (-31) B=0xBC3E (-17346)                                        
+    F10 A=0xFFE2 (-30) B=0xBC5F (-17313)                                        
+    F11 A=0xFFE1 (-31) B=0xBCA8 (-17240)                                        
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -32 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 32                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -2392 / -1852                                              
+  STREAM B MEAN    = -2141                                                      
+  STREAM B PEAK    = 2392                                                       
+  STREAM B FS/2    = -15                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE3 (-29) B=0xF81E (-2018)                                         
+    F01 A=0xFFE1 (-31) B=0xF82F (-2001)                                         
+    F02 A=0xFFE2 (-30) B=0xF81E (-2018)                                         
+    F03 A=0xFFE1 (-31) B=0xF7D7 (-2089)                                         
+    F04 A=0xFFE1 (-31) B=0xF78D (-2163)                                         
+    F05 A=0xFFE2 (-30) B=0xF762 (-2206)                                         
+    F06 A=0xFFE2 (-30) B=0xF756 (-2218)                                         
+    F07 A=0xFFE2 (-30) B=0xF786 (-2170)                                         
+    F08 A=0xFFE3 (-29) B=0xF806 (-2042)                                         
+    F09 A=0xFFE2 (-30) B=0xF88F (-1905)                                         
+    F10 A=0xFFE1 (-31) B=0xF8C4 (-1852)                                         
+    F11 A=0xFFE0 (-32) B=0xF87C (-1924)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -33 / -28                                                  
+  STREAM A MEAN    = -30                                                        
+  STREAM A PEAK    = 33                                                         
+  STREAM A FS/2    = 0                                                          
+  STREAM B MIN/MAX = -2378 / -1922                                              
+  STREAM B MEAN    = -2139                                                      
+  STREAM B PEAK    = 2378                                                       
+  STREAM B FS/2    = -17                                                        
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0xFFE1 (-31) B=0xF7D7 (-2089)                                         
+    F01 A=0xFFE1 (-31) B=0xF7E9 (-2071)                                         
+    F02 A=0xFFE2 (-30) B=0xF7CD (-2099)                                         
+    F03 A=0xFFE1 (-31) B=0xF79F (-2145)                                         
+    F04 A=0xFFE2 (-30) B=0xF76C (-2196)                                         
+    F05 A=0xFFE2 (-30) B=0xF779 (-2183)                                         
+    F06 A=0xFFE2 (-30) B=0xF78C (-2164)                                         
+    F07 A=0xFFE2 (-30) B=0xF759 (-2215)                                         
+    F08 A=0xFFE2 (-30) B=0xF739 (-2247)                                         
+    F09 A=0xFFE3 (-29) B=0xF73D (-2243)                                         
+    F10 A=0xFFE2 (-30) B=0xF76C (-2196)                                         
+    F11 A=0xFFE1 (-31) B=0xF7B9 (-2119)                                         
+> i2s capture                                                                   
+Starting frame-aligned I2S capture...                                           
+I2S capture PASS.                                                               
+                                                                                
+I2S FRAME-ALIGNED CHANNEL ANALYSIS                                              
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)                               
+  WS at DMA   = HIGH                                                            
+  Slot phase   = even stream A, odd stream B                                    
+  Statistics exclude first captured A/B pair                                    
+  STREAM A MIN/MAX = -2490 / 23978                                              
+  STREAM A MEAN    = 1281                                                       
+  STREAM A PEAK    = 23978                                                      
+  STREAM A FS/2    = 114                                                        
+  STREAM B MIN/MAX = -32768 / 32767                                             
+  STREAM B MEAN    = -24542                                                     
+  STREAM B PEAK    = 32768                                                      
+  STREAM B FS/2    = 88                                                         
+  FIRST 12 RAW FRAMES:                                                          
+    F00 A=0x52A1 (21153) B=0x099D (2461)                                        
+    F01 A=0x1028 (4136) B=0x8000 (-32768)                                       
+    F02 A=0xF98F (-1649) B=0x8000 (-32768)                                      
+    F03 A=0x04E9 (1257) B=0x8000 (-32768)                                       
+    F04 A=0xFAD0 (-1328) B=0x8000 (-32768)                                      
+    F05 A=0x05F2 (1522) B=0x8000 (-32768)                                       
+    F06 A=0xF646 (-2490) B=0x7514 (29972)                                       
+    F07 A=0x2AF9 (11001) B=0x7FFF (32767)                                       
+    F08 A=0x5BE6 (23526) B=0x7FFF (32767)                                       
+    F09 A=0x5DAA (23978) B=0x5CCD (23757)                                       
+    F10 A=0x284D (10317) B=0x8000 (-32768)                                      
+    F11 A=0xF798 (-2152) B=0x8000 (-32768)                                      
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-34 max=-20 mean=-30 peak=34] B[min=-9784 max=30615 mean=-2292 peak=]
+  #2 A[min=-11292 max=32767 mean=-98 peak=32767] B[min=-3430 max=22313 mean=636]
+  #3 A[min=-14406 max=32767 mean=-5129 peak=32767] B[min=-1891 max=24907 mean=2]
+  #4 A[min=-1659 max=21365 mean=266 peak=21365] B[min=-15116 max=32767 mean=-50]
+  #5 A[min=-2464 max=19473 mean=336 peak=19473] B[min=-13531 max=32767 mean=-52]
+  #6 A[min=-2332 max=21478 mean=202 peak=21478] B[min=-12128 max=32767 mean=-51]
+  #7 A[min=-32 max=-28 mean=-30 peak=32] B[min=-10182 max=13459 mean=-5959 peak]
+  #8 A[min=-32 max=-27 mean=-30 peak=32] B[min=-5465 max=-4251 mean=-4934 peak=]
+  #9 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4375 max=-3240 mean=-4011 peak=]
+  #10 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3596 max=-3120 mean=-3373 peak]
+  #11 A[min=-3220 max=-2643 mean=-2941 peak=3220] B[min=-32 max=-28 mean=-30 pe]
+  #12 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2873 max=-2389 mean=-2678 peak]
+  #13 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2799 max=-1949 mean=-2514 peak]
+  #14 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2826 max=-263 mean=-2326 peak=]
+  #15 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2500 max=-1886 mean=-2257 peak]
+  #16 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2424 max=-1959 mean=-2181 peak]
+  #17 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2420 max=-1826 mean=-2155 peak]
+  #18 A[min=-2388 max=-1875 mean=-2138 peak=2388] B[min=-33 max=-29 mean=-30 pe]
+  #19 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2298 max=-1804 mean=-2103 peak]
+  #20 A[min=-32 max=-27 mean=-30 peak=32] B[min=-2293 max=-1866 mean=-2066 peak]
+  #21 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2316 max=-1725 mean=-2078 peak]
+  #22 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2285 max=-1758 mean=-2047 peak]
+  #23 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2368 max=-1534 mean=-2045 peak]
+  #24 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2265 max=-1633 mean=-2048 peak]
+  #25 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2240 max=-1621 mean=-2053 peak]
+  #26 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2309 max=-1637 mean=-2078 peak]
+  #27 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2273 max=-1688 mean=-2064 peak]
+  #28 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2387 max=-1752 mean=-2107 peak]
+  #29 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2359 max=-1829 mean=-2096 peak]
+  #30 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2263 max=-1841 mean=-2078 peak]
+  #31 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2284 max=-1860 mean=-2083 peak]
+  #32 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2286 max=-1833 mean=-2072 peak]
+  #33 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2389 max=-1866 mean=-2087 peak]
+  #34 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2406 max=-1887 mean=-2120 peak]
+  #35 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2273 max=-1809 mean=-2098 peak]
+  #36 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2356 max=-1574 mean=-2070 peak]
+  #37 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2297 max=-1622 mean=-2043 peak]
+  #38 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2318 max=-1741 mean=-2040 peak]
+  #39 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2235 max=-1723 mean=-2018 peak]
+  #40 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2289 max=-1804 mean=-2033 peak]
+  #41 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2216 max=-1858 mean=-2055 peak]
+  #42 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2276 max=-1803 mean=-2072 peak]
+  #43 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2377 max=-1811 mean=-2101 peak]
+  #44 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2280 max=-1765 mean=-2086 peak]
+  #45 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2315 max=-1806 mean=-2073 peak]
+  #46 A[min=-2483 max=27274 mean=1190 peak=27274] B[min=-14285 max=32767 mean=-]
+  #47 A[min=-32 max=-29 mean=-30 peak=32] B[min=-8100 max=-7062 mean=-7605 peak]
+  #48 A[min=-33 max=-29 mean=-30 peak=33] B[min=-6173 max=-5175 mean=-5738 peak]
+  #49 A[min=-32 max=-29 mean=-30 peak=32] B[min=-4983 max=-4248 mean=-4544 peak]
+  #50 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4145 max=-3063 mean=-3711 peak]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2424 max=-1787 mean=-2120 peak=]
+  #2 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2427 max=-1607 mean=-2107 peak=]
+  #3 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2342 max=-1874 mean=-2115 peak=]
+  #4 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2398 max=-1737 mean=-2126 peak=]
+  #5 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2421 max=-1852 mean=-2117 peak=]
+  #6 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2459 max=-1666 mean=-2072 peak=]
+  #7 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2293 max=-1642 mean=-2037 peak=]
+  #8 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2230 max=-1751 mean=-2010 peak=]
+  #9 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2361 max=-1645 mean=-2014 peak=]
+  #10 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2385 max=-1705 mean=-2045 peak]
+  #11 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2299 max=-1531 mean=-2076 peak]
+  #12 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2397 max=-1882 mean=-2156 peak]
+  #13 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2442 max=-1862 mean=-2171 peak]
+  #14 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2397 max=-1642 mean=-2119 peak]
+  #15 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2426 max=-1603 mean=-2098 peak]
+  #16 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2273 max=-1719 mean=-2012 peak]
+  #17 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2348 max=-1560 mean=-1994 peak]
+  #18 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2201 max=-1717 mean=-1982 peak]
+  #19 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2286 max=-1773 mean=-2021 peak]
+  #20 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2398 max=-1688 mean=-2048 peak]
+  #21 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2387 max=-1710 mean=-2092 peak]
+  #22 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2319 max=-1899 mean=-2111 peak]
+  #23 A[min=-2382 max=-1745 mean=-2092 peak=2382] B[min=-33 max=-28 mean=-30 pe]
+  #24 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2304 max=-1766 mean=-2059 peak]
+  #25 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2323 max=-1749 mean=-2057 peak]
+  #26 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2467 max=-1440 mean=-2035 peak]
+  #27 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2329 max=-1645 mean=-2033 peak]
+  #28 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2440 max=-1541 mean=-2051 peak]
+  #29 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2495 max=-1450 mean=-2036 peak]
+  #30 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2386 max=-1710 mean=-2115 peak]
+  #31 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2445 max=-1668 mean=-2130 peak]
+  #32 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2450 max=-1768 mean=-2098 peak]
+  #33 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2419 max=-1676 mean=-2080 peak]
+  #34 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2433 max=-1577 mean=-2033 peak]
+  #35 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2304 max=-1573 mean=-1996 peak]
+  #36 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2374 max=-1572 mean=-1992 peak]
+  #37 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2378 max=-1604 mean=-2031 peak]
+  #38 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2388 max=-1728 mean=-2057 peak]
+  #39 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2314 max=-1680 mean=-2087 peak]
+  #40 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2432 max=-1677 mean=-2128 peak]
+  #41 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2416 max=-1640 mean=-2135 peak]
+  #42 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2450 max=-1710 mean=-2142 peak]
+  #43 A[min=-131 max=120 mean=-29 peak=131] B[min=-2544 max=-1018 mean=-2020 pe]
+  #44 A[min=-33 max=-28 mean=-30 peak=33] B[min=-10492 max=-8568 mean=-9655 pea]
+  #45 A[min=-33 max=-29 mean=-30 peak=33] B[min=-7858 max=-6574 mean=-7129 peak]
+  #46 A[min=-32 max=-28 mean=-30 peak=32] B[min=-5921 max=-5003 mean=-5449 peak]
+  #47 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4766 max=-3685 mean=-4358 peak]
+  #48 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4152 max=-2894 mean=-3655 peak]
+  #49 A[min=-32 max=-29 mean=-30 peak=32] B[min=-3524 max=-2734 mean=-3197 peak]
+  #50 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3083 max=-2491 mean=-2837 peak]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-2596 max=25409 mean=1608 peak=25409] B[min=-28069 max=32767 mean=-1]
+  #2 A[min=-1996 max=25199 mean=1760 peak=25199] B[min=-32191 max=32767 mean=-1]
+  #3 A[min=-2644 max=26031 mean=1277 peak=26031] B[min=-32768 max=32767 mean=-1]
+  #4 A[min=-2903 max=24648 mean=1653 peak=24648] B[min=-32768 max=32767 mean=-1]
+  #5 A[min=-1906 max=24720 mean=1056 peak=24720] B[min=-32768 max=32767 mean=-2]
+  #6 A[min=-1883 max=25709 mean=1219 peak=25709] B[min=-32768 max=32767 mean=-2]
+  #7 A[min=-2048 max=26345 mean=2280 peak=26345] B[min=-32768 max=32767 mean=-1]
+  #8 A[min=-2642 max=24326 mean=1315 peak=24326] B[min=-32768 max=32767 mean=-2]
+  #9 A[min=-4397 max=24831 mean=599 peak=24831] B[min=-32768 max=32767 mean=-22]
+  #10 A[min=-32768 max=32767 mean=-19694 peak=32768] B[min=-3599 max=26374 mean]
+  #11 A[min=-2778 max=21525 mean=854 peak=21525] B[min=-32768 max=32767 mean=-2]
+  #12 A[min=-36 max=-26 mean=-30 peak=36] B[min=-32768 max=32767 mean=-30438 pe]
+  #13 A[min=-32 max=-29 mean=-30 peak=32] B[min=-30393 max=-8838 mean=-27119 pe]
+  #14 A[min=-20973 max=-17502 mean=-19104 peak=20973] B[min=-32 max=-29 mean=-3]
+  #15 A[min=-51 max=-19 mean=-30 peak=51] B[min=-18737 max=31882 mean=-13112 pe]
+  #16 A[min=-33 max=-29 mean=-30 peak=33] B[min=-11062 max=-8159 mean=-9918 pea]
+  #17 A[min=-63 max=234 mean=-28 peak=234] B[min=-10602 max=32767 mean=-6127 pe]
+  #18 A[min=-74 max=170 mean=-28 peak=170] B[min=-10252 max=32767 mean=-5141 pe]
+  #19 A[min=-9485 max=32767 mean=-4486 peak=32767] B[min=-36 max=-18 mean=-30 p]
+  #20 A[min=-1875 max=22467 mean=321 peak=22467] B[min=-9614 max=32767 mean=-32]
+  #21 A[min=-33 max=-27 mean=-30 peak=33] B[min=-7945 max=32767 mean=-4586 peak]
+  #22 A[min=-2156 max=22460 mean=773 peak=22460] B[min=-9186 max=32767 mean=-23]
+  #23 A[min=-544 max=2901 mean=-2 peak=2901] B[min=-8354 max=32767 mean=-4421 p]
+  #24 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4979 max=-4098 mean=-4562 peak]
+  #25 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4214 max=-3292 mean=-3782 peak]
+  #26 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3627 max=-2410 mean=-3182 peak]
+  #27 A[min=-2428 max=25596 mean=750 peak=25596] B[min=-9950 max=32767 mean=-17]
+  #28 A[min=-3454 max=26050 mean=3330 peak=26050] B[min=-32768 max=32767 mean=-]
+  #29 A[min=-2685 max=26686 mean=5041 peak=26686] B[min=-32768 max=32767 mean=-]
+  #30 A[min=-6862 max=27007 mean=678 peak=27007] B[min=-32768 max=32767 mean=-1]
+  #31 A[min=-6485 max=23140 mean=-1727 peak=23140] B[min=-32768 max=32767 mean=]
+  #32 A[min=-2686 max=26463 mean=1719 peak=26463] B[min=-32768 max=32767 mean=-]
+  #33 A[min=-32768 max=32767 mean=-23552 peak=32768] B[min=-2265 max=22621 mean]
+  #34 A[min=-1622 max=24343 mean=271 peak=24343] B[min=-32768 max=32767 mean=-3]
+  #35 A[min=-32 max=-29 mean=-30 peak=32] B[min=-27728 max=-23086 mean=-25397 p]
+  #36 A[min=-32 max=-29 mean=-30 peak=32] B[min=-19263 max=-15295 mean=-17610 p]
+  #37 A[min=-2187 max=24440 mean=1005 peak=24440] B[min=-22468 max=32767 mean=-]
+  #38 A[min=-32 max=-27 mean=-30 peak=32] B[min=-15983 max=23811 mean=-11400 pe]
+  #39 A[min=-33 max=-29 mean=-30 peak=33] B[min=-10318 max=-7935 mean=-9350 pea]
+  #40 A[min=-33 max=-28 mean=-30 peak=33] B[min=-8630 max=32767 mean=-6330 peak]
+  #41 A[min=-2252 max=16613 mean=151 peak=16613] B[min=-12534 max=32767 mean=-3]
+  #42 A[min=-22820 max=32767 mean=-4586 peak=32767] B[min=-1169 max=26248 mean=]
+  #43 A[min=-23340 max=32767 mean=-13132 peak=32767] B[min=-2371 max=18586 mean]
+  #44 A[min=-30527 max=32767 mean=-13903 peak=32767] B[min=-1903 max=25310 mean]
+  #45 A[min=-2377 max=25907 mean=1464 peak=25907] B[min=-30425 max=32767 mean=-]
+  #46 A[min=-2397 max=21620 mean=250 peak=21620] B[min=-24232 max=32767 mean=-1]
+  #47 A[min=-2525 max=26936 mean=1723 peak=26936] B[min=-31362 max=32767 mean=-]
+  #48 A[min=-32768 max=32767 mean=-17377 peak=32768] B[min=-3229 max=26955 mean]
+  #49 A[min=-6580 max=26435 mean=-696 peak=26435] B[min=-32768 max=32767 mean=-]
+  #50 A[min=-4808 max=18935 mean=278 peak=18935] B[min=-32768 max=32767 mean=-2]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2680 max=-1227 mean=-2151 peak=]
+  #2 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2495 max=-1203 mean=-2125 peak=]
+  #3 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2540 max=-1542 mean=-2117 peak=]
+  #4 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4433 max=25527 mean=-1715 peak=]
+  #5 A[min=-32 max=-27 mean=-30 peak=32] B[min=-6322 max=32424 mean=-1451 peak=]
+  #6 A[min=-2658 max=21929 mean=410 peak=21929] B[min=-6116 max=32767 mean=-934]
+  #7 A[min=-2426 max=25037 mean=1428 peak=25037] B[min=-14903 max=32767 mean=-1]
+  #8 A[min=-800 max=22509 mean=339 peak=22509] B[min=-18159 max=32767 mean=-832]
+  #9 A[min=-34 max=-27 mean=-30 peak=34] B[min=-14252 max=32767 mean=-8734 peak]
+  #10 A[min=-34 max=-26 mean=-30 peak=34] B[min=-13648 max=32767 mean=-6183 pea]
+  #11 A[min=-2116 max=16390 mean=309 peak=16390] B[min=-11427 max=32767 mean=-5]
+  #12 A[min=-1010 max=23124 mean=294 peak=23124] B[min=-12648 max=32767 mean=-5]
+  #13 A[min=-10194 max=32741 mean=-5272 peak=32741] B[min=-33 max=-28 mean=-30 ]
+  #14 A[min=-64 max=178 mean=-28 peak=178] B[min=-7456 max=32767 mean=-3960 pea]
+  #15 A[min=-33 max=-28 mean=-30 peak=33] B[min=-6608 max=20719 mean=-4120 peak]
+  #16 A[min=-32 max=-28 mean=-30 peak=32] B[min=-5416 max=8974 mean=-3809 peak=]
+  #17 A[min=-33 max=-28 mean=-30 peak=33] B[min=-5935 max=21423 mean=-3224 peak]
+  #18 A[min=-32 max=-27 mean=-30 peak=32] B[min=-5559 max=32767 mean=-2678 peak]
+  #19 A[min=-32 max=-29 mean=-30 peak=32] B[min=-4474 max=8250 mean=-3038 peak=]
+  #20 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3399 max=-2198 mean=-2911 peak]
+  #21 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3191 max=-1902 mean=-2671 peak]
+  #22 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3020 max=-1197 mean=-2478 peak]
+  #23 A[min=-32 max=-29 mean=-30 peak=32] B[min=-3358 max=1119 mean=-2330 peak=]
+  #24 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2899 max=-984 mean=-2442 peak=]
+  #25 A[min=-32 max=-28 mean=-30 peak=32] B[min=-5899 max=26596 mean=-2024 peak]
+  #26 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2664 max=-1452 mean=-2326 peak]
+  #27 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2610 max=-1248 mean=-2216 peak]
+  #28 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2639 max=-1323 mean=-2150 peak]
+  #29 A[min=-32 max=-27 mean=-30 peak=32] B[min=-5035 max=28441 mean=-1723 peak]
+  #30 A[min=-4994 max=17450 mean=-1935 peak=17450] B[min=-33 max=-28 mean=-30 p]
+  #31 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2706 max=-1434 mean=-2189 peak]
+  #32 A[min=-33 max=-28 mean=-30 peak=33] B[min=-4562 max=25679 mean=-1833 peak]
+  #33 A[min=-33 max=-28 mean=-30 peak=33] B[min=-3671 max=7594 mean=-2126 peak=]
+  #34 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2689 max=-1429 mean=-2260 peak]
+  #35 A[min=-33 max=-29 mean=-30 peak=33] B[min=-2619 max=-243 mean=-2203 peak=]
+  #36 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2580 max=-1509 mean=-2153 peak]
+  #37 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2527 max=4450 mean=-2012 peak=]
+  #38 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2449 max=-1218 mean=-2042 peak]
+  #39 A[min=-32 max=-29 mean=-30 peak=32] B[min=-3336 max=10057 mean=-1862 peak]
+  #40 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2490 max=-628 mean=-2023 peak=]
+  #41 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2447 max=-1034 mean=-2027 peak]
+  #42 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4632 max=13200 mean=-1820 peak]
+  #43 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3016 max=8392 mean=-2079 peak=]
+  #44 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2725 max=-1286 mean=-2200 peak]
+  #45 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2956 max=4538 mean=-2064 peak=]
+  #46 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4263 max=21576 mean=-1903 peak]
+  #47 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2611 max=-807 mean=-2060 peak=]
+  #48 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2536 max=3856 mean=-2002 peak=]
+  #49 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2507 max=-1023 mean=-2085 peak]
+  #50 A[min=-33 max=-27 mean=-30 peak=33] B[min=-5405 max=32767 mean=-698 peak=]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-2242 max=23491 mean=505 peak=23491] B[min=-16861 max=32767 mean=-63]
+  #2 A[min=-2377 max=20107 mean=199 peak=20107] B[min=-17626 max=32767 mean=-94]
+  #3 A[min=-3232 max=24353 mean=2483 peak=24353] B[min=-32768 max=32767 mean=-1]
+  #4 A[min=-2719 max=23281 mean=1346 peak=23281] B[min=-30947 max=32767 mean=-1]
+  #5 A[min=-2709 max=25248 mean=3163 peak=25248] B[min=-32768 max=32767 mean=-1]
+  #6 A[min=-2855 max=24435 mean=2486 peak=24435] B[min=-32768 max=32767 mean=-1]
+  #7 A[min=-4012 max=26982 mean=694 peak=26982] B[min=-32768 max=32767 mean=-20]
+  #8 A[min=-32768 max=32767 mean=-26477 peak=32768] B[min=-1815 max=13190 mean=]
+  #9 A[min=-2797 max=26531 mean=1769 peak=26531] B[min=-32768 max=32767 mean=-1]
+  #10 A[min=-2450 max=23445 mean=702 peak=23445] B[min=-32768 max=32767 mean=-2]
+  #11 A[min=-2451 max=14794 mean=162 peak=14794] B[min=-31328 max=32767 mean=-1]
+  #12 A[min=-235 max=2038 mean=-12 peak=2038] B[min=-22984 max=32767 mean=-1797]
+  #13 A[min=-21581 max=32767 mean=-12740 peak=32767] B[min=-35 max=-27 mean=-30]
+  #14 A[min=-32 max=-28 mean=-30 peak=32] B[min=-15504 max=20798 mean=-10146 pe]
+  #15 A[min=-10913 max=32767 mean=-6883 peak=32767] B[min=-35 max=-26 mean=-30 ]
+  #16 A[min=-32 max=-28 mean=-30 peak=32] B[min=-10046 max=14575 mean=-6139 pea]
+  #17 A[min=-32 max=-28 mean=-30 peak=32] B[min=-6266 max=2743 mean=-5118 peak=]
+  #18 A[min=-12859 max=32767 mean=-2476 peak=32767] B[min=-1522 max=23509 mean=]
+  #19 A[min=-1564 max=6900 mean=128 peak=6900] B[min=-18751 max=32767 mean=-736]
+  #20 A[min=-2649 max=22385 mean=466 peak=22385] B[min=-23061 max=32767 mean=-8]
+  #21 A[min=-2356 max=24206 mean=1565 peak=24206] B[min=-32768 max=32767 mean=-]
+  #22 A[min=-2571 max=21456 mean=962 peak=21456] B[min=-32768 max=32767 mean=-1]
+  #23 A[min=-2417 max=26673 mean=2565 peak=26673] B[min=-32768 max=32767 mean=-]
+  #24 A[min=-2751 max=24758 mean=2797 peak=24758] B[min=-32768 max=32767 mean=-]
+  #25 A[min=-2382 max=26691 mean=2501 peak=26691] B[min=-32768 max=32767 mean=-]
+  #26 A[min=-3374 max=25314 mean=1332 peak=25314] B[min=-32768 max=32767 mean=-]
+  #27 A[min=-1444 max=15850 mean=120 peak=15850] B[min=-32768 max=32767 mean=-2]
+  #28 A[min=-2489 max=23203 mean=683 peak=23203] B[min=-32768 max=32767 mean=-1]
+  #29 A[min=-2775 max=25743 mean=1043 peak=25743] B[min=-27327 max=32767 mean=-]
+  #30 A[min=-24940 max=32767 mean=-13908 peak=32767] B[min=-851 max=6548 mean=3]
+  #31 A[min=-23756 max=32767 mean=-8651 peak=32767] B[min=-1598 max=25440 mean=]
+  #32 A[min=-2430 max=21340 mean=390 peak=21340] B[min=-21792 max=32767 mean=-1]
+  #33 A[min=-1292 max=26197 mean=780 peak=26197] B[min=-21731 max=32767 mean=-1]
+  #34 A[min=-2439 max=22865 mean=501 peak=22865] B[min=-21223 max=32767 mean=-1]
+  #35 A[min=-2640 max=21769 mean=688 peak=21769] B[min=-21519 max=32767 mean=-8]
+  #36 A[min=-23865 max=32767 mean=-6658 peak=32767] B[min=-2422 max=26941 mean=]
+  #37 A[min=-2464 max=13522 mean=260 peak=13522] B[min=-28973 max=32767 mean=-1]
+  #38 A[min=-2648 max=20383 mean=599 peak=20383] B[min=-23214 max=32767 mean=-1]
+  #39 A[min=-33 max=-29 mean=-30 peak=33] B[min=-15921 max=2861 mean=-13314 pea]
+  #40 A[min=-2368 max=24589 mean=613 peak=24589] B[min=-17586 max=32767 mean=-7]
+  #41 A[min=-18961 max=32767 mean=-13093 peak=32767] B[min=-36 max=-25 mean=-30]
+  #42 A[min=-432 max=4469 mean=9 peak=4469] B[min=-20510 max=32767 mean=-9656 p]
+  #43 A[min=-2675 max=25164 mean=1060 peak=25164] B[min=-25447 max=32767 mean=-]
+  #44 A[min=-2129 max=25253 mean=1288 peak=25253] B[min=-32768 max=32767 mean=-]
+  #45 A[min=-32768 max=32767 mean=-19301 peak=32768] B[min=-2595 max=24643 mean]
+  #46 A[min=-3032 max=26415 mean=3295 peak=26415] B[min=-32768 max=32767 mean=-]
+  #47 A[min=-1604 max=25328 mean=958 peak=25328] B[min=-32768 max=32767 mean=-2]
+  #48 A[min=-2690 max=24337 mean=1132 peak=24337] B[min=-32768 max=32767 mean=-]
+  #49 A[min=-2421 max=26279 mean=2002 peak=26279] B[min=-32768 max=32767 mean=-]
+  #50 A[min=-2371 max=26681 mean=1814 peak=26681] B[min=-32768 max=32767 mean=-]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-33 max=-27 mean=-30 peak=33] B[min=-5081 max=32767 mean=-1977 peak=]
+  #2 A[min=-32 max=-28 mean=-30 peak=32] B[min=-6271 max=32767 mean=-1875 peak=]
+  #3 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3235 max=-1822 mean=-2610 peak=]
+  #4 A[min=-5459 max=30320 mean=-1624 peak=30320] B[min=-32 max=-28 mean=-30 pe]
+  #5 A[min=-33 max=-26 mean=-30 peak=33] B[min=-7413 max=32767 mean=-811 peak=3]
+  #6 A[min=-2548 max=13427 mean=235 peak=13427] B[min=-6713 max=32767 mean=-626]
+  #7 A[min=-1899 max=18248 mean=239 peak=18248] B[min=-11695 max=32767 mean=-14]
+  #8 A[min=-2357 max=15108 mean=124 peak=15108] B[min=-11571 max=32767 mean=-49]
+  #9 A[min=-1245 max=8407 mean=61 peak=8407] B[min=-12503 max=32767 mean=-6084 ]
+  #10 A[min=-16905 max=32767 mean=-8246 peak=32767] B[min=-1305 max=17627 mean=]
+  #11 A[min=-32 max=-28 mean=-30 peak=32] B[min=-12995 max=32767 mean=-8113 pea]
+  #12 A[min=-1753 max=10542 mean=74 peak=10542] B[min=-11419 max=32767 mean=-56]
+  #13 A[min=-116 max=118 mean=-29 peak=118] B[min=-11148 max=32767 mean=-5639 p]
+  #14 A[min=-2332 max=20078 mean=369 peak=20078] B[min=-10073 max=32767 mean=-2]
+  #15 A[min=-33 max=-28 mean=-30 peak=33] B[min=-9929 max=32767 mean=-5026 peak]
+  #16 A[min=-1970 max=23996 mean=531 peak=23996] B[min=-10335 max=32767 mean=-2]
+  #17 A[min=-35 max=-25 mean=-30 peak=35] B[min=-10688 max=32767 mean=-3046 pea]
+  #18 A[min=-34 max=-27 mean=-30 peak=34] B[min=-7536 max=32767 mean=-4283 peak]
+  #19 A[min=-7790 max=32767 mean=-3259 peak=32767] B[min=-34 max=-27 mean=-30 p]
+  #20 A[min=-32 max=-27 mean=-30 peak=32] B[min=-7920 max=32767 mean=-2985 peak]
+  #21 A[min=-5852 max=30383 mean=-2985 peak=30383] B[min=-32 max=-28 mean=-30 p]
+  #22 A[min=-32 max=-28 mean=-30 peak=32] B[min=-6707 max=32767 mean=-2355 peak]
+  #23 A[min=-6177 max=32767 mean=-2405 peak=32767] B[min=-34 max=-26 mean=-30 p]
+  #24 A[min=-32 max=-26 mean=-30 peak=32] B[min=-6643 max=32767 mean=-2303 peak]
+  #25 A[min=-8442 max=32767 mean=-670 peak=32767] B[min=-1635 max=6575 mean=48 ]
+  #26 A[min=-8156 max=32767 mean=-1377 peak=32767] B[min=-309 max=2595 mean=-6 ]
+  #27 A[min=-33 max=-28 mean=-30 peak=33] B[min=-7034 max=32767 mean=-3770 peak]
+  #28 A[min=-5987 max=32767 mean=-2444 peak=32767] B[min=-36 max=24 mean=-29 pe]
+  #29 A[min=-33 max=-29 mean=-30 peak=33] B[min=-6039 max=32767 mean=-2856 peak]
+  #30 A[min=-4286 max=16269 mean=-2690 peak=16269] B[min=-32 max=-28 mean=-30 p]
+  #31 A[min=-32 max=-28 mean=-30 peak=32] B[min=-5850 max=23162 mean=-2968 peak]
+  #32 A[min=-33 max=-28 mean=-30 peak=33] B[min=-5121 max=32767 mean=-2432 peak]
+  #33 A[min=-33 max=-29 mean=-30 peak=33] B[min=-4687 max=18859 mean=-2206 peak]
+  #34 A[min=-5081 max=32767 mean=-1517 peak=32767] B[min=-1615 max=20649 mean=1]
+  #35 A[min=-32 max=-29 mean=-30 peak=32] B[min=-4989 max=24881 mean=-2200 peak]
+  #36 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2991 max=-1316 mean=-2615 peak]
+  #37 A[min=-33 max=-29 mean=-30 peak=33] B[min=-5489 max=15694 mean=-2153 peak]
+  #38 A[min=-7040 max=32710 mean=-1354 peak=32710] B[min=-32 max=-27 mean=-30 p]
+  #39 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4175 max=18358 mean=-2246 peak]
+  #40 A[min=-7564 max=32767 mean=-1675 peak=32767] B[min=-2140 max=1025 mean=-4]
+  #41 A[min=-214 max=1160 mean=-19 peak=1160] B[min=-9784 max=32767 mean=-3041 ]
+  #42 A[min=-1752 max=22081 mean=261 peak=22081] B[min=-9609 max=32767 mean=-24]
+  #43 A[min=-2125 max=8590 mean=84 peak=8590] B[min=-10451 max=32767 mean=-3988]
+  #44 A[min=-2396 max=10965 mean=170 peak=10965] B[min=-10402 max=32767 mean=-3]
+  #45 A[min=-2335 max=11842 mean=282 peak=11842] B[min=-9856 max=32767 mean=-34]
+  #46 A[min=-32 max=-28 mean=-30 peak=32] B[min=-8731 max=31966 mean=-4783 peak]
+  #47 A[min=-8578 max=29415 mean=-3575 peak=29415] B[min=-32 max=-28 mean=-30 p]
+  #48 A[min=-33 max=-26 mean=-30 peak=33] B[min=-7655 max=32767 mean=-2778 peak]
+  #49 A[min=-2290 max=10170 mean=183 peak=10170] B[min=-7688 max=32767 mean=-30]
+  #50 A[min=-1549 max=7711 mean=53 peak=7711] B[min=-7207 max=32767 mean=-1779 ]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-1275 max=8038 mean=102 peak=8038] B[min=-12318 max=32767 mean=-6417]
+  #2 A[min=-33 max=-27 mean=-30 peak=33] B[min=-10917 max=32767 mean=-4880 peak]
+  #3 A[min=-8245 max=32767 mean=-4090 peak=32767] B[min=-1470 max=13314 mean=94]
+  #4 A[min=-11347 max=32767 mean=-4160 peak=32767] B[min=-1636 max=24561 mean=2]
+  #5 A[min=-35 max=-27 mean=-30 peak=35] B[min=-10438 max=32767 mean=-4319 peak]
+  #6 A[min=-1833 max=25971 mean=934 peak=25971] B[min=-14212 max=32767 mean=-18]
+  #7 A[min=-2642 max=16227 mean=164 peak=16227] B[min=-12312 max=32767 mean=-60]
+  #8 A[min=-1170 max=11472 mean=83 peak=11472] B[min=-18157 max=32767 mean=-758]
+  #9 A[min=-37 max=-25 mean=-30 peak=37] B[min=-16458 max=32767 mean=-8876 peak]
+  #10 A[min=-2093 max=23751 mean=581 peak=23751] B[min=-17716 max=32767 mean=-5]
+  #11 A[min=-258 max=3026 mean=8 peak=3026] B[min=-14685 max=32767 mean=-6015 p]
+  #12 A[min=-32 max=-28 mean=-30 peak=32] B[min=-12659 max=32767 mean=-6599 pea]
+  #13 A[min=-2783 max=26876 mean=1393 peak=26876] B[min=-15881 max=32767 mean=-]
+  #14 A[min=-312 max=215 mean=-31 peak=312] B[min=-16224 max=32767 mean=-10768 ]
+  #15 A[min=-15341 max=32767 mean=-7554 peak=32767] B[min=-2427 max=18570 mean=]
+  #16 A[min=-68 max=439 mean=-26 peak=439] B[min=-13753 max=32767 mean=-5764 pe]
+  #17 A[min=-12848 max=32767 mean=-5181 peak=32767] B[min=-41 max=-27 mean=-30 ]
+  #18 A[min=-23084 max=32767 mean=-9931 peak=32767] B[min=-2514 max=26347 mean=]
+  #19 A[min=-3549 max=24726 mean=1843 peak=24726] B[min=-31566 max=32767 mean=-]
+  #20 A[min=-2400 max=25807 mean=2668 peak=25807] B[min=-32768 max=32767 mean=-]
+  #21 A[min=-2256 max=22186 mean=1034 peak=22186] B[min=-32768 max=32767 mean=-]
+  #22 A[min=-4157 max=25100 mean=437 peak=25100] B[min=-32768 max=32767 mean=-2]
+  #23 A[min=-32768 max=32767 mean=-13650 peak=32768] B[min=-6571 max=26189 mean]
+  #24 A[min=-5295 max=26609 mean=2250 peak=26609] B[min=-32768 max=32767 mean=-]
+  #25 A[min=-2473 max=25828 mean=720 peak=25828] B[min=-32768 max=32767 mean=-2]
+  #26 A[min=-2362 max=20391 mean=533 peak=20391] B[min=-32768 max=32767 mean=-2]
+  #27 A[min=-2716 max=25426 mean=1283 peak=25426] B[min=-32768 max=32767 mean=-]
+  #28 A[min=-2021 max=25025 mean=835 peak=25025] B[min=-32768 max=32767 mean=-1]
+  #29 A[min=-877 max=23243 mean=316 peak=23243] B[min=-29538 max=32767 mean=-19]
+  #30 A[min=-32 max=-29 mean=-30 peak=32] B[min=-18377 max=-14126 mean=-16655 p]
+  #31 A[min=-34 max=-20 mean=-30 peak=34] B[min=-20328 max=32767 mean=-11780 pe]
+  #32 A[min=-11927 max=12348 mean=-9961 peak=12348] B[min=-33 max=-28 mean=-30 ]
+  #33 A[min=-33 max=-22 mean=-30 peak=33] B[min=-10742 max=32767 mean=-6266 pea]
+  #34 A[min=-33 max=-28 mean=-30 peak=33] B[min=-8649 max=22895 mean=-6090 peak]
+  #35 A[min=-6803 max=32767 mean=-4596 peak=32767] B[min=-32 max=-27 mean=-30 p]
+  #36 A[min=-1383 max=16841 mean=105 peak=16841] B[min=-6689 max=32767 mean=-27]
+  #37 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4693 max=1032 mean=-3931 peak=]
+  #38 A[min=-32 max=-28 mean=-30 peak=32] B[min=-5449 max=17361 mean=-3110 peak]
+  #39 A[min=-4097 max=13246 mean=-2679 peak=13246] B[min=-32 max=-29 mean=-30 p]
+  #40 A[min=-1563 max=7092 mean=49 peak=7092] B[min=-5851 max=32767 mean=-1616 ]
+  #41 A[min=-7063 max=32767 mean=-485 peak=32767] B[min=-34 max=-27 mean=-30 pe]
+  #42 A[min=-2202 max=14161 mean=121 peak=14161] B[min=-6191 max=32767 mean=-11]
+  #43 A[min=-34 max=-27 mean=-30 peak=34] B[min=-6532 max=32767 mean=-2172 peak]
+  #44 A[min=-2155 max=12072 mean=204 peak=12072] B[min=-7836 max=32767 mean=565]
+  #45 A[min=-1990 max=23795 mean=457 peak=23795] B[min=-11678 max=32767 mean=-4]
+  #46 A[min=-2335 max=18020 mean=292 peak=18020] B[min=-14316 max=32767 mean=-3]
+  #47 A[min=-2970 max=21448 mean=943 peak=21448] B[min=-19209 max=32767 mean=-6]
+  #48 A[min=-2132 max=22771 mean=230 peak=22771] B[min=-17426 max=32767 mean=-8]
+  #49 A[min=-2364 max=21118 mean=1409 peak=21118] B[min=-21932 max=32767 mean=-]
+  #50 A[min=-3130 max=25656 mean=3094 peak=25656] B[min=-32768 max=32767 mean=-]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-2646 max=22398 mean=851 peak=22398] B[min=-23482 max=32767 mean=-10]
+  #2 A[min=-746 max=6852 mean=45 peak=6852] B[min=-18092 max=32767 mean=-10372 ]
+  #3 A[min=-12303 max=32767 mean=-9894 peak=32767] B[min=-34 max=-26 mean=-30 p]
+  #4 A[min=-34 max=-28 mean=-30 peak=34] B[min=-10700 max=25721 mean=-7190 peak]
+  #5 A[min=-8596 max=12419 mean=-5961 peak=12419] B[min=-33 max=-28 mean=-30 pe]
+  #6 A[min=-33 max=-27 mean=-30 peak=33] B[min=-6815 max=32767 mean=-3779 peak=]
+  #7 A[min=-32 max=-29 mean=-30 peak=32] B[min=-5273 max=10150 mean=-3977 peak=]
+  #8 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4591 max=-1722 mean=-3731 peak=]
+  #9 A[min=-5302 max=14905 mean=-3093 peak=14905] B[min=-33 max=-29 mean=-30 pe]
+  #10 A[min=-6685 max=32767 mean=-2819 peak=32767] B[min=-34 max=-26 mean=-30 p]
+  #11 A[min=-32 max=-25 mean=-30 peak=32] B[min=-5369 max=18849 mean=-4091 peak]
+  #12 A[min=-6485 max=32767 mean=-2696 peak=32767] B[min=-1405 max=5377 mean=4 ]
+  #13 A[min=-4663 max=17180 mean=-3200 peak=17180] B[min=-32 max=-28 mean=-30 p]
+  #14 A[min=-172 max=988 mean=-21 peak=988] B[min=-6824 max=32767 mean=-1613 pe]
+  #15 A[min=-5045 max=18745 mean=-2822 peak=18745] B[min=-33 max=-28 mean=-30 p]
+  #16 A[min=-2211 max=11486 mean=97 peak=11486] B[min=-6256 max=32767 mean=-153]
+  #17 A[min=-5810 max=32767 mean=-1983 peak=32767] B[min=-33 max=-28 mean=-30 p]
+  #18 A[min=-32 max=-28 mean=-30 peak=32] B[min=-5717 max=32767 mean=-2468 peak]
+  #19 A[min=-32 max=-29 mean=-30 peak=32] B[min=-3174 max=1389 mean=-2650 peak=]
+  #20 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2981 max=-1503 mean=-2501 peak]
+  #21 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3383 max=24984 mean=-1860 peak]
+  #22 A[min=-2840 max=400 mean=-2364 peak=2840] B[min=-32 max=-29 mean=-30 peak]
+  #23 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2729 max=-1753 mean=-2294 peak]
+  #24 A[min=-33 max=-29 mean=-30 peak=33] B[min=-3560 max=10023 mean=-2145 peak]
+  #25 A[min=-2535 max=-1537 mean=-2184 peak=2535] B[min=-32 max=-28 mean=-30 pe]
+  #26 A[min=-2500 max=-1574 mean=-2108 peak=2500] B[min=-32 max=-28 mean=-30 pe]
+  #27 A[min=-2351 max=-1572 mean=-2057 peak=2351] B[min=-33 max=-28 mean=-30 pe]
+  #28 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2434 max=-1470 mean=-2058 peak]
+  #29 A[min=-33 max=-28 mean=-30 peak=33] B[min=-2388 max=-1661 mean=-2054 peak]
+  #30 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2315 max=-1472 mean=-2024 peak]
+  #31 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2303 max=-1407 mean=-2049 peak]
+  #32 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2297 max=-1653 mean=-2022 peak]
+  #33 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2332 max=-1605 mean=-1999 peak]
+  #34 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2381 max=-1314 mean=-1995 peak]
+  #35 A[min=-32 max=-28 mean=-30 peak=32] B[min=-2562 max=892 mean=-1946 peak=2]
+  #36 A[min=-33 max=-26 mean=-30 peak=33] B[min=-3854 max=32767 mean=-1611 peak]
+  #37 A[min=-6676 max=32767 mean=93 peak=32767] B[min=-709 max=2393 mean=0 peak]
+  #38 A[min=-33 max=-27 mean=-30 peak=33] B[min=-7460 max=32767 mean=-1388 peak]
+  #39 A[min=-1885 max=12787 mean=98 peak=12787] B[min=-7902 max=32767 mean=-183]
+  #40 A[min=-7543 max=32767 mean=-1665 peak=32767] B[min=-33 max=-27 mean=-30 p]
+  #41 A[min=-1957 max=11965 mean=87 peak=11965] B[min=-5635 max=32767 mean=-257]
+  #42 A[min=-3955 max=1887 mean=-3020 peak=3955] B[min=-32 max=-29 mean=-30 pea]
+  #43 A[min=-32 max=-29 mean=-30 peak=32] B[min=-3278 max=-1027 mean=-2678 peak]
+  #44 A[min=-34 max=-28 mean=-30 peak=34] B[min=-6238 max=32767 mean=-1774 peak]
+  #45 A[min=-33 max=-28 mean=-30 peak=33] B[min=-3666 max=32767 mean=-1932 peak]
+  #46 A[min=-3898 max=10507 mean=-2564 peak=10507] B[min=-32 max=-28 mean=-30 p]
+  #47 A[min=-33 max=-28 mean=-30 peak=33] B[min=-4861 max=32422 mean=-1361 peak]
+  #48 A[min=-32 max=-28 mean=-30 peak=32] B[min=-3868 max=14290 mean=-2245 peak]
+  #49 A[min=-32 max=-29 mean=-30 peak=32] B[min=-3007 max=-1685 mean=-2542 peak]
+  #50 A[min=-32 max=-29 mean=-30 peak=32] B[min=-2901 max=-1393 mean=-2383 peak]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-2660 max=22733 mean=459 peak=22733] B[min=-21699 max=32767 mean=-10]
+  #2 A[min=-2800 max=18614 mean=649 peak=18614] B[min=-26125 max=32767 mean=-10]
+  #3 A[min=-2361 max=24608 mean=437 peak=24608] B[min=-19697 max=32767 mean=-10]
+  #4 A[min=-1860 max=26956 mean=816 peak=26956] B[min=-25729 max=32767 mean=-12]
+  #5 A[min=-2216 max=26507 mean=1914 peak=26507] B[min=-32768 max=32767 mean=-1]
+  #6 A[min=-2690 max=26814 mean=1728 peak=26814] B[min=-32768 max=32767 mean=-2]
+  #7 A[min=-2270 max=11933 mean=104 peak=11933] B[min=-32768 max=32767 mean=-25]
+  #8 A[min=-2409 max=23992 mean=1500 peak=23992] B[min=-32768 max=32767 mean=-2]
+  #9 A[min=-2710 max=25524 mean=1637 peak=25524] B[min=-32768 max=32767 mean=-1]
+  #10 A[min=-2469 max=24911 mean=717 peak=24911] B[min=-32768 max=32767 mean=-2]
+  #11 A[min=-3083 max=26454 mean=1785 peak=26454] B[min=-32768 max=32767 mean=-]
+  #12 A[min=-32768 max=32767 mean=-22687 peak=32768] B[min=-2705 max=22465 mean]
+  #13 A[min=-2760 max=16144 mean=435 peak=16144] B[min=-32467 max=32767 mean=-1]
+  #14 A[min=-2386 max=24380 mean=919 peak=24380] B[min=-32768 max=32767 mean=-2]
+  #15 A[min=-2002 max=26187 mean=1263 peak=26187] B[min=-32768 max=32767 mean=-]
+  #16 A[min=-32768 max=32767 mean=-21496 peak=32768] B[min=-2688 max=20465 mean]
+  #17 A[min=-2177 max=24122 mean=567 peak=24122] B[min=-32768 max=32767 mean=-1]
+  #18 A[min=-2152 max=22821 mean=656 peak=22821] B[min=-30735 max=32767 mean=-1]
+  #19 A[min=-2768 max=24019 mean=507 peak=24019] B[min=-30367 max=32767 mean=-1]
+  #20 A[min=-2045 max=24693 mean=1372 peak=24693] B[min=-25960 max=32767 mean=-]
+  #21 A[min=-1593 max=26083 mean=923 peak=26083] B[min=-31224 max=32767 mean=-1]
+  #22 A[min=-2304 max=26792 mean=828 peak=26792] B[min=-31125 max=32767 mean=-1]
+  #23 A[min=-2487 max=24275 mean=1752 peak=24275] B[min=-32768 max=32767 mean=-]
+  #24 A[min=-1547 max=23994 mean=1042 peak=23994] B[min=-30673 max=32767 mean=-]
+  #25 A[min=-2346 max=19756 mean=565 peak=19756] B[min=-30473 max=32767 mean=-1]
+  #26 A[min=-2027 max=21895 mean=526 peak=21895] B[min=-28517 max=32767 mean=-1]
+  #27 A[min=-2282 max=25924 mean=689 peak=25924] B[min=-26940 max=32767 mean=-1]
+  #28 A[min=-2037 max=16879 mean=452 peak=16879] B[min=-25921 max=32767 mean=-1]
+  #29 A[min=-2778 max=26000 mean=863 peak=26000] B[min=-25438 max=32767 mean=-1]
+  #30 A[min=-2232 max=23783 mean=786 peak=23783] B[min=-25178 max=32767 mean=-1]
+  #31 A[min=-1931 max=23241 mean=796 peak=23241] B[min=-28776 max=32767 mean=-1]
+  #32 A[min=-2377 max=8175 mean=22 peak=8175] B[min=-21084 max=32767 mean=-1364]
+  #33 A[min=-20648 max=32767 mean=-9959 peak=32767] B[min=-2571 max=19213 mean=]
+  #34 A[min=-2437 max=22038 mean=615 peak=22038] B[min=-21367 max=32767 mean=-1]
+  #35 A[min=-2680 max=25403 mean=639 peak=25403] B[min=-23545 max=32767 mean=-1]
+  #36 A[min=-1603 max=16916 mean=129 peak=16916] B[min=-23738 max=32767 mean=-1]
+  #37 A[min=-2705 max=17363 mean=685 peak=17363] B[min=-22336 max=32767 mean=-9]
+  #38 A[min=-20974 max=32767 mean=-8749 peak=32767] B[min=-2879 max=15665 mean=]
+  #39 A[min=-1922 max=26106 mean=812 peak=26106] B[min=-23961 max=32767 mean=-9]
+  #40 A[min=-26070 max=32767 mean=-9793 peak=32767] B[min=-2064 max=25945 mean=]
+  #41 A[min=-1653 max=18936 mean=228 peak=18936] B[min=-23740 max=32767 mean=-1]
+  #42 A[min=-1965 max=9710 mean=81 peak=9710] B[min=-19753 max=32767 mean=-1084]
+  #43 A[min=-475 max=24133 mean=389 peak=24133] B[min=-19114 max=32767 mean=-82]
+  #44 A[min=-2595 max=17886 mean=316 peak=17886] B[min=-16207 max=32767 mean=-6]
+  #45 A[min=-1840 max=20148 mean=275 peak=20148] B[min=-16716 max=32767 mean=-6]
+  #46 A[min=-15238 max=32767 mean=-6000 peak=32767] B[min=-2465 max=19611 mean=]
+  #47 A[min=-2121 max=23082 mean=844 peak=23082] B[min=-17632 max=32767 mean=-4]
+  #48 A[min=-18235 max=32767 mean=-7984 peak=32767] B[min=-2156 max=22757 mean=]
+  #49 A[min=-2005 max=23495 mean=570 peak=23495] B[min=-21105 max=32767 mean=-9]
+  #50 A[min=-18245 max=32767 mean=-9293 peak=32767] B[min=-2100 max=23555 mean=]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-2205 max=22978 mean=504 peak=22978] B[min=-10247 max=32767 mean=-31]
+  #2 A[min=-323 max=4117 mean=5 peak=4117] B[min=-8782 max=32767 mean=-3299 pea]
+  #3 A[min=-34 max=-29 mean=-30 peak=34] B[min=-9095 max=32767 mean=-2610 peak=]
+  #4 A[min=-1509 max=5626 mean=36 peak=5626] B[min=-8835 max=32767 mean=-2910 p]
+  #5 A[min=-54 max=48 mean=-29 peak=54] B[min=-8190 max=32600 mean=-2574 peak=3]
+  #6 A[min=-33 max=-27 mean=-30 peak=33] B[min=-8278 max=32767 mean=-2427 peak=]
+  #7 A[min=-2058 max=15329 mean=236 peak=15329] B[min=-10081 max=32767 mean=-22]
+  #8 A[min=-270 max=360 mean=-24 peak=360] B[min=-10285 max=32767 mean=-3657 pe]
+  #9 A[min=-487 max=2542 mean=-6 peak=2542] B[min=-10361 max=32767 mean=-2566 p]
+  #10 A[min=-2670 max=14188 mean=192 peak=14188] B[min=-10025 max=32767 mean=-3]
+  #11 A[min=-9126 max=32767 mean=-2811 peak=32767] B[min=-2604 max=19975 mean=3]
+  #12 A[min=-8202 max=24428 mean=-3903 peak=24428] B[min=-33 max=-29 mean=-30 p]
+  #13 A[min=-78 max=144 mean=-28 peak=144] B[min=-8029 max=32767 mean=-3230 pea]
+  #14 A[min=-32 max=-25 mean=-30 peak=32] B[min=-7007 max=32767 mean=-3419 peak]
+  #15 A[min=-2006 max=11547 mean=97 peak=11547] B[min=-7405 max=32767 mean=-261]
+  #16 A[min=-6413 max=32767 mean=-3208 peak=32767] B[min=-32 max=-26 mean=-30 p]
+  #17 A[min=-2280 max=20395 mean=210 peak=20395] B[min=-6989 max=32767 mean=-25]
+  #18 A[min=-32 max=-28 mean=-30 peak=32] B[min=-4304 max=8423 mean=-3215 peak=]
+  #19 A[min=-34 max=-28 mean=-30 peak=34] B[min=-6830 max=32767 mean=-2292 peak]
+  #20 A[min=-41 max=122 mean=-29 peak=122] B[min=-6416 max=32767 mean=-2505 pea]
+  #21 A[min=-4961 max=12107 mean=-2481 peak=12107] B[min=-32 max=-28 mean=-30 p]
+  #22 A[min=-33 max=-28 mean=-30 peak=33] B[min=-6097 max=19818 mean=-1906 peak]
+  #23 A[min=-548 max=1781 mean=-7 peak=1781] B[min=-5037 max=32767 mean=-1438 p]
+  #24 A[min=-32 max=-29 mean=-30 peak=32] B[min=-5448 max=10165 mean=-2865 peak]
+  #25 A[min=-32 max=-29 mean=-30 peak=32] B[min=-4018 max=6456 mean=-2851 peak=]
+  #26 A[min=-33 max=-26 mean=-30 peak=33] B[min=-5861 max=32767 mean=-2186 peak]
+  #27 A[min=-32 max=-29 mean=-30 peak=32] B[min=-4827 max=11815 mean=-2674 peak]
+  #28 A[min=-33 max=-28 mean=-30 peak=33] B[min=-4889 max=28692 mean=-1883 peak]
+  #29 A[min=-1930 max=23851 mean=750 peak=23851] B[min=-11090 max=32767 mean=44]
+  #30 A[min=-9551 max=32767 mean=-1473 peak=32767] B[min=-2150 max=9298 mean=86]
+  #31 A[min=-2625 max=15619 mean=264 peak=15619] B[min=-10233 max=32767 mean=-9]
+  #32 A[min=-32 max=-28 mean=-30 peak=32] B[min=-6877 max=30352 mean=-4077 peak]
+  #33 A[min=-91 max=547 mean=-25 peak=547] B[min=-8302 max=32767 mean=-2404 pea]
+  #34 A[min=-924 max=10111 mean=111 peak=10111] B[min=-9932 max=32767 mean=-136]
+  #35 A[min=-2181 max=11127 mean=87 peak=11127] B[min=-6811 max=32767 mean=-346]
+  #36 A[min=-8932 max=32767 mean=-2267 peak=32767] B[min=-2110 max=16931 mean=2]
+  #37 A[min=-10344 max=32767 mean=-4802 peak=32767] B[min=-35 max=22 mean=-29 p]
+  #38 A[min=-1785 max=10646 mean=77 peak=10646] B[min=-10467 max=32767 mean=-39]
+  #39 A[min=-1045 max=21150 mean=275 peak=21150] B[min=-10756 max=32767 mean=-2]
+  #40 A[min=-33 max=-29 mean=-30 peak=33] B[min=-11034 max=32767 mean=-5138 pea]
+  #41 A[min=-32 max=-27 mean=-30 peak=32] B[min=-10337 max=32767 mean=-3678 pea]
+  #42 A[min=-923 max=1397 mean=-23 peak=1397] B[min=-9283 max=32767 mean=-3412 ]
+  #43 A[min=-7882 max=32767 mean=-1714 peak=32767] B[min=-1169 max=10998 mean=7]
+  #44 A[min=-2610 max=22257 mean=553 peak=22257] B[min=-9810 max=32767 mean=-17]
+  #45 A[min=-1947 max=22729 mean=258 peak=22729] B[min=-13388 max=32767 mean=-3]
+  #46 A[min=-12751 max=32767 mean=-4455 peak=32767] B[min=-45 max=37 mean=-28 p]
+  #47 A[min=-2688 max=22687 mean=794 peak=22687] B[min=-14068 max=32767 mean=-1]
+  #48 A[min=-16759 max=32767 mean=-4668 peak=32767] B[min=-2799 max=21356 mean=]
+  #49 A[min=-1888 max=25314 mean=1041 peak=25314] B[min=-19210 max=32767 mean=-]
+  #50 A[min=-2633 max=26387 mean=2475 peak=26387] B[min=-32768 max=32767 mean=-]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture 50                                                                
+Running 50 compact frame-aligned I2S captures...                                
+  #1 A[min=-2584 max=19998 mean=704 peak=19998] B[min=-32768 max=32767 mean=-22]
+  #2 A[min=-2747 max=25883 mean=1439 peak=25883] B[min=-32768 max=32767 mean=-1]
+  #3 A[min=-2679 max=23670 mean=1102 peak=23670] B[min=-32768 max=32767 mean=-2]
+  #4 A[min=-2435 max=21199 mean=857 peak=21199] B[min=-32768 max=32767 mean=-19]
+  #5 A[min=-29794 max=32767 mean=-17042 peak=32767] B[min=-2582 max=16904 mean=]
+  #6 A[min=-1519 max=25915 mean=398 peak=25915] B[min=-30236 max=32767 mean=-13]
+  #7 A[min=-2377 max=24245 mean=786 peak=24245] B[min=-24248 max=32767 mean=-12]
+  #8 A[min=-26386 max=32767 mean=-15027 peak=32767] B[min=-2247 max=22585 mean=]
+  #9 A[min=-2292 max=21442 mean=774 peak=21442] B[min=-25021 max=32767 mean=-10]
+  #10 A[min=-20874 max=32767 mean=-12157 peak=32767] B[min=-2153 max=18697 mean]
+  #11 A[min=-1587 max=9236 mean=117 peak=9236] B[min=-20422 max=32767 mean=-969]
+  #12 A[min=-3961 max=24716 mean=2347 peak=24716] B[min=-32768 max=32767 mean=-]
+  #13 A[min=-2517 max=26227 mean=2764 peak=26227] B[min=-32768 max=32767 mean=-]
+  #14 A[min=-32768 max=32767 mean=-19765 peak=32768] B[min=-3105 max=23308 mean]
+  #15 A[min=-2896 max=23804 mean=1170 peak=23804] B[min=-32768 max=32767 mean=-]
+  #16 A[min=-2488 max=22435 mean=873 peak=22435] B[min=-32768 max=32767 mean=-2]
+  #17 A[min=-2886 max=25117 mean=459 peak=25117] B[min=-32768 max=32767 mean=-2]
+  #18 A[min=-2499 max=16198 mean=497 peak=16198] B[min=-31476 max=32767 mean=-1]
+  #19 A[min=-612 max=4209 mean=7 peak=4209] B[min=-27196 max=32767 mean=-15098 ]
+  #20 A[min=-20228 max=32767 mean=-11746 peak=32767] B[min=-2783 max=14955 mean]
+  #21 A[min=-18582 max=32767 mean=-9123 peak=32767] B[min=-2164 max=16333 mean=]
+  #22 A[min=-2458 max=24331 mean=597 peak=24331] B[min=-19574 max=32767 mean=-8]
+  #23 A[min=-2724 max=23895 mean=525 peak=23895] B[min=-20448 max=32767 mean=-8]
+  #24 A[min=-2737 max=19826 mean=744 peak=19826] B[min=-21116 max=32767 mean=-4]
+  #25 A[min=-2929 max=17775 mean=1100 peak=17775] B[min=-20536 max=32767 mean=-]
+  #26 A[min=-2746 max=20416 mean=1355 peak=20416] B[min=-22868 max=32767 mean=-]
+  #27 A[min=-1894 max=10111 mean=188 peak=10111] B[min=-24402 max=32767 mean=-9]
+  #28 A[min=-25547 max=32767 mean=-10304 peak=32767] B[min=-2899 max=23681 mean]
+  #29 A[min=-25967 max=32767 mean=-13503 peak=32767] B[min=-2652 max=14907 mean]
+  #30 A[min=-2381 max=23284 mean=877 peak=23284] B[min=-25486 max=32767 mean=-9]
+  #31 A[min=-2828 max=23018 mean=1324 peak=23018] B[min=-29669 max=32767 mean=-]
+  #32 A[min=-2437 max=16665 mean=603 peak=16665] B[min=-27835 max=32767 mean=-1]
+  #33 A[min=-3069 max=24440 mean=2472 peak=24440] B[min=-32768 max=32767 mean=-]
+  #34 A[min=-2752 max=23721 mean=569 peak=23721] B[min=-32768 max=32767 mean=-2]
+  #35 A[min=-1922 max=26423 mean=1269 peak=26423] B[min=-32768 max=32767 mean=-]
+  #36 A[min=-2245 max=24330 mean=1257 peak=24330] B[min=-32768 max=32767 mean=-]
+  #37 A[min=-35 max=-24 mean=-30 peak=35] B[min=-32768 max=32767 mean=-25750 pe]
+  #38 A[min=-31116 max=32767 mean=-16916 peak=32767] B[min=-2447 max=22025 mean]
+  #39 A[min=-2761 max=25611 mean=935 peak=25611] B[min=-31983 max=32767 mean=-1]
+  #40 A[min=-2286 max=18557 mean=227 peak=18557] B[min=-25680 max=32767 mean=-1]
+  #41 A[min=-2684 max=21300 mean=712 peak=21300] B[min=-23368 max=32767 mean=-1]
+  #42 A[min=-1897 max=22865 mean=485 peak=22865] B[min=-22891 max=32767 mean=-9]
+  #43 A[min=-22673 max=32767 mean=-11464 peak=32767] B[min=-2506 max=25229 mean]
+  #44 A[min=-24842 max=32767 mean=-11907 peak=32767] B[min=-2661 max=22048 mean]
+  #45 A[min=-24787 max=32767 mean=-13672 peak=32767] B[min=-35 max=-27 mean=-30]
+  #46 A[min=-1947 max=23291 mean=299 peak=23291] B[min=-21381 max=32767 mean=-1]
+  #47 A[min=-1920 max=23233 mean=493 peak=23233] B[min=-20073 max=32767 mean=-9]
+  #48 A[min=-21063 max=32767 mean=-8675 peak=32767] B[min=-2722 max=24323 mean=]
+  #49 A[min=-2695 max=19809 mean=857 peak=19809] B[min=-21465 max=32767 mean=-7]
+  #50 A[min=-23637 max=32767 mean=-10697 peak=32767] B[min=-2174 max=21477 mean]
+Repeated capture summary: 50/50 PASS                                            
+> i2s capture                                                                   
+Usage: i2s capture N, where N is 1..50            
+> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -10688 / 24624
+  STREAM A MEAN    = 978
+  STREAM A PEAK    = 24624
+  STREAM A FS/2    = 25
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -13000
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = -801
+  FIRST 12 RAW FRAMES:
+    F00 A=0xEC50 (-5040) B=0x8000 (-32768)
+    F01 A=0xF0F1 (-3855) B=0x9503 (-27389)
+    F02 A=0xFB93 (-1133) B=0x8000 (-32768)
+    F03 A=0xDF7C (-8324) B=0x00B4 (180)
+    F04 A=0x1C40 (7232) B=0x7FFF (32767)
+    F05 A=0x4BE3 (19427) B=0x8000 (-32768)
+    F06 A=0xEA7D (-5507) B=0x8000 (-32768)
+    F07 A=0xF425 (-3035) B=0xA1F5 (-24075)
+    F08 A=0xF9B0 (-1616) B=0x8000 (-32768)
+    F09 A=0xE96A (-5782) B=0x8000 (-32768)
+    F10 A=0xF0A4 (-3932) B=0x8000 (-32768)
+    F11 A=0xF3D3 (-3117) B=0x8000 (-32768)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2742 / 21904
+  STREAM A MEAN    = 1159
+  STREAM A PEAK    = 21904
+  STREAM A FS/2    = 6
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -19062
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = -272
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFFD (-3) B=0x7FFF (32767)
+    F01 A=0xFFA9 (-87) B=0xA495 (-23403)
+    F02 A=0x0049 (73) B=0x847A (-31622)
+    F03 A=0xFF27 (-217) B=0x95EF (-27153)
+    F04 A=0x010B (267) B=0x8660 (-31136)
+    F05 A=0xFE28 (-472) B=0x95E8 (-27160)
+    F06 A=0x0248 (584) B=0x8686 (-31098)
+    F07 A=0xFCA8 (-856) B=0x9AA5 (-25947)
+    F08 A=0x042D (1069) B=0x8000 (-32768)
+    F09 A=0xF99B (-1637) B=0x10ED (4333)
+    F10 A=0x0FF2 (4082) B=0x7FFF (32767)
+    F11 A=0x4AEC (19180) B=0xDB40 (-9408)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -6323 / 25905
+  STREAM A MEAN    = 5
+  STREAM A PEAK    = 25905
+  STREAM A FS/2    = 10
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -18913
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = -775
+  FIRST 12 RAW FRAMES:
+    F00 A=0x47F4 (18420) B=0x7FFF (32767)
+    F01 A=0x6531 (25905) B=0x4357 (17239)
+    F02 A=0x1F95 (8085) B=0x8000 (-32768)
+    F03 A=0xEAA4 (-5468) B=0x8000 (-32768)
+    F04 A=0xF1E2 (-3614) B=0x8000 (-32768)
+    F05 A=0xEEAA (-4438) B=0x8000 (-32768)
+    F06 A=0xF127 (-3801) B=0x8000 (-32768)
+    F07 A=0xEF1A (-4326) B=0x8000 (-32768)
+    F08 A=0xF19A (-3686) B=0x8000 (-32768)
+    F09 A=0xEEA7 (-4441) B=0x8B12 (-29934)
+    F10 A=0xF5DD (-2595) B=0x0008 (8)
+    F11 A=0x000F (15) B=0x8000 (-32768)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -6789 / 25577
+  STREAM A MEAN    = -126
+  STREAM A PEAK    = 25577
+  STREAM A FS/2    = 66
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -16925
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = 506
+  FIRST 12 RAW FRAMES:
+    F00 A=0xE92D (-5843) B=0x8000 (-32768)
+    F01 A=0xF261 (-3487) B=0x8000 (-32768)
+    F02 A=0xEF28 (-4312) B=0x8000 (-32768)
+    F03 A=0xEF98 (-4200) B=0x8000 (-32768)
+    F04 A=0xF0EC (-3860) B=0x8000 (-32768)
+    F05 A=0xF2A0 (-3424) B=0x7FFF (32767)
+    F06 A=0x04EB (1259) B=0xE362 (-7326)
+    F07 A=0xF7C1 (-2111) B=0xEEF6 (-4362)
+    F08 A=0x16AD (5805) B=0x7FFF (32767)
+    F09 A=0x6364 (25444) B=0xFA9A (-1382)
+    F10 A=0x15CB (5579) B=0x8000 (-32768)
+    F11 A=0xE7CD (-6195) B=0x8000 (-32768)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2521 / 25553
+  STREAM A MEAN    = 1064
+  STREAM A PEAK    = 25553
+  STREAM A FS/2    = 21
+  STREAM B MIN/MAX = -27488 / 32767
+  STREAM B MEAN    = -8903
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = 245
+  FIRST 12 RAW FRAMES:
+    F00 A=0x0571 (1393) B=0xC1F5 (-15883)
+    F01 A=0xF74A (-2230) B=0x7FFF (32767)
+    F02 A=0x20A8 (8360) B=0x7FFF (32767)
+    F03 A=0x18BE (6334) B=0xBD9D (-16995)
+    F04 A=0xF8A7 (-1881) B=0xAA94 (-21868)
+    F05 A=0x037E (894) B=0xA7D6 (-22570)
+    F06 A=0xFE2F (-465) B=0xACDA (-21286)
+    F07 A=0x001E (30) B=0xA6D5 (-22827)
+    F08 A=0x00ED (237) B=0xB577 (-19081)
+    F09 A=0xFD80 (-640) B=0xFD61 (-671)
+    F10 A=0x03E1 (993) B=0xFF7B (-133)
+    F11 A=0xF926 (-1754) B=0x6E8F (28303)
+> > i2s capture> i2s capture > i2s capture 50
+Running 50 compact frame-aligned I2S captures...
+  #1 A[min=-6832 max=25502 mean=-619 peak=25502] B[min=-32768 max=32767 mean=-19095 peak=32768]
+  #2 A[min=-5523 max=24796 mean=191 peak=24796] B[min=-32768 max=32767 mean=-16958 peak=32768]
+  #3 A[min=-32768 max=32767 mean=-14822 peak=32768] B[min=-6855 max=26039 mean=1147 peak=26039]
+  #4 A[min=-32768 max=32767 mean=-14574 peak=32768] B[min=-7163 max=25326 mean=1027 peak=25326]
+  #5 A[min=-7042 max=25899 mean=492 peak=25899] B[min=-32768 max=32767 mean=-12751 peak=32768]
+  #6 A[min=-7261 max=25801 mean=-103 peak=25801] B[min=-32768 max=32767 mean=-17956 peak=32768]
+  #7 A[min=-6902 max=27064 mean=843 peak=27064] B[min=-32768 max=32767 mean=-16187 peak=32768]
+  #8 A[min=-7368 max=26716 mean=903 peak=26716] B[min=-32768 max=32767 mean=-14855 peak=32768]
+  #9 A[min=-32768 max=32767 mean=-15685 peak=32768] B[min=-5819 max=26138 mean=550 peak=26138]
+  #10 A[min=-7319 max=26158 mean=1536 peak=26158] B[min=-32768 max=32767 mean=-12841 peak=32768]
+  #11 A[min=-32768 max=32767 mean=-18450 peak=32768] B[min=-6122 max=26413 mean=186 peak=26413]
+  #12 A[min=-32768 max=32767 mean=-13712 peak=32768] B[min=-6876 max=25590 mean=986 peak=25590]
+  #13 A[min=-32768 max=32767 mean=-19110 peak=32768] B[min=-6009 max=23532 mean=-68 peak=23532]
+  #14 A[min=-4353 max=26721 mean=1484 peak=26721] B[min=-32768 max=32767 mean=-18500 peak=32768]
+  #15 A[min=-32768 max=32767 mean=-19814 peak=32768] B[min=-5087 max=26275 mean=312 peak=26275]
+  #16 A[min=-32768 max=32767 mean=-20132 peak=32768] B[min=-1941 max=21161 mean=1040 peak=21161]
+  #17 A[min=-3578 max=23533 mean=1765 peak=23533] B[min=-32768 max=32767 mean=-17067 peak=32768]
+  #18 A[min=-32768 max=32767 mean=-18527 peak=32768] B[min=-2038 max=25694 mean=1644 peak=25694]
+  #19 A[min=-2977 max=26440 mean=1857 peak=26440] B[min=-32768 max=32767 mean=-19728 peak=32768]
+  #20 A[min=-5009 max=25869 mean=1411 peak=25869] B[min=-32768 max=32767 mean=-17248 peak=32768]
+  #21 A[min=-5700 max=25952 mean=1076 peak=25952] B[min=-32768 max=32767 mean=-16846 peak=32768]
+  #22 A[min=-6666 max=26314 mean=27 peak=26314] B[min=-32768 max=32767 mean=-19602 peak=32768]
+  #23 A[min=-32768 max=32767 mean=-19709 peak=32768] B[min=-4324 max=24501 mean=629 peak=24501]
+  #24 A[min=-4828 max=24715 mean=1507 peak=24715] B[min=-32768 max=32767 mean=-16455 peak=32768]
+  #25 A[min=-2011 max=26294 mean=2456 peak=26294] B[min=-32768 max=32767 mean=-18552 peak=32768]
+  #26 A[min=-4102 max=24128 mean=1206 peak=24128] B[min=-32768 max=32767 mean=-17415 peak=32768]
+  #27 A[min=-4457 max=25409 mean=498 peak=25409] B[min=-32768 max=32767 mean=-17824 peak=32768]
+  #28 A[min=-5403 max=24694 mean=530 peak=24694] B[min=-32768 max=32767 mean=-16495 peak=32768]
+  #29 A[min=-5830 max=25732 mean=864 peak=25732] B[min=-32768 max=32767 mean=-14933 peak=32768]
+  #30 A[min=-4134 max=25986 mean=1515 peak=25986] B[min=-32768 max=32767 mean=-18492 peak=32768]
+  #31 A[min=-32768 max=32767 mean=-17628 peak=32768] B[min=-4206 max=25335 mean=1868 peak=25335]
+  #32 A[min=-4093 max=24485 mean=74 peak=24485] B[min=-32768 max=32767 mean=-22377 peak=32768]
+  #33 A[min=-32768 max=32767 mean=-22042 peak=32768] B[min=-2618 max=25127 mean=1071 peak=25127]
+  #34 A[min=-2488 max=23929 mean=722 peak=23929] B[min=-32768 max=32767 mean=-21075 peak=32768]
+  #35 A[min=-2722 max=24828 mean=1928 peak=24828] B[min=-32768 max=32767 mean=-18183 peak=32768]
+  #36 A[min=-32768 max=32767 mean=-22548 peak=32768] B[min=-3333 max=21083 mean=843 peak=21083]
+  #37 A[min=-2670 max=22424 mean=1724 peak=22424] B[min=-32768 max=32767 mean=-17851 peak=32768]
+  #38 A[min=-2976 max=25080 mean=1620 peak=25080] B[min=-32768 max=32767 mean=-17707 peak=32768]
+  #39 A[min=-2286 max=25357 mean=1947 peak=25357] B[min=-32768 max=32767 mean=-18274 peak=32768]
+  #40 A[min=-32768 max=32767 mean=-21954 peak=32768] B[min=-2627 max=16126 mean=726 peak=16126]
+  #41 A[min=-32768 max=32767 mean=-18856 peak=32768] B[min=-2790 max=22942 mean=990 peak=22942]
+  #42 A[min=-1495 max=26272 mean=797 peak=26272] B[min=-32768 max=32767 mean=-23579 peak=32768]
+  #43 A[min=-2657 max=24802 mean=768 peak=24802] B[min=-32768 max=32767 mean=-21026 peak=32768]
+  #44 A[min=-2485 max=25429 mean=865 peak=25429] B[min=-32768 max=32767 mean=-18698 peak=32768]
+  #45 A[min=-1989 max=22511 mean=835 peak=22511] B[min=-30517 max=32767 mean=-17523 peak=32767]
+  #46 A[min=-3178 max=19699 mean=806 peak=19699] B[min=-27432 max=32767 mean=-11869 peak=32767]
+  #47 A[min=-1492 max=7157 mean=89 peak=7157] B[min=-25492 max=32767 mean=-12930 peak=32767]
+  #48 A[min=-2312 max=26354 mean=635 peak=26354] B[min=-23657 max=32767 mean=-9211 peak=32767]
+  #49 A[min=-21375 max=32767 mean=-8232 peak=32767] B[min=-2384 max=21492 mean=537 peak=21492]
+  #50 A[min=-2625 max=23718 mean=939 peak=23718] B[min=-21070 max=32767 mean=-9408 peak=32767]
+Repeated capture summary: 50/50 PASS
+> > i2s capture 50
+Running 50 compact frame-aligned I2S captures...
+  #1 A[min=-2890 max=23231 mean=1672 peak=23231] B[min=-32768 max=32767 mean=-16175 peak=32768]
+  #2 A[min=-2529 max=21916 mean=1292 peak=21916] B[min=-32768 max=32767 mean=-20141 peak=32768]
+  #3 A[min=-2400 max=22797 mean=1489 peak=22797] B[min=-32768 max=32767 mean=-19398 peak=32768]
+  #4 A[min=-1668 max=26254 mean=1562 peak=26254] B[min=-32768 max=32767 mean=-18645 peak=32768]
+  #5 A[min=-2915 max=26017 mean=1799 peak=26017] B[min=-32768 max=32767 mean=-19138 peak=32768]
+  #6 A[min=-2275 max=25772 mean=1525 peak=25772] B[min=-32768 max=32767 mean=-18957 peak=32768]
+  #7 A[min=-2831 max=21137 mean=1114 peak=21137] B[min=-32768 max=32767 mean=-21630 peak=32768]
+  #8 A[min=-3450 max=25763 mean=1863 peak=25763] B[min=-32768 max=32767 mean=-21800 peak=32768]
+  #9 A[min=-3120 max=18657 mean=998 peak=18657] B[min=-32768 max=32767 mean=-21738 peak=32768]
+  #10 A[min=-32768 max=32767 mean=-22532 peak=32768] B[min=-2105 max=22896 mean=640 peak=22896]
+  #11 A[min=-32768 max=32767 mean=-14634 peak=32768] B[min=-3216 max=25702 mean=3090 peak=25702]
+  #12 A[min=-35 max=-26 mean=-30 peak=35] B[min=-32768 max=32767 mean=-27654 peak=32768]
+  #13 A[min=-39 max=21 mean=-29 peak=39] B[min=-32768 max=32767 mean=-24965 peak=32768]
+  #14 A[min=-2346 max=23280 mean=740 peak=23280] B[min=-27133 max=32767 mean=-12488 peak=32767]
+  #15 A[min=-2698 max=25865 mean=1917 peak=25865] B[min=-32768 max=32767 mean=-10526 peak=32768]
+  #16 A[min=-32768 max=32767 mean=-15044 peak=32768] B[min=-4765 max=26526 mean=3679 peak=26526]
+  #17 A[min=-9070 max=27442 mean=1951 peak=27442] B[min=-32768 max=32767 mean=-10956 peak=32768]
+  #18 A[min=-32768 max=32767 mean=-11598 peak=32768] B[min=-7907 max=26886 mean=1860 peak=26886]
+  #19 A[min=-8308 max=26837 mean=1170 peak=26837] B[min=-32768 max=32767 mean=-13760 peak=32768]
+  #20 A[min=-32768 max=32767 mean=-13448 peak=32768] B[min=-8542 max=26565 mean=914 peak=26565]
+  #21 A[min=-32768 max=32767 mean=-17929 peak=32768] B[min=-11302 max=26625 mean=-749 peak=26625]
+  #22 A[min=-32768 max=32767 mean=-12311 peak=32768] B[min=-8891 max=27444 mean=1733 peak=27444]
+  #23 A[min=-7708 max=26618 mean=1384 peak=26618] B[min=-32768 max=32767 mean=-14554 peak=32768]
+  #24 A[min=-32768 max=32767 mean=-24817 peak=32768] B[min=-8052 max=21629 mean=-2254 peak=21629]
+  #25 A[min=-32768 max=32767 mean=-27141 peak=32768] B[min=-258 max=1324 mean=-12 peak=1324]
+  #26 A[min=-33 max=-28 mean=-30 peak=33] B[min=-32768 max=6759 mean=-30424 peak=32768]
+  #27 A[min=-34 max=-27 mean=-30 peak=34] B[min=-29208 max=32767 mean=-21664 peak=32767]
+  #28 A[min=-66 max=-21 mean=-30 peak=66] B[min=-23499 max=23104 mean=-18313 peak=23499]
+  #29 A[min=-5214 max=25037 mean=3671 peak=25037] B[min=-32768 max=32767 mean=-3974 peak=32768]
+  #30 A[min=-10630 max=22956 mean=3175 peak=22956] B[min=-32768 max=32767 mean=-8538 peak=32768]
+  #31 A[min=-32768 max=32767 mean=-11620 peak=32768] B[min=-11568 max=27759 mean=1581 peak=27759]
+  #32 A[min=-10497 max=25002 mean=1603 peak=25002] B[min=-32768 max=32767 mean=-12734 peak=32768]
+  #33 A[min=-9171 max=26032 mean=667 peak=26032] B[min=-32768 max=32767 mean=-13277 peak=32768]
+  #34 A[min=-6565 max=26350 mean=48 peak=26350] B[min=-32768 max=32767 mean=-17047 peak=32768]
+  #35 A[min=-32768 max=32767 mean=-15476 peak=32768] B[min=-5916 max=25691 mean=885 peak=25691]
+  #36 A[min=-4231 max=23889 mean=-787 peak=23889] B[min=-32768 max=32767 mean=-23352 peak=32768]
+  #37 A[min=-36 max=-27 mean=-30 peak=36] B[min=-32768 max=15586 mean=-30881 peak=32768]
+  #38 A[min=-1112 max=12059 mean=90 peak=12059] B[min=-32768 max=32767 mean=-23483 peak=32768]
+  #39 A[min=-26108 max=32767 mean=-17653 peak=32767] B[min=-2303 max=13545 mean=112 peak=13545]
+  #40 A[min=-32768 max=32767 mean=-8962 peak=32768] B[min=-5772 max=26263 mean=5377 peak=26263]
+  #41 A[min=-32768 max=32767 mean=-17528 peak=32768] B[min=-8320 max=25520 mean=82 peak=25520]
+  #42 A[min=-9341 max=26093 mean=1933 peak=26093] B[min=-32768 max=32767 mean=-12567 peak=32768]
+  #43 A[min=-32768 max=32767 mean=-12514 peak=32768] B[min=-9163 max=27036 mean=1754 peak=27036]
+  #44 A[min=-11583 max=26874 mean=1478 peak=26874] B[min=-32768 max=32767 mean=-12173 peak=32768]
+  #45 A[min=-10289 max=26995 mean=1825 peak=26995] B[min=-32768 max=32767 mean=-12355 peak=32768]
+  #46 A[min=-9714 max=26988 mean=1370 peak=26988] B[min=-32768 max=32767 mean=-12155 peak=32768]
+  #47 A[min=-32768 max=32767 mean=-15781 peak=32768] B[min=-9845 max=26775 mean=921 peak=26775]
+  #48 A[min=-9064 max=27365 mean=3095 peak=27365] B[min=-32768 max=32767 mean=-9534 peak=32768]
+  #49 A[min=-8256 max=27582 mean=1141 peak=27582] B[min=-32768 max=32767 mean=-14586 peak=32768]
+  #50 A[min=-32768 max=32767 mean=-12943 peak=32768] B[min=-7483 max=26577 mean=1720 peak=26577]
+Repeated capture summary: 50/50 PASS
+> > i2s capture 50
+Running 50 compact frame-aligned I2S captures...
+  #1 A[min=-1848 max=12930 mean=105 peak=12930] B[min=-16777 max=32767 mean=-8770 peak=32767]
+  #2 A[min=-32 max=-28 mean=-30 peak=32] B[min=-11749 max=32767 mean=-8477 peak=32767]
+  #3 A[min=-889 max=5031 mean=19 peak=5031] B[min=-13392 max=32767 mean=-5540 peak=32767]
+  #4 A[min=-39 max=54 mean=-29 peak=54] B[min=-9618 max=32767 mean=-4389 peak=32767]
+  #5 A[min=-33 max=-28 mean=-30 peak=33] B[min=-7940 max=28772 mean=-4901 peak=28772]
+  #6 A[min=-9290 max=32767 mean=-3687 peak=32767] B[min=-1206 max=24083 mean=338 peak=24083]
+  #7 A[min=-33 max=-27 mean=-30 peak=33] B[min=-9020 max=32767 mean=-3505 peak=32767]
+  #8 A[min=-7699 max=12957 mean=-4384 peak=12957] B[min=-33 max=-28 mean=-30 peak=33]
+  #9 A[min=-32 max=-29 mean=-30 peak=32] B[min=-5405 max=5401 mean=-3696 peak=5405]
+  #10 A[min=-5630 max=32767 mean=-2810 peak=32767] B[min=-32 max=-29 mean=-30 peak=32]
+  #11 A[min=-5325 max=25515 mean=3157 peak=25515] B[min=-28532 max=32767 mean=-263 peak=32767]
+  #12 A[min=-2676 max=26171 mean=1850 peak=26171] B[min=-32768 max=32767 mean=-17180 peak=32768]
+  #13 A[min=-32768 max=32767 mean=-12774 peak=32768] B[min=-5299 max=25716 mean=3449 peak=25716]
+  #14 A[min=-4700 max=26260 mean=988 peak=26260] B[min=-32768 max=32767 mean=-18127 peak=32768]
+  #15 A[min=-5011 max=26392 mean=1526 peak=26392] B[min=-32768 max=32767 mean=-14424 peak=32768]
+  #16 A[min=-32768 max=32767 mean=-16983 peak=32768] B[min=-6148 max=25556 mean=259 peak=25556]
+  #17 A[min=-32768 max=32767 mean=-17889 peak=32768] B[min=-5928 max=26074 mean=19 peak=26074]
+  #18 A[min=-5071 max=24518 mean=1010 peak=24518] B[min=-32768 max=32767 mean=-19336 peak=32768]
+  #19 A[min=-32768 max=32767 mean=-17195 peak=32768] B[min=-5669 max=27007 mean=1248 peak=27007]
+  #20 A[min=-6078 max=26343 mean=-195 peak=26343] B[min=-32768 max=32767 mean=-18961 peak=32768]
+  #21 A[min=-32768 max=32767 mean=-18986 peak=32768] B[min=-5809 max=24007 mean=-124 peak=24007]
+  #22 A[min=-5046 max=26773 mean=575 peak=26773] B[min=-32768 max=32767 mean=-17581 peak=32768]
+  #23 A[min=-6156 max=26147 mean=739 peak=26147] B[min=-32768 max=32767 mean=-16515 peak=32768]
+  #24 A[min=-5942 max=25870 mean=-590 peak=25870] B[min=-32768 max=32767 mean=-18158 peak=32768]
+  #25 A[min=-32768 max=32767 mean=-18396 peak=32768] B[min=-5393 max=24703 mean=356 peak=24703]
+  #26 A[min=-6270 max=24742 mean=282 peak=24742] B[min=-32768 max=32767 mean=-17298 peak=32768]
+  #27 A[min=-5094 max=25680 mean=289 peak=25680] B[min=-32768 max=32767 mean=-17577 peak=32768]
+  #28 A[min=-5512 max=26473 mean=612 peak=26473] B[min=-32768 max=32767 mean=-15886 peak=32768]
+  #29 A[min=-6380 max=26155 mean=67 peak=26155] B[min=-32768 max=32767 mean=-16921 peak=32768]
+  #30 A[min=-32768 max=32767 mean=-16558 peak=32768] B[min=-6620 max=26511 mean=240 peak=26511]
+  #31 A[min=-6362 max=26350 mean=528 peak=26350] B[min=-32768 max=32767 mean=-18130 peak=32768]
+  #32 A[min=-8257 max=24999 mean=1334 peak=24999] B[min=-32768 max=32767 mean=-16360 peak=32768]
+  #33 A[min=-32768 max=32767 mean=-16922 peak=32768] B[min=-4107 max=26984 mean=2353 peak=26984]
+  #34 A[min=-4268 max=25709 mean=1480 peak=25709] B[min=-32768 max=32767 mean=-16639 peak=32768]
+  #35 A[min=-6605 max=26025 mean=644 peak=26025] B[min=-32768 max=32767 mean=-16010 peak=32768]
+  #36 A[min=-7202 max=24391 mean=359 peak=24391] B[min=-32768 max=32767 mean=-17391 peak=32768]
+  #37 A[min=-8305 max=25881 mean=533 peak=25881] B[min=-32768 max=32767 mean=-15261 peak=32768]
+  #38 A[min=-6568 max=24777 mean=434 peak=24777] B[min=-32768 max=32767 mean=-16937 peak=32768]
+  #39 A[min=-6482 max=25727 mean=680 peak=25727] B[min=-32768 max=32767 mean=-15274 peak=32768]
+  #40 A[min=-7137 max=26988 mean=1027 peak=26988] B[min=-32768 max=32767 mean=-14457 peak=32768]
+  #41 A[min=-6919 max=25839 mean=900 peak=25839] B[min=-32768 max=32767 mean=-15220 peak=32768]
+  #42 A[min=-6468 max=26021 mean=-560 peak=26021] B[min=-32768 max=32767 mean=-20308 peak=32768]
+  #43 A[min=-6118 max=26108 mean=396 peak=26108] B[min=-32768 max=32767 mean=-17315 peak=32768]
+  #44 A[min=-4799 max=26067 mean=420 peak=26067] B[min=-32768 max=32767 mean=-18839 peak=32768]
+  #45 A[min=-5603 max=26305 mean=618 peak=26305] B[min=-32768 max=32767 mean=-19010 peak=32768]
+  #46 A[min=-4471 max=25391 mean=2514 peak=25391] B[min=-32768 max=32767 mean=-18130 peak=32768]
+  #47 A[min=-2789 max=21285 mean=626 peak=21285] B[min=-32768 max=32767 mean=-23139 peak=32768]
+  #48 A[min=-3041 max=22603 mean=1885 peak=22603] B[min=-32768 max=32767 mean=-18913 peak=32768]
+  #49 A[min=-32768 max=32767 mean=-16916 peak=32768] B[min=-5016 max=22576 mean=2096 peak=22576]
+  #50 A[min=-7175 max=23639 mean=1081 peak=23639] B[min=-32768 max=32767 mean=-18906 peak=32768]
+Repeated capture summary: 50/50 PASS
+> > i2s capture 50> i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2310 / 11401
+  STREAM A MEAN    = 196
+  STREAM A PEAK    = 11401
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -25937 / 32767
+  STREAM B MEAN    = -12390
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -233
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFF5 (-11) B=0xB05F (-20385)
+    F01 A=0xFF9D (-99) B=0xAC1D (-21475)
+    F02 A=0x0077 (119) B=0xB459 (-19367)
+    F03 A=0xFEC5 (-315) B=0xABBD (-21571)
+    F04 A=0x01C6 (454) B=0xB1A6 (-20058)
+    F05 A=0xFCCC (-820) B=0xA79C (-22628)
+    F06 A=0x04DE (1246) B=0xC98E (-13938)
+    F07 A=0xF6FA (-2310) B=0x7FFF (32767)
+    F08 A=0x1CD7 (7383) B=0x7FFF (32767)
+    F09 A=0x2C89 (11401) B=0xD742 (-10430)
+    F10 A=0xF8D9 (-1831) B=0xA269 (-23959)
+    F11 A=0x02EC (748) B=0xB1EB (-19989)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -28
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -1965 / -1837
+  STREAM B MEAN    = -1909
+  STREAM B PEAK    = 1965
+  STREAM B FS/2    = -14
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE3 (-29) B=0xF8AB (-1877)
+    F01 A=0xFFE3 (-29) B=0xF8BD (-1859)
+    F02 A=0xFFE3 (-29) B=0xF8C3 (-1853)
+    F03 A=0xFFE3 (-29) B=0xF8B4 (-1868)
+    F04 A=0xFFE3 (-29) B=0xF8AB (-1877)
+    F05 A=0xFFE2 (-30) B=0xF8B1 (-1871)
+    F06 A=0xFFE1 (-31) B=0xF8B6 (-1866)
+    F07 A=0xFFE1 (-31) B=0xF8BA (-1862)
+    F08 A=0xFFE1 (-31) B=0xF8BE (-1858)
+    F09 A=0xFFE1 (-31) B=0xF8CA (-1846)
+    F10 A=0xFFE1 (-31) B=0xF8D3 (-1837)
+    F11 A=0xFFE1 (-31) B=0xF8BA (-1862)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -28
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -2088 / -1712
+  STREAM B MEAN    = -1887
+  STREAM B PEAK    = 2088
+  STREAM B FS/2    = -14
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF895 (-1899)
+    F01 A=0xFFE2 (-30) B=0xF88A (-1910)
+    F02 A=0xFFE2 (-30) B=0xF891 (-1903)
+    F03 A=0xFFE1 (-31) B=0xF890 (-1904)
+    F04 A=0xFFE2 (-30) B=0xF887 (-1913)
+    F05 A=0xFFE3 (-29) B=0xF880 (-1920)
+    F06 A=0xFFE3 (-29) B=0xF871 (-1935)
+    F07 A=0xFFE2 (-30) B=0xF876 (-1930)
+    F08 A=0xFFE2 (-30) B=0xF894 (-1900)
+    F09 A=0xFFE2 (-30) B=0xF8A8 (-1880)
+    F10 A=0xFFE4 (-28) B=0xF8B6 (-1866)
+    F11 A=0xFFE2 (-30) B=0xF8B0 (-1872)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -28
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -2081 / -1838
+  STREAM B MEAN    = -1952
+  STREAM B PEAK    = 2081
+  STREAM B FS/2    = -15
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF89E (-1890)
+    F01 A=0xFFE2 (-30) B=0xF884 (-1916)
+    F02 A=0xFFE1 (-31) B=0xF884 (-1916)
+    F03 A=0xFFE1 (-31) B=0xF885 (-1915)
+    F04 A=0xFFE2 (-30) B=0xF88D (-1907)
+    F05 A=0xFFE0 (-32) B=0xF891 (-1903)
+    F06 A=0xFFE1 (-31) B=0xF895 (-1899)
+    F07 A=0xFFE3 (-29) B=0xF87A (-1926)
+    F08 A=0xFFE2 (-30) B=0xF859 (-1959)
+    F09 A=0xFFE1 (-31) B=0xF85E (-1954)
+    F10 A=0xFFE3 (-29) B=0xF873 (-1933)
+    F11 A=0xFFE2 (-30) B=0xF883 (-1917)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -29
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -2042 / -1802
+  STREAM B MEAN    = -1916
+  STREAM B PEAK    = 2042
+  STREAM B FS/2    = -14
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE3 (-29) B=0xF8C1 (-1855)
+    F01 A=0xFFE3 (-29) B=0xF8C1 (-1855)
+    F02 A=0xFFE2 (-30) B=0xF8C0 (-1856)
+    F03 A=0xFFE2 (-30) B=0xF8C5 (-1851)
+    F04 A=0xFFE1 (-31) B=0xF8C8 (-1848)
+    F05 A=0xFFE1 (-31) B=0xF8C6 (-1850)
+    F06 A=0xFFE1 (-31) B=0xF8C1 (-1855)
+    F07 A=0xFFE1 (-31) B=0xF8BB (-1861)
+    F08 A=0xFFE3 (-29) B=0xF8B3 (-1869)
+    F09 A=0xFFE1 (-31) B=0xF8AB (-1877)
+    F10 A=0xFFE2 (-30) B=0xF8AD (-1875)
+    F11 A=0xFFE2 (-30) B=0xF8B1 (-1871)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -28
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -1995 / -1827
+  STREAM B MEAN    = -1916
+  STREAM B PEAK    = 1995
+  STREAM B FS/2    = -14
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF8D8 (-1832)
+    F01 A=0xFFE1 (-31) B=0xF8D8 (-1832)
+    F02 A=0xFFE1 (-31) B=0xF8D8 (-1832)
+    F03 A=0xFFE2 (-30) B=0xF8CE (-1842)
+    F04 A=0xFFE2 (-30) B=0xF8CC (-1844)
+    F05 A=0xFFE1 (-31) B=0xF8C7 (-1849)
+    F06 A=0xFFE2 (-30) B=0xF8C0 (-1856)
+    F07 A=0xFFE2 (-30) B=0xF8B6 (-1866)
+    F08 A=0xFFE2 (-30) B=0xF8A7 (-1881)
+    F09 A=0xFFE1 (-31) B=0xF8A1 (-1887)
+    F10 A=0xFFE1 (-31) B=0xF8AB (-1877)
+    F11 A=0xFFE2 (-30) B=0xF8BB (-1861)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -29
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -2013 / -1798
+  STREAM B MEAN    = -1914
+  STREAM B PEAK    = 2013
+  STREAM B FS/2    = -14
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF903 (-1789)
+    F01 A=0xFFE2 (-30) B=0xF8FA (-1798)
+    F02 A=0xFFE3 (-29) B=0xF8D9 (-1831)
+    F03 A=0xFFE1 (-31) B=0xF8EE (-1810)
+    F04 A=0xFFE2 (-30) B=0xF8F1 (-1807)
+    F05 A=0xFFE2 (-30) B=0xF8DF (-1825)
+    F06 A=0xFFE2 (-30) B=0xF8E0 (-1824)
+    F07 A=0xFFE2 (-30) B=0xF8E1 (-1823)
+    F08 A=0xFFE1 (-31) B=0xF8E1 (-1823)
+    F09 A=0xFFE2 (-30) B=0xF8DE (-1826)
+    F10 A=0xFFE1 (-31) B=0xF8EF (-1809)
+    F11 A=0xFFE1 (-31) B=0xF8E9 (-1815)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -29
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -2012 / -1895
+  STREAM B MEAN    = -1943
+  STREAM B PEAK    = 2012
+  STREAM B FS/2    = -15
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF840 (-1984)
+    F01 A=0xFFE1 (-31) B=0xF84A (-1974)
+    F02 A=0xFFE1 (-31) B=0xF853 (-1965)
+    F03 A=0xFFE1 (-31) B=0xF853 (-1965)
+    F04 A=0xFFE1 (-31) B=0xF85B (-1957)
+    F05 A=0xFFE1 (-31) B=0xF867 (-1945)
+    F06 A=0xFFE2 (-30) B=0xF864 (-1948)
+    F07 A=0xFFE2 (-30) B=0xF863 (-1949)
+    F08 A=0xFFE2 (-30) B=0xF865 (-1947)
+    F09 A=0xFFE2 (-30) B=0xF863 (-1949)
+    F10 A=0xFFE2 (-30) B=0xF866 (-1946)
+    F11 A=0xFFE3 (-29) B=0xF86F (-1937)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -33 / -28
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 33
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -3465 / 9505
+  STREAM B MEAN    = -1807
+  STREAM B PEAK    = 9505
+  STREAM B FS/2    = 2
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF7DA (-2086)
+    F01 A=0xFFE3 (-29) B=0xF7ED (-2067)
+    F02 A=0xFFE0 (-32) B=0xF838 (-1992)
+    F03 A=0xFFE2 (-30) B=0xF82F (-2001)
+    F04 A=0xFFE2 (-30) B=0xF8F8 (-1800)
+    F05 A=0xFFE2 (-30) B=0xFA20 (-1504)
+    F06 A=0xFFE1 (-31) B=0xF8BB (-1861)
+    F07 A=0xFFE0 (-32) B=0xF76A (-2198)
+    F08 A=0xFFE2 (-30) B=0xF7C4 (-2108)
+    F09 A=0xFFE3 (-29) B=0xF8AB (-1877)
+    F10 A=0xFFE2 (-30) B=0xF9A5 (-1627)
+    F11 A=0xFFE2 (-30) B=0xF975 (-1675)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -33 / -28
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 33
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -8689 / 32767
+  STREAM B MEAN    = -2069
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -83
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xF01B (-4069)
+    F01 A=0xFFE1 (-31) B=0xF32B (-3285)
+    F02 A=0xFFE2 (-30) B=0xF019 (-4071)
+    F03 A=0xFFE1 (-31) B=0x017C (380)
+    F04 A=0xFFE1 (-31) B=0x0EFF (3839)
+    F05 A=0xFFE2 (-30) B=0xF1D0 (-3632)
+    F06 A=0xFFE1 (-31) B=0xF0B2 (-3918)
+    F07 A=0xFFE2 (-30) B=0xF061 (-3999)
+    F08 A=0xFFE2 (-30) B=0xF052 (-4014)
+    F09 A=0xFFE3 (-29) B=0xF12E (-3794)
+    F10 A=0xFFE1 (-31) B=0xF254 (-3500)
+    F11 A=0xFFE2 (-30) B=0xF3AD (-3155)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2014 / 19680
+  STREAM A MEAN    = 238
+  STREAM A PEAK    = 19680
+  STREAM A FS/2    = 39
+  STREAM B MIN/MAX = -24551 / 32767
+  STREAM B MEAN    = -12522
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -54
+  FIRST 12 RAW FRAMES:
+    F00 A=0x035E (862) B=0xAD00 (-21248)
+    F01 A=0xFD2C (-724) B=0xB8E8 (-18200)
+    F02 A=0x01F7 (503) B=0xA9A9 (-22103)
+    F03 A=0xFE57 (-425) B=0xF760 (-2208)
+    F04 A=0x00F8 (248) B=0x4D2B (19755)
+    F05 A=0xFF2C (-212) B=0x5DF1 (24049)
+    F06 A=0x004B (75) B=0xF26A (-3478)
+    F07 A=0xFFA7 (-89) B=0xA564 (-23196)
+    F08 A=0xFFFB (-5) B=0xBD54 (-17068)
+    F09 A=0xFFD7 (-41) B=0xB113 (-20205)
+    F10 A=0xFFE2 (-30) B=0xB921 (-18143)
+    F11 A=0xFFE2 (-30) B=0xB4B0 (-19280)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2886 / 22986
+  STREAM A MEAN    = 836
+  STREAM A PEAK    = 22986
+  STREAM A FS/2    = 13
+  STREAM B MIN/MAX = -32375 / 32767
+  STREAM B MEAN    = -15349
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -241
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFF6C (-148) B=0xA2F4 (-23820)
+    F01 A=0x0031 (49) B=0x9420 (-27616)
+    F02 A=0xFFAA (-86) B=0x9C4B (-25525)
+    F03 A=0x0007 (7) B=0x9972 (-26254)
+    F04 A=0xFFCB (-53) B=0x9A1B (-26085)
+    F05 A=0xFFEF (-17) B=0x9899 (-26471)
+    F06 A=0xFFDD (-35) B=0x974D (-26803)
+    F07 A=0xFFE4 (-28) B=0x9F57 (-24745)
+    F08 A=0xFFE2 (-30) B=0x92B6 (-27978)
+    F09 A=0xFFE1 (-31) B=0xAA66 (-21914)
+    F10 A=0xFFE1 (-31) B=0xA16F (-24209)
+    F11 A=0xFFE3 (-29) B=0x09A0 (2464)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -511 / 2542
+  STREAM A MEAN    = 3
+  STREAM A PEAK    = 2542
+  STREAM A FS/2    = -5
+  STREAM B MIN/MAX = -12817 / 32767
+  STREAM B MEAN    = -3678
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -103
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0x032E (814)
+    F01 A=0xFFE4 (-28) B=0x7FFF (32767)
+    F02 A=0xFFE1 (-31) B=0x028D (653)
+    F03 A=0xFFE1 (-31) B=0xD1C4 (-11836)
+    F04 A=0xFFE2 (-30) B=0xE6EC (-6420)
+    F05 A=0xFFE2 (-30) B=0xE710 (-6384)
+    F06 A=0xFFE3 (-29) B=0xE700 (-6400)
+    F07 A=0xFFE0 (-32) B=0xDA26 (-9690)
+    F08 A=0xFFE2 (-30) B=0xE19A (-7782)
+    F09 A=0xFFE1 (-31) B=0xDA9F (-9569)
+    F10 A=0xFFE3 (-29) B=0xE1A4 (-7772)
+    F11 A=0xFFE2 (-30) B=0xDDB0 (-8784)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -32 / -27
+  STREAM A MEAN    = -30
+  STREAM A PEAK    = 32
+  STREAM A FS/2    = 0
+  STREAM B MIN/MAX = -13688 / 32767
+  STREAM B MEAN    = -8192
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -216
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE1 (-31) B=0xD688 (-10616)
+    F01 A=0xFFE2 (-30) B=0xD866 (-10138)
+    F02 A=0xFFE2 (-30) B=0xD603 (-10749)
+    F03 A=0xFFE1 (-31) B=0xD775 (-10379)
+    F04 A=0xFFE2 (-30) B=0xD6AB (-10581)
+    F05 A=0xFFE2 (-30) B=0xD843 (-10173)
+    F06 A=0xFFE2 (-30) B=0xD784 (-10364)
+    F07 A=0xFFE2 (-30) B=0xD8E1 (-10015)
+    F08 A=0xFFE0 (-32) B=0xD801 (-10239)
+    F09 A=0xFFE1 (-31) B=0xD66B (-10645)
+    F10 A=0xFFE1 (-31) B=0xD616 (-10730)
+    F11 A=0xFFE1 (-31) B=0xD880 (-10112)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2659 / 26367
+  STREAM A MEAN    = 2204
+  STREAM A PEAK    = 26367
+  STREAM A FS/2    = -34
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -19993
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = 284
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFD8F (-625) B=0x8000 (-32768)
+    F01 A=0x0191 (401) B=0x8000 (-32768)
+    F02 A=0xFEE2 (-286) B=0x8000 (-32768)
+    F03 A=0x000C (12) B=0x8000 (-32768)
+    F04 A=0x00A6 (166) B=0x8000 (-32768)
+    F05 A=0xFDE5 (-539) B=0x8000 (-32768)
+    F06 A=0x0392 (914) B=0x8000 (-32768)
+    F07 A=0xF8C7 (-1849) B=0x31C7 (12743)
+    F08 A=0x1900 (6400) B=0x7FFF (32767)
+    F09 A=0x5319 (21273) B=0x7FFF (32767)
+    F10 A=0x5E10 (24080) B=0x7140 (28992)
+    F11 A=0x2DC8 (11720) B=0x8000 (-32768)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2403 / 23819
+  STREAM A MEAN    = 1030
+  STREAM A PEAK    = 23819
+  STREAM A FS/2    = 80
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -20689
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = -261
+  FIRST 12 RAW FRAMES:
+    F00 A=0xF72D (-2259) B=0x8000 (-32768)
+    F01 A=0x0441 (1089) B=0x86DD (-31011)
+    F02 A=0xFD4A (-694) B=0x8000 (-32768)
+    F03 A=0x01E3 (483) B=0xDD58 (-8872)
+    F04 A=0xFD2B (-725) B=0x7FFF (32767)
+    F05 A=0x3626 (13862) B=0x2EE6 (12006)
+    F06 A=0x109A (4250) B=0x8000 (-32768)
+    F07 A=0xF8ED (-1811) B=0x81D4 (-32300)
+    F08 A=0x0470 (1136) B=0x8000 (-32768)
+    F09 A=0xFCA4 (-860) B=0x812F (-32465)
+    F10 A=0x0227 (551) B=0x8000 (-32768)
+    F11 A=0xFE57 (-425) B=0x8000 (-32768)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -2149 / 24609
+  STREAM A MEAN    = 778
+  STREAM A PEAK    = 24609
+  STREAM A FS/2    = 9
+  STREAM B MIN/MAX = -23686 / 32767
+  STREAM B MEAN    = -9725
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -200
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE1 (-31) B=0xB70A (-18678)
+    F01 A=0xFFE2 (-30) B=0xBFF5 (-16395)
+    F02 A=0xFFE1 (-31) B=0xB661 (-18847)
+    F03 A=0xFFE0 (-32) B=0xBA5E (-17826)
+    F04 A=0xFFE7 (-25) B=0xB827 (-18393)
+    F05 A=0xFFD5 (-43) B=0xBB7C (-17540)
+    F06 A=0xFFFB (-5) B=0xBA5C (-17828)
+    F07 A=0xFFB8 (-72) B=0xBA0F (-17905)
+    F08 A=0x001F (31) B=0xB954 (-18092)
+    F09 A=0xFF91 (-111) B=0xBA39 (-17863)
+    F10 A=0x003A (58) B=0xB96F (-18065)
+    F11 A=0xFF94 (-108) B=0xBD28 (-17112)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -3155 / 24956
+  STREAM A MEAN    = 875
+  STREAM A PEAK    = 24956
+  STREAM A FS/2    = -31
+  STREAM B MIN/MAX = -30461 / 32767
+  STREAM B MEAN    = -14402
+  STREAM B PEAK    = 32767
+  STREAM B FS/2    = -487
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFFE2 (-30) B=0xAE0B (-20981)
+    F01 A=0xFFE2 (-30) B=0xA684 (-22908)
+    F02 A=0xFFE1 (-31) B=0xA5F4 (-23052)
+    F03 A=0xFFE1 (-31) B=0xA5EA (-23062)
+    F04 A=0xFFE2 (-30) B=0xA6DC (-22820)
+    F05 A=0xFFE1 (-31) B=0xA729 (-22743)
+    F06 A=0xFFE3 (-29) B=0xA7D6 (-22570)
+    F07 A=0xFFE0 (-32) B=0xA53F (-23233)
+    F08 A=0xFFE5 (-27) B=0xAA81 (-21887)
+    F09 A=0xFFD9 (-39) B=0xA52C (-23252)
+    F10 A=0xFFF0 (-16) B=0x5DE1 (24033)
+    F11 A=0xFFD2 (-46) B=0x7FFF (32767)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -4560 / 26067
+  STREAM A MEAN    = 1115
+  STREAM A PEAK    = 26067
+  STREAM A FS/2    = 11
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -16073
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = 717
+  FIRST 12 RAW FRAMES:
+    F00 A=0xFEDA (-294) B=0x8000 (-32768)
+    F01 A=0xF62E (-2514) B=0x8000 (-32768)
+    F02 A=0xFF72 (-142) B=0x8000 (-32768)
+    F03 A=0xF2E6 (-3354) B=0xE5AE (-6738)
+    F04 A=0x0E4F (3663) B=0x7FFF (32767)
+    F05 A=0x2789 (10121) B=0x8000 (-32768)
+    F06 A=0xF6B1 (-2383) B=0x8000 (-32768)
+    F07 A=0xFBF6 (-1034) B=0x8000 (-32768)
+    F08 A=0xF8FF (-1793) B=0x86F5 (-30987)
+    F09 A=0xFC64 (-924) B=0x8000 (-32768)
+    F10 A=0xF976 (-1674) B=0xEA54 (-5548)
+    F11 A=0x00FC (252) B=0x4A6E (19054)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -5657 / 24844
+  STREAM A MEAN    = 869
+  STREAM A PEAK    = 24844
+  STREAM A FS/2    = 36
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -16400
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = 261
+  FIRST 12 RAW FRAMES:
+    F00 A=0x000A (10) B=0x8413 (-31725)
+    F01 A=0x005A (90) B=0x8000 (-32768)
+    F02 A=0xFAB8 (-1352) B=0x8000 (-32768)
+    F03 A=0xF568 (-2712) B=0x8000 (-32768)
+    F04 A=0xF7C1 (-2111) B=0x21C6 (8646)
+    F05 A=0xFEFC (-260) B=0x7FFF (32767)
+    F06 A=0x00AE (174) B=0x9649 (-27063)
+    F07 A=0xFB17 (-1257) B=0x8000 (-32768)
+    F08 A=0xF57E (-2690) B=0x8000 (-32768)
+    F09 A=0xF5CF (-2609) B=0x8000 (-32768)
+    F10 A=0xF68E (-2418) B=0xAF8D (-20595)
+    F11 A=0xF9CB (-1589) B=0x7FFF (32767)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -7869 / 27605
+  STREAM A MEAN    = 2270
+  STREAM A PEAK    = 27605
+  STREAM A FS/2    = -24
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -9884
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = -1266
+  FIRST 12 RAW FRAMES:
+    F00 A=0xEADA (-5414) B=0x8000 (-32768)
+    F01 A=0xEC64 (-5020) B=0x8000 (-32768)
+    F02 A=0xF633 (-2509) B=0x8000 (-32768)
+    F03 A=0xF001 (-4095) B=0x8000 (-32768)
+    F04 A=0xE9D7 (-5673) B=0x8987 (-30329)
+    F05 A=0xF954 (-1708) B=0x67C8 (26568)
+    F06 A=0x004D (77) B=0x7FFF (32767)
+    F07 A=0x0132 (306) B=0x7FFF (32767)
+    F08 A=0xFB99 (-1127) B=0x7FFF (32767)
+    F09 A=0x21F5 (8693) B=0x5BF2 (23538)
+    F10 A=0x1225 (4645) B=0x8000 (-32768)
+    F11 A=0xECD5 (-4907) B=0x8000 (-32768)
+> > i2s capture
+Starting frame-aligned I2S capture...
+I2S capture PASS.
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = HIGH
+  Slot phase   = even stream A, odd stream B
+  Statistics exclude first captured A/B pair
+  STREAM A MIN/MAX = -7482 / 24107
+  STREAM A MEAN    = -79
+  STREAM A PEAK    = 24107
+  STREAM A FS/2    = 132
+  STREAM B MIN/MAX = -32768 / 32767
+  STREAM B MEAN    = -18317
+  STREAM B PEAK    = 32768
+  STREAM B FS/2    = 324
+  FIRST 12 RAW FRAMES:
+    F00 A=0x58FC (22780) B=0x7FFF (32767)
+    F01 A=0x57A2 (22434) B=0xE3EE (-7186)
+    F02 A=0x04F2 (1266) B=0x8000 (-32768)
+    F03 A=0xE6C2 (-6462) B=0x8000 (-32768)
+    F04 A=0xF069 (-3991) B=0x8000 (-32768)
+    F05 A=0xEB37 (-5321) B=0xA532 (-23246)
+    F06 A=0x01F4 (500) B=0x8093 (-32621)
+    F07 A=0xF423 (-3037) B=0x8000 (-32768)
+    F08 A=0xEC4E (-5042) B=0x8000 (-32768)
+    F09 A=0xED27 (-4825) B=0x8000 (-32768)
+    F10 A=0xEDBA (-4678) B=0x8000 (-32768)
+    F11 A=0xEC6C (-5012) B=0x8000 (-32768)
+> 
