@@ -59,10 +59,12 @@ void uart2_print(const char *s)
 }
 
 /*
- * USART1: ESP-01 interface
- * PA9  = TX
- * PA10 = RX
- * 115200 8N1
+ * USART1: ESP-01 high-speed PCM transport
+ * PA9  = TX -> ESP GPIO3/RX
+ * PA10 = RX <- ESP GPIO1/TX
+ * 2000000 8N1
+ *
+ * PCLK2 is 72 MHz, so 2 Mbaud is an exact integer USART divisor.
  */
 void esp_uart_init(void)
 {
@@ -82,7 +84,7 @@ void esp_uart_init(void)
     gpio.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &gpio);
 
-    us.USART_BaudRate = 115200;
+    us.USART_BaudRate = 2000000;
     us.USART_WordLength = USART_WordLength_8b;
     us.USART_StopBits = USART_StopBits_1;
     us.USART_Parity = USART_Parity_No;
@@ -109,6 +111,12 @@ void esp_uart_putc(char c)
         ;
 
     USART1->DR = (uint16_t)c;
+}
+
+void esp_uart_write(const uint8_t *data, uint32_t length)
+{
+    while (length--)
+        esp_uart_putc((char)*data++);
 }
 
 void esp_uart_print(const char *s)
