@@ -6,6 +6,7 @@
 #include "codec.h"
 #include "diagnostics.h"
 #include "i2s_rx.h"
+#include "audio_stream.h"
 
 static void delay(uint32_t d)
 {
@@ -93,12 +94,14 @@ int main(void)
 
     board_init();
     uart2_init();
+    esp_uart_init();
     cli_init();
 
     uart2_print("\r\n========================================\r\n");
     uart2_print(" audio_controller - RCT6 bring-up\r\n");
     uart2_print("========================================\r\n");
     uart2_print("USART2: PA2=TX PA3=RX 115200 8N1\r\n");
+    uart2_print("USART1: PA9=TX PA10=RX 2000000 8N1 (ESP-01 PCM link)\r\n");
 
     diagnostics_print_mcu();
     diagnostics_print_clock();
@@ -319,8 +322,12 @@ int main(void)
     delay(500000u);
 
     uart2_print("\r\nBring-up complete. CLI ready.\r\n");
+    uart2_print("ESP-01 stream waits for Wi-Fi READY token on USART1.\r\n");
     uart2_print("> ");
 
     while (1)
+    {
         cli_task();
+        audio_stream_task();
+    }
 }
