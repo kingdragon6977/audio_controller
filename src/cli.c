@@ -4,6 +4,7 @@
 #include "i2c.h"
 #include "codec.h"
 #include "i2s_rx.h"
+#include "i2s_meter.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -245,14 +246,44 @@ static int parse_capture_count(const char *cmd, unsigned int *count)
     return 1;
 }
 
+static int parse_meter_seconds(const char *cmd, unsigned int *seconds)
+{
+    const char prefix[] = "i2s meter ";
+    const char *p;
+    unsigned int value = 0u;
+
+    if (strncmp(cmd, prefix, sizeof(prefix) - 1u) != 0)
+        return 0;
+
+    p = cmd + sizeof(prefix) - 1u;
+    if (*p == 0)
+        return 0;
+
+    while (*p >= '0' && *p <= '9')
+    {
+        value = value * 10u + (unsigned int)(*p - '0');
+        if (value > 10u)
+            return 0;
+        p++;
+    }
+
+    if (*p != 0 || value == 0u)
+        return 0;
+
+    *seconds = value;
+    return 1;
+}
+
 static void execute(char *cmd)
 {
     unsigned int capture_count;
+    unsigned int meter_seconds;
 
     if (strcmp(cmd, "help") == 0)
     {
         uart2_print("\r\nCommands:\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
+        uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
         uart2_print(" reboot\r\n led on\r\n led off\r\n esp test\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
         return;
     }
@@ -334,9 +365,27 @@ static void execute(char *cmd)
         return;
     }
 
+    if (strcmp(cmd, "i2s meter") == 0)
+    {
+        (void)i2s_meter_run(5u);
+        return;
+    }
+
+    if (parse_meter_seconds(cmd, &meter_seconds))
+    {
+        (void)i2s_meter_run(meter_seconds);
+        return;
+    }
+
     if (strncmp(cmd, "i2s capture ", 12u) == 0)
     {
         uart2_print("Usage: i2s capture N, where N is 1..50\r\n");
+        return;
+    }
+
+    if (strncmp(cmd, "i2s meter ", 10u) == 0)
+    {
+        uart2_print("Usage: i2s meter N, where N is 1..10 seconds\r\n");
         return;
     }
 
