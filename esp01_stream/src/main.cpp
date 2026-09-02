@@ -58,7 +58,6 @@ static void forwardFrame()
     uint16_t seq = (uint16_t)header[4] | ((uint16_t)header[5] << 8);
 
     if (haveSeq && seq != expectedSeq) {
-        /* Drop any partial UDP aggregate after a serial discontinuity. */
         udpFill = 0u;
     }
     expectedSeq = (uint16_t)(seq + 1u);
@@ -141,6 +140,8 @@ static void connectWifi()
 
 void setup()
 {
+    /* Buffer several UART frames so a Wi-Fi transmit burst cannot starve RX. */
+    Serial.setRxBufferSize(2048u);
     Serial.begin(UART_BAUD);
     Serial.setDebugOutput(false);
     delay(100);
