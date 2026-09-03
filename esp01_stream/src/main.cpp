@@ -21,6 +21,8 @@ static uint16_t udpFill = 0u;
 static uint16_t expectedSeq = 0u;
 static bool haveSeq = false;
 static bool announcedReady = false;
+static bool pcmSeen = false;
+static uint32_t lastReadyMs = 0u;
 
 enum ParseState {
     WAIT_A5,
@@ -56,6 +58,8 @@ static bool headerValid()
 static void forwardFrame()
 {
     uint16_t seq = (uint16_t)header[4] | ((uint16_t)header[5] << 8);
+
+    pcmSeen = true;
 
     if (haveSeq && seq != expectedSeq) {
         udpFill = 0u;
@@ -118,6 +122,14 @@ static void consumeByte(uint8_t b)
     }
 }
 
+static void sendReady()
+{
+    Serial.write(CTRL_READY);
+    Serial.flush();
+    announcedReady = true;
+    lastReadyMs = millis();
+}
+
 static void connectWifi()
 {
     WiFi.mode(WIFI_STA);
@@ -133,15 +145,13 @@ static void connectWifi()
     targetIp.fromString(UDP_TARGET_IP);
     udp.begin(UDP_TARGET_PORT);
 
-    Serial.write(CTRL_READY);
-    Serial.flush();
-    announcedReady = true;
+    pcmSeen = false;
+    sendReady();
 }
 
 void setup()
 {
-    /* Buffer several UART frames so a Wi-Fi transmit burst cannot starve RX. */
-    Serial.setRxBufferSize(2048u);
+    Serial.setRxBufferSize(2048);
     Serial.begin(UART_BAUD);
     Serial.setDebugOutput(false);
     delay(100);
@@ -167,6 +177,10 @@ void loop()
 
     while (Serial.available() > 0) {
         consumeByte((uint8_t)Serial.read());
+    }
+
+    if (!pcmSeen && (uint32_t)(millis() - lastReadyMs) >= 1000u) {
+        sendReady();
     }
 
     yield();
