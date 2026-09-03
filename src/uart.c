@@ -62,9 +62,11 @@ void uart2_print(const char *s)
  * USART1: ESP-01 high-speed PCM transport
  * PA9  = TX -> ESP GPIO3/RX
  * PA10 = RX <- ESP GPIO1/TX
- * 2000000 8N1
+ * 1000000 8N1
  *
- * PCLK2 is 72 MHz, so 2 Mbaud is an exact integer USART divisor.
+ * 24 kHz mono PCM16 is 48 kB/s. A 1 Mbaud 8N1 UART carries about
+ * 100 kB/s, leaving comfortable framing/headroom while improving
+ * signal margin versus the previous 2 Mbaud bring-up setting.
  */
 void esp_uart_init(void)
 {
@@ -84,7 +86,7 @@ void esp_uart_init(void)
     gpio.GPIO_Mode = GPIO_Mode_IN_FLOATING;
     GPIO_Init(GPIOA, &gpio);
 
-    us.USART_BaudRate = 2000000;
+    us.USART_BaudRate = 1000000;
     us.USART_WordLength = USART_WordLength_8b;
     us.USART_StopBits = USART_StopBits_1;
     us.USART_Parity = USART_Parity_No;
