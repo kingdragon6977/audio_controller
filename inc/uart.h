@@ -17,5 +17,9 @@ char esp_uart_getc(void);
 void esp_uart_putc(char c);
 void esp_uart_write(const uint8_t *data, uint32_t length);
 void esp_uart_print(const char *s);
+uint32_t esp_uart_rx_bytes(void);
+uint32_t esp_uart_overrun_errors(void);
+uint32_t esp_uart_framing_errors(void);
+uint32_t esp_uart_noise_errors(void);
 
 #endif
