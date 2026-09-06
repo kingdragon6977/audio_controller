@@ -243,15 +243,22 @@ void audio_stream_task(void)
 
         if (control == ESP_CTRL_READY)
         {
-            esp_ready = 1u;
-            start_message_printed = 0u;
-            uart2_print("ESP-01: Wi-Fi/UDP ready; enabling PCM stream.\r\n");
+            if (!esp_ready)
+            {
+                esp_ready = 1u;
+                start_message_printed = 0u;
+                uart2_print("ESP-01: Wi-Fi/UDP ready; enabling PCM stream.\r\n");
+            }
         }
         else if (control == ESP_CTRL_STOP)
         {
-            esp_ready = 0u;
-            audio_stream_stop();
-            uart2_print("ESP-01: stream stopped by receiver.\r\n");
+            if (esp_ready || running)
+            {
+                esp_ready = 0u;
+                audio_stream_stop();
+                start_message_printed = 0u;
+                uart2_print("ESP-01: stream stopped by receiver.\r\n");
+            }
         }
     }
 
