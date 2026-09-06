@@ -101,7 +101,7 @@ int main(void)
     uart2_print(" audio_controller - RCT6 bring-up\r\n");
     uart2_print("========================================\r\n");
     uart2_print("USART2: PA2=TX PA3=RX 115200 8N1\r\n");
-    uart2_print("USART1: PA9=TX PA10=RX 2000000 8N1 (ESP-01 PCM link)\r\n");
+    uart2_print("USART1: PA9=TX PA10=RX 1000000 8N1 (ESP-01 PCM link)\r\n");
 
     diagnostics_print_mcu();
     diagnostics_print_clock();
