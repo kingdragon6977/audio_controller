@@ -267,7 +267,7 @@ void audio_stream_task(void)
             {
                 if (!start_message_printed)
                 {
-                    uart2_print("AUDIO STREAM: 24 kHz mono PCM16 -> USART1 2 Mbaud -> ESP-01.\r\n");
+                    uart2_print("AUDIO STREAM: 24 kHz mono PCM16 -> USART1 1 Mbaud -> ESP-01.\r\n");
                     start_message_printed = 1u;
                 }
             }
