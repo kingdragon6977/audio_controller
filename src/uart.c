@@ -1,6 +1,11 @@
 #include "stm32f10x.h"
 #include "uart.h"
 
+static uint32_t esp_rx_bytes;
+static uint32_t esp_ore_errors;
+static uint32_t esp_fe_errors;
+static uint32_t esp_ne_errors;
+
 /*
  * USART2: primary/debug CLI UART
  * PA2 = TX, PA3 = RX
@@ -73,6 +78,11 @@ void esp_uart_init(void)
     GPIO_InitTypeDef gpio;
     USART_InitTypeDef us;
 
+    esp_rx_bytes = 0u;
+    esp_ore_errors = 0u;
+    esp_fe_errors = 0u;
+    esp_ne_errors = 0u;
+
     RCC_APB2PeriphClockCmd(
         RCC_APB2Periph_GPIOA | RCC_APB2Periph_USART1,
         ENABLE);
@@ -104,7 +114,19 @@ int esp_uart_available(void)
 
 char esp_uart_getc(void)
 {
-    return (char)(USART1->DR & 0xFF);
+    uint32_t sr = USART1->SR;
+    uint8_t data = (uint8_t)(USART1->DR & 0xFFu);
+
+    if (sr & USART_SR_ORE)
+        esp_ore_errors++;
+    if (sr & USART_SR_FE)
+        esp_fe_errors++;
+    if (sr & USART_SR_NE)
+        esp_ne_errors++;
+    if (sr & USART_SR_RXNE)
+        esp_rx_bytes++;
+
+    return (char)data;
 }
 
 void esp_uart_putc(char c)
@@ -125,4 +147,24 @@ void esp_uart_print(const char *s)
 {
     while (*s)
         esp_uart_putc(*s++);
+}
+
+uint32_t esp_uart_rx_bytes(void)
+{
+    return esp_rx_bytes;
+}
+
+uint32_t esp_uart_overrun_errors(void)
+{
+    return esp_ore_errors;
+}
+
+uint32_t esp_uart_framing_errors(void)
+{
+    return esp_fe_errors;
+}
+
+uint32_t esp_uart_noise_errors(void)
+{
+    return esp_ne_errors;
 }
