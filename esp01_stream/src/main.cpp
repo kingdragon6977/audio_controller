@@ -1,7 +1,16 @@
 #include <Arduino.h>
+#include <ArduinoOTA.h>
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include "wifi_config.h"
+
+#ifndef OTA_HOSTNAME
+#define OTA_HOSTNAME "audio-esp01"
+#endif
+
+#ifndef OTA_PASSWORD
+#define OTA_PASSWORD ""
+#endif
 
 static const uint32_t UART_BAUD = 1000000u;
 static const uint16_t PCM_SAMPLES_PER_FRAME = 64u;
@@ -22,6 +31,7 @@ static uint16_t expectedSeq = 0u;
 static bool haveSeq = false;
 static bool announcedReady = false;
 static bool pcmSeen = false;
+static bool otaActive = false;
 static uint32_t lastReadyMs = 0u;
 static uint32_t lastHeartbeatMs = 0u;
 static uint32_t pcmFrames = 0u;
@@ -151,6 +161,38 @@ static void sendReady()
     lastReadyMs = millis();
 }
 
+static void setupOta()
+{
+    ArduinoOTA.setHostname(OTA_HOSTNAME);
+
+    if (OTA_PASSWORD[0] != '\0') {
+        ArduinoOTA.setPassword(OTA_PASSWORD);
+    }
+
+    ArduinoOTA.onStart([]() {
+        otaActive = true;
+        Serial.write(CTRL_STOP);
+        Serial.flush();
+        announcedReady = false;
+        pcmSeen = false;
+        udpFill = 0u;
+        haveSeq = false;
+        resetParser();
+    });
+
+    ArduinoOTA.onEnd([]() {
+        otaActive = false;
+    });
+
+    ArduinoOTA.onError([](ota_error_t) {
+        otaActive = false;
+        pcmSeen = false;
+        lastReadyMs = 0u;
+    });
+
+    ArduinoOTA.begin();
+}
+
 static void connectWifi()
 {
     WiFi.mode(WIFI_STA);
@@ -179,10 +221,18 @@ void setup()
     Serial.setDebugOutput(false);
     delay(100);
     connectWifi();
+    setupOta();
 }
 
 void loop()
 {
+    ArduinoOTA.handle();
+
+    if (otaActive) {
+        yield();
+        return;
+    }
+
     if (WiFi.status() != WL_CONNECTED) {
         if (announcedReady) {
             Serial.write(CTRL_STOP);
