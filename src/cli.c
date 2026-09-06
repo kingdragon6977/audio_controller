@@ -5,6 +5,7 @@
 #include "codec.h"
 #include "i2s_rx.h"
 #include "i2s_meter.h"
+#include "audio_stream.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -274,6 +275,40 @@ static int parse_meter_seconds(const char *cmd, unsigned int *seconds)
     return 1;
 }
 
+static void print_esp_status(void)
+{
+    char buf[192];
+
+    uart2_print("ESP-01 / USART1 status:\r\n");
+    sprintf(buf,
+            " stream=%s packets=%lu dma_errors=%lu rx_bytes=%lu\r\n",
+            audio_stream_running() ? "RUNNING" : "STOPPED",
+            (unsigned long)audio_stream_packets(),
+            (unsigned long)audio_stream_dma_errors(),
+            (unsigned long)esp_uart_rx_bytes());
+    uart2_print(buf);
+
+    sprintf(buf,
+            " uart_errors: ORE=%lu FE=%lu NE=%lu\r\n",
+            (unsigned long)esp_uart_overrun_errors(),
+            (unsigned long)esp_uart_framing_errors(),
+            (unsigned long)esp_uart_noise_errors());
+    uart2_print(buf);
+
+    sprintf(buf,
+            " USART1: SR=%08lX BRR=%08lX CR1=%08lX CR2=%08lX CR3=%08lX\r\n",
+            (unsigned long)USART1->SR,
+            (unsigned long)USART1->BRR,
+            (unsigned long)USART1->CR1,
+            (unsigned long)USART1->CR2,
+            (unsigned long)USART1->CR3);
+    uart2_print(buf);
+
+    uart2_print(USART1->BRR == 0x0048u ?
+                " baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)\r\n" :
+                " baud_check=WARNING (expected BRR 0x0048 at PCLK2 72 MHz)\r\n");
+}
+
 static void execute(char *cmd)
 {
     unsigned int capture_count;
@@ -284,7 +319,7 @@ static void execute(char *cmd)
         uart2_print("\r\nCommands:\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
-        uart2_print(" reboot\r\n led on\r\n led off\r\n esp test\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
+        uart2_print(" esp status         (USART1 + stream diagnostics)\r\n reboot\r\n led on\r\n led off\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
         return;
     }
 
@@ -413,10 +448,9 @@ static void execute(char *cmd)
         return;
     }
 
-    if (strcmp(cmd, "esp test") == 0)
+    if (strcmp(cmd, "esp status") == 0)
     {
-        esp_uart_print("AT\r\n");
-        uart2_print("ESP: AT sent\r\n");
+        print_esp_status();
         return;
     }
 
