@@ -20,6 +20,21 @@ static const uint16_t UDP_BYTES = PCM_BYTES_PER_FRAME * UDP_FRAMES;
 static const uint8_t CTRL_READY = 0xF0u;
 static const uint8_t CTRL_STOP = 0xF1u;
 
+/*
+ * STM32F103 ROM-bootloader control hardware:
+ *   ESP GPIO0 LOW  -> P-MOS on  -> STM32 BOOT0 HIGH
+ *   ESP GPIO0 HIGH -> P-MOS off -> STM32 BOOT0 pulled LOW
+ *   ESP GPIO2 HIGH -> N-MOS on  -> STM32 NRST LOW
+ *   ESP GPIO2 LOW  -> N-MOS off -> STM32 NRST released
+ *
+ * GPIO0/GPIO2 are also ESP8266 boot straps, so these levels are only driven
+ * after the ESP has booted normally.
+ */
+static const uint8_t STM32_BOOT_PIN = 0u;
+static const uint8_t STM32_RESET_PIN = 2u;
+static const uint32_t STM32_ROM_BAUD = 115200u;
+static const uint8_t STM32_ACK = 0x79u;
+
 WiFiUDP udp;
 IPAddress targetIp;
 
@@ -153,6 +168,195 @@ static void consumeByte(uint8_t b)
     }
 }
 
+static void stm32NormalPins()
+{
+    pinMode(STM32_BOOT_PIN, OUTPUT);
+    digitalWrite(STM32_BOOT_PIN, HIGH);  // BOOT0 low through P-MOS stage
+    pinMode(STM32_RESET_PIN, OUTPUT);
+    digitalWrite(STM32_RESET_PIN, LOW);  // NRST released through N-MOS stage
+}
+
+static void stm32Reset(bool bootloader)
+{
+    // Select boot source before releasing reset.
+    digitalWrite(STM32_BOOT_PIN, bootloader ? LOW : HIGH);
+    delay(2);
+    digitalWrite(STM32_RESET_PIN, HIGH); // assert NRST low
+    delay(25);
+    digitalWrite(STM32_RESET_PIN, LOW);  // release NRST
+    delay(60);
+}
+
+static void serialDrainRx()
+{
+    while (Serial.available() > 0)
+        (void)Serial.read();
+}
+
+static int serialReadTimeout(uint32_t timeoutMs)
+{
+    uint32_t start = millis();
+    while ((uint32_t)(millis() - start) < timeoutMs) {
+        if (Serial.available() > 0)
+            return Serial.read();
+        yield();
+    }
+    return -1;
+}
+
+static bool stm32SendCommand(uint8_t command)
+{
+    uint8_t pair[2] = {command, (uint8_t)(command ^ 0xFFu)};
+    Serial.write(pair, sizeof(pair));
+    Serial.flush();
+    return serialReadTimeout(500u) == STM32_ACK;
+}
+
+static void udpReply(const IPAddress &ip, uint16_t port, const char *message)
+{
+    udp.beginPacket(ip, port);
+    udp.write((const uint8_t *)message, strlen(message));
+    udp.endPacket();
+}
+
+static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
+{
+    char result[192];
+    size_t used = 0u;
+    bool syncOk = false;
+    bool getOk = false;
+    bool idOk = false;
+    uint8_t bootVersion = 0u;
+    uint16_t productId = 0u;
+
+    // Stop the STM32 application PCM producer before changing UART format.
+    Serial.write(CTRL_STOP);
+    Serial.flush();
+    delay(20);
+
+    resetParser();
+    udpFill = 0u;
+    haveSeq = false;
+    pcmSeen = false;
+    announcedReady = false;
+
+    // STM32 USART ROM protocol uses autobaud sync and even parity.
+    Serial.end();
+    delay(5);
+    Serial.setRxBufferSize(256);
+    Serial.begin(STM32_ROM_BAUD, SERIAL_8E1);
+    Serial.setDebugOutput(false);
+    serialDrainRx();
+
+    stm32Reset(true);
+    serialDrainRx();
+
+    Serial.write((uint8_t)0x7Fu);
+    Serial.flush();
+    syncOk = (serialReadTimeout(1000u) == STM32_ACK);
+
+    if (syncOk && stm32SendCommand(0x00u)) {
+        int n = serialReadTimeout(500u);
+        if (n >= 0 && n <= 31) {
+            int version = serialReadTimeout(500u);
+            if (version >= 0) {
+                bootVersion = (uint8_t)version;
+                bool bytesOk = true;
+                for (int i = 0; i < n; ++i) {
+                    if (serialReadTimeout(500u) < 0) {
+                        bytesOk = false;
+                        break;
+                    }
+                }
+                if (bytesOk && serialReadTimeout(500u) == STM32_ACK)
+                    getOk = true;
+            }
+        }
+    }
+
+    if (syncOk && stm32SendCommand(0x02u)) {
+        int n = serialReadTimeout(500u);
+        if (n >= 0 && n <= 3) {
+            uint16_t id = 0u;
+            bool bytesOk = true;
+            for (int i = 0; i <= n; ++i) {
+                int b = serialReadTimeout(500u);
+                if (b < 0) {
+                    bytesOk = false;
+                    break;
+                }
+                id = (uint16_t)((id << 8) | (uint8_t)b);
+            }
+            if (bytesOk && serialReadTimeout(500u) == STM32_ACK) {
+                productId = id;
+                idOk = true;
+            }
+        }
+    }
+
+    // Return the shared UART and STM32 to the normal PCM application.
+    digitalWrite(STM32_BOOT_PIN, HIGH); // BOOT0 low
+    Serial.end();
+    delay(5);
+    Serial.setRxBufferSize(2048);
+    Serial.begin(UART_BAUD, SERIAL_8N1);
+    Serial.setDebugOutput(false);
+    stm32Reset(false);
+    resetParser();
+    udpFill = 0u;
+    haveSeq = false;
+    pcmSeen = false;
+    lastReadyMs = 0u;
+
+    used = (size_t)snprintf(result, sizeof(result),
+                            "STM32_BOOT_TEST sync=%s get=%s getid=%s",
+                            syncOk ? "ACK" : "FAIL",
+                            getOk ? "OK" : "FAIL",
+                            idOk ? "OK" : "FAIL");
+    if (getOk && used < sizeof(result))
+        used += (size_t)snprintf(result + used, sizeof(result) - used,
+                                 " bootver=0x%02X", bootVersion);
+    if (idOk && used < sizeof(result))
+        used += (size_t)snprintf(result + used, sizeof(result) - used,
+                                 " pid=0x%04X", productId);
+    if (used < sizeof(result) - 2u) {
+        result[used++] = '\n';
+        result[used] = '\0';
+    }
+
+    udpReply(replyIp, replyPort, result);
+
+    // Re-arm normal streaming immediately; repeated READY remains the fallback.
+    sendReady();
+}
+
+static void handleUdpControl()
+{
+    int packetSize = udp.parsePacket();
+    if (packetSize <= 0)
+        return;
+
+    char command[40];
+    int count = udp.read(command, sizeof(command) - 1u);
+    if (count < 0)
+        return;
+    command[count] = '\0';
+
+    while (count > 0 &&
+           (command[count - 1] == '\n' || command[count - 1] == '\r' ||
+            command[count - 1] == ' ' || command[count - 1] == '\t')) {
+        command[--count] = '\0';
+    }
+
+    IPAddress replyIp = udp.remoteIP();
+    uint16_t replyPort = udp.remotePort();
+
+    if (strcmp(command, "STM32_BOOT_TEST") == 0) {
+        udpReply(replyIp, replyPort, "STM32_BOOT_TEST starting (read-only)\n");
+        stm32BootloaderTest(replyIp, replyPort);
+    }
+}
+
 static void sendReady()
 {
     Serial.write(CTRL_READY);
@@ -216,6 +420,9 @@ static void connectWifi()
 
 void setup()
 {
+    // Establish safe STM32 states before Wi-Fi/audio initialization.
+    stm32NormalPins();
+
     Serial.setRxBufferSize(2048);
     Serial.begin(UART_BAUD);
     Serial.setDebugOutput(false);
@@ -247,6 +454,8 @@ void loop()
         udpFill = 0u;
         haveSeq = false;
     }
+
+    handleUdpControl();
 
     while (Serial.available() > 0) {
         consumeByte((uint8_t)Serial.read());
