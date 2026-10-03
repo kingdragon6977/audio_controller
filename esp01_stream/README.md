@@ -74,3 +74,58 @@ python3 esp01_stream/tools/udp_pcm_receiver.py | \
 ```
 
 The ESP aggregates four 64-sample STM32 UART frames into each 512-byte UDP packet.
+
+
+## Read-only STM32 ROM bootloader test
+
+With the BOOT0 and NRST MOSFET control stages installed, the ESP-01 can test
+the STM32F103 factory ROM bootloader without erasing or writing flash.
+
+Control logic used by the ESP firmware:
+
+- GPIO0 HIGH -> STM32 BOOT0 LOW (normal application)
+- GPIO0 LOW -> STM32 BOOT0 HIGH (system-memory bootloader)
+- GPIO2 LOW -> STM32 NRST released
+- GPIO2 HIGH -> STM32 NRST asserted LOW
+
+The firmware establishes the normal GPIO0/GPIO2 states immediately after ESP
+startup, before Wi-Fi/audio initialization.
+
+First OTA-flash this ESP firmware. Then listen for the reply on Linux while
+sending the diagnostic command to the ESP's current IP (replace the address):
+
+```bash
+printf 'STM32_BOOT_TEST\n' | nc -u -w 3 192.168.114.80 5004
+```
+
+If that netcat exits before showing the reply, use two terminals:
+
+Terminal 1:
+
+```bash
+nc -u -l 5004
+```
+
+Terminal 2 (use a different local source port if your nc supports it, or use
+the Python UDP diagnostic helper described below when added):
+
+```bash
+printf 'STM32_BOOT_TEST\n' | nc -u -w 5 192.168.114.80 5004
+```
+
+The ESP sends an immediate `STM32_BOOT_TEST starting (read-only)` response,
+stops PCM, enters the STM32 ROM bootloader, switches the shared UART to
+115200 8E1, sends the 0x7F autobaud synchronization byte, and expects 0x79
+ACK. If synchronization succeeds it issues only the read-only GET (0x00) and
+GET ID (0x02) commands. It then restores BOOT0 LOW, resets the STM32 into the
+normal application, restores the UART to 1,000,000 8N1, and sends READY so
+PCM streaming can resume.
+
+A successful result has this form:
+
+```text
+STM32_BOOT_TEST sync=ACK get=OK getid=OK bootver=0x.. pid=0x....
+```
+
+This diagnostic contains no erase, write-memory, write-protect, or
+readout-protect commands.
