@@ -168,6 +168,8 @@ static void consumeByte(uint8_t b)
     }
 }
 
+static void sendReady();
+
 static void stm32NormalPins()
 {
     pinMode(STM32_BOOT_PIN, OUTPUT);
