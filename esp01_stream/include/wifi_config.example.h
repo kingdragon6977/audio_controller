@@ -7,6 +7,8 @@
 /* PC running the UDP receiver. 255.255.255.255 can be used for LAN broadcast. */
 #define UDP_TARGET_IP    "255.255.255.255"
 #define UDP_TARGET_PORT  5004
+/* Local ESP port for inbound control commands such as STM32_BOOT_TEST. */
+#define UDP_CONTROL_PORT 5004
 
 /* ESP8266 ArduinoOTA. Keep hostname in sync with the PlatformIO OTA environment. */
 #define OTA_HOSTNAME     "audio-esp01"

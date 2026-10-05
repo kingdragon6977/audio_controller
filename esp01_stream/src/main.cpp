@@ -19,6 +19,17 @@ static const uint16_t UDP_FRAMES = 4u;
 static const uint16_t UDP_BYTES = PCM_BYTES_PER_FRAME * UDP_FRAMES;
 static const uint8_t CTRL_READY = 0xF0u;
 static const uint8_t CTRL_STOP = 0xF1u;
+static const uint8_t CTRL_BOOT_PREP = 0xF2u;
+static const uint8_t BOOT_PREP_PASS = 0x01u;
+static const uint32_t BOOT_PREP_TIMEOUT_MS = 750u;
+static const uint32_t BOOT1_LOW_SETTLE_MS = 250u;
+static const uint8_t BOOT_PREP_ACK_MAGIC[] = {
+    0xB0u, 0x07u, 0x10u, 0xADu
+};
+
+#ifndef UDP_CONTROL_PORT
+#define UDP_CONTROL_PORT 5004
+#endif
 
 /*
  * STM32F103 ROM-bootloader control hardware:
@@ -35,7 +46,11 @@ static const uint8_t STM32_RESET_PIN = 2u;
 static const uint32_t STM32_ROM_BAUD = 115200u;
 static const uint8_t STM32_ACK = 0x79u;
 
-WiFiUDP udp;
+// Keep the listener separate from outbound traffic. beginPacket() sets the
+// UDP PCB's remote endpoint, which would make a shared socket reject control
+// datagrams sent from any other IP/source-port pair.
+WiFiUDP udpTx;
+WiFiUDP udpControl;
 IPAddress targetIp;
 
 static uint8_t header[10];
@@ -92,9 +107,9 @@ static void sendHeartbeat()
                      (unsigned long)UART_BAUD);
 
     if (n > 0) {
-        udp.beginPacket(targetIp, UDP_TARGET_PORT);
-        udp.write((const uint8_t *)msg, (size_t)n);
-        udp.endPacket();
+        udpTx.beginPacket(targetIp, UDP_TARGET_PORT);
+        udpTx.write((const uint8_t *)msg, (size_t)n);
+        udpTx.endPacket();
     }
 
     lastHeartbeatMs = millis();
@@ -117,9 +132,9 @@ static void forwardFrame()
     udpFill += PCM_BYTES_PER_FRAME;
 
     if (udpFill == UDP_BYTES) {
-        udp.beginPacket(targetIp, UDP_TARGET_PORT);
-        udp.write(udpBuffer, UDP_BYTES);
-        udp.endPacket();
+        udpTx.beginPacket(targetIp, UDP_TARGET_PORT);
+        udpTx.write(udpBuffer, UDP_BYTES);
+        udpTx.endPacket();
         udpFill = 0u;
     }
 }
@@ -214,33 +229,87 @@ static bool stm32SendCommand(uint8_t command)
     return serialReadTimeout(500u) == STM32_ACK;
 }
 
+static bool stm32PrepareBoot()
+{
+    size_t matched = 0u;
+    uint32_t start;
+
+    // Discard complete/partial PCM frames already buffered before requesting
+    // a quiet link and an explicit PB2/BOOT1-low confirmation.
+    serialDrainRx();
+    Serial.write(CTRL_BOOT_PREP);
+    Serial.flush();
+
+    start = millis();
+    while ((uint32_t)(millis() - start) < BOOT_PREP_TIMEOUT_MS) {
+        while (Serial.available() > 0) {
+            uint8_t b = (uint8_t)Serial.read();
+
+            if (b == BOOT_PREP_ACK_MAGIC[matched]) {
+                matched++;
+                if (matched == sizeof(BOOT_PREP_ACK_MAGIC)) {
+                    int status = serialReadTimeout(100u);
+                    return status == BOOT_PREP_PASS;
+                }
+            } else {
+                matched = (b == BOOT_PREP_ACK_MAGIC[0]) ? 1u : 0u;
+            }
+        }
+        yield();
+    }
+
+    return false;
+}
+
 static void udpReply(const IPAddress &ip, uint16_t port, const char *message)
 {
-    udp.beginPacket(ip, port);
-    udp.write((const uint8_t *)message, strlen(message));
-    udp.endPacket();
+    udpTx.beginPacket(ip, port);
+    udpTx.write((const uint8_t *)message, strlen(message));
+    udpTx.endPacket();
 }
 
 static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
 {
     char result[192];
     size_t used = 0u;
+    bool bootPrepInitialOk = false;
+    bool bootPrepSettledOk = false;
     bool syncOk = false;
     bool getOk = false;
     bool idOk = false;
+    int syncResponse = -1;
+    char syncStatus[16];
     uint8_t bootVersion = 0u;
     uint16_t productId = 0u;
-
-    // Stop the STM32 application PCM producer before changing UART format.
-    Serial.write(CTRL_STOP);
-    Serial.flush();
-    delay(20);
 
     resetParser();
     udpFill = 0u;
     haveSeq = false;
     pcmSeen = false;
     announcedReady = false;
+
+    // Ask the running application to stop PCM and drive PB2/BOOT1 low. Its
+    // acknowledgment includes GPIO output-latch and pin-level readback.
+    bootPrepInitialOk = stm32PrepareBoot();
+    if (!bootPrepInitialOk) {
+        udpReply(replyIp, replyPort,
+                 "STM32_BOOT_TEST sync=SKIPPED get=SKIPPED getid=SKIPPED "
+                 "bootprep_initial=FAIL bootprep_settled=SKIPPED\n");
+        sendReady();
+        return;
+    }
+
+    // Keep PB2 actively low long enough to discharge the LED/board node before
+    // checking it again and changing it from an output to BOOT1 via reset.
+    delay(BOOT1_LOW_SETTLE_MS);
+    bootPrepSettledOk = stm32PrepareBoot();
+    if (!bootPrepSettledOk) {
+        udpReply(replyIp, replyPort,
+                 "STM32_BOOT_TEST sync=SKIPPED get=SKIPPED getid=SKIPPED "
+                 "bootprep_initial=PASS bootprep_settled=FAIL\n");
+        sendReady();
+        return;
+    }
 
     // STM32 USART ROM protocol uses autobaud sync and even parity.
     Serial.end();
@@ -255,7 +324,8 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
 
     Serial.write((uint8_t)0x7Fu);
     Serial.flush();
-    syncOk = (serialReadTimeout(1000u) == STM32_ACK);
+    syncResponse = serialReadTimeout(1000u);
+    syncOk = (syncResponse == STM32_ACK);
 
     if (syncOk && stm32SendCommand(0x00u)) {
         int n = serialReadTimeout(500u);
@@ -310,9 +380,18 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     pcmSeen = false;
     lastReadyMs = 0u;
 
+    if (syncOk)
+        snprintf(syncStatus, sizeof(syncStatus), "ACK");
+    else if (syncResponse < 0)
+        snprintf(syncStatus, sizeof(syncStatus), "TIMEOUT");
+    else
+        snprintf(syncStatus, sizeof(syncStatus), "RX_0x%02X",
+                 (unsigned int)(uint8_t)syncResponse);
+
     used = (size_t)snprintf(result, sizeof(result),
-                            "STM32_BOOT_TEST sync=%s get=%s getid=%s",
-                            syncOk ? "ACK" : "FAIL",
+                            "STM32_BOOT_TEST sync=%s get=%s getid=%s "
+                            "bootprep_initial=PASS bootprep_settled=PASS",
+                            syncStatus,
                             getOk ? "OK" : "FAIL",
                             idOk ? "OK" : "FAIL");
     if (getOk && used < sizeof(result))
@@ -334,12 +413,12 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
 
 static void handleUdpControl()
 {
-    int packetSize = udp.parsePacket();
+    int packetSize = udpControl.parsePacket();
     if (packetSize <= 0)
         return;
 
     char command[40];
-    int count = udp.read(command, sizeof(command) - 1u);
+    int count = udpControl.read(command, sizeof(command) - 1u);
     if (count < 0)
         return;
     command[count] = '\0';
@@ -350,8 +429,8 @@ static void handleUdpControl()
         command[--count] = '\0';
     }
 
-    IPAddress replyIp = udp.remoteIP();
-    uint16_t replyPort = udp.remotePort();
+    IPAddress replyIp = udpControl.remoteIP();
+    uint16_t replyPort = udpControl.remotePort();
 
     if (strcmp(command, "STM32_BOOT_TEST") == 0) {
         udpReply(replyIp, replyPort, "STM32_BOOT_TEST starting (read-only)\n");
@@ -412,7 +491,8 @@ static void connectWifi()
     }
 
     targetIp.fromString(UDP_TARGET_IP);
-    udp.begin(UDP_TARGET_PORT);
+    udpControl.stop();
+    udpControl.begin(UDP_CONTROL_PORT);
 
     pcmSeen = false;
     pcmFrames = 0u;

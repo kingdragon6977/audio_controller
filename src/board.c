@@ -43,3 +43,11 @@ void led_toggle(void)
     else
         led_on();
 }
+
+int board_boot1_hold_low(void)
+{
+    led_off();
+
+    return ((GPIOB->ODR & GPIO_Pin_2) == 0u &&
+            (GPIOB->IDR & GPIO_Pin_2) == 0u) ? 1 : 0;
+}

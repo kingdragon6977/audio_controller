@@ -1,5 +1,6 @@
 #include "stm32f10x.h"
 #include "audio_stream.h"
+#include "board.h"
 #include "diagnostics.h"
 #include "i2s_rx.h"
 #include "uart.h"
@@ -10,6 +11,13 @@
 #define STREAM_SAMPLE_RATE   24000u
 #define ESP_CTRL_READY         0xF0u
 #define ESP_CTRL_STOP          0xF1u
+#define ESP_CTRL_BOOT_PREP     0xF2u
+#define BOOT_PREP_PASS         0x01u
+#define BOOT_PREP_FAIL         0x00u
+
+static const uint8_t boot_prep_ack_magic[] = {
+    0xB0u, 0x07u, 0x10u, 0xADu
+};
 
 static uint16_t stream_dma_buffer[STREAM_DMA_SLOTS];
 static int16_t packet_samples[STREAM_PACKET_SAMPLES];
@@ -259,6 +267,22 @@ void audio_stream_task(void)
                 start_message_printed = 0u;
                 uart2_print("ESP-01: stream stopped by receiver.\r\n");
             }
+        }
+        else if (control == ESP_CTRL_BOOT_PREP)
+        {
+            uint8_t status;
+
+            esp_ready = 0u;
+            audio_stream_stop();
+            start_message_printed = 0u;
+
+            status = board_boot1_hold_low() ? BOOT_PREP_PASS : BOOT_PREP_FAIL;
+            esp_uart_write(boot_prep_ack_magic, sizeof(boot_prep_ack_magic));
+            esp_uart_write(&status, 1u);
+
+            uart2_print(status == BOOT_PREP_PASS
+                        ? "STM32 BOOT PREP: PASS - PCM stopped; PB2/BOOT1 driven and read LOW.\r\n"
+                        : "STM32 BOOT PREP: FAIL - PB2/BOOT1 did not read LOW; ROM test blocked.\r\n");
         }
     }
 

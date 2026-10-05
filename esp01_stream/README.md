@@ -91,41 +91,42 @@ Control logic used by the ESP firmware:
 The firmware establishes the normal GPIO0/GPIO2 states immediately after ESP
 startup, before Wi-Fi/audio initialization.
 
-First OTA-flash this ESP firmware. Then listen for the reply on Linux while
-sending the diagnostic command to the ESP's current IP (replace the address):
+The ESP uses a dedicated `WiFiUDP` listener on local port 5004 for control.
+PCM and heartbeat transmission use a separate UDP object, so their remote
+destination cannot filter control packets sent from the PC's ephemeral source
+port.
+
+Flash matching STM32 and ESP firmware before running this test. The STM32
+firmware recognizes the ESP's boot-preparation request, stops PCM, drives the
+shared PB2 LED/BOOT1 pin LOW, verifies both its output latch and pin readback,
+and returns a binary acknowledgment. The ESP performs this check immediately
+and again after holding PB2 LOW for 250 ms. It skips the reset and ROM commands
+if either check fails.
+
+Send the diagnostic from Linux with a socket that waits for both responses
+(replace the address if DHCP changes it):
 
 ```bash
-printf 'STM32_BOOT_TEST\n' | nc -u -w 3 192.168.114.80 5004
-```
-
-If that netcat exits before showing the reply, use two terminals:
-
-Terminal 1:
-
-```bash
-nc -u -l 5004
-```
-
-Terminal 2 (use a different local source port if your nc supports it, or use
-the Python UDP diagnostic helper described below when added):
-
-```bash
-printf 'STM32_BOOT_TEST\n' | nc -u -w 5 192.168.114.80 5004
+python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(5); s.sendto(b"STM32_BOOT_TEST\n",("192.168.114.54",5004)); print(s.recvfrom(2048)[0].decode(),end=""); print(s.recvfrom(2048)[0].decode(),end="")'
 ```
 
 The ESP sends an immediate `STM32_BOOT_TEST starting (read-only)` response,
-stops PCM, enters the STM32 ROM bootloader, switches the shared UART to
-115200 8E1, sends the 0x7F autobaud synchronization byte, and expects 0x79
-ACK. If synchronization succeeds it issues only the read-only GET (0x00) and
-GET ID (0x02) commands. It then restores BOOT0 LOW, resets the STM32 into the
-normal application, restores the UART to 1,000,000 8N1, and sends READY so
-PCM streaming can resume.
+performs the PB2 checks, enters the STM32 ROM bootloader, switches the shared
+UART to 115200 8E1, sends the 0x7F autobaud synchronization byte, and expects
+0x79 ACK. If synchronization succeeds it issues only the read-only GET (0x00)
+and GET ID (0x02) commands. It then restores BOOT0 LOW, resets the STM32 into
+the normal application, restores the UART to 1,000,000 8N1, and sends READY so
+PCM streaming can resume. A failed sync reports `TIMEOUT` or the actual byte
+received as `RX_0xNN`.
 
 A successful result has this form:
 
 ```text
-STM32_BOOT_TEST sync=ACK get=OK getid=OK bootver=0x.. pid=0x....
+STM32_BOOT_TEST sync=ACK get=OK getid=OK bootprep_initial=PASS bootprep_settled=PASS bootver=0x22 pid=0x0414
 ```
+
+This exact result was verified on the STM32F103RCT6 hardware. Device ID 0x0414
+identifies the STM32F10xxx high-density family.
 
 This diagnostic contains no erase, write-memory, write-protect, or
 readout-protect commands.
