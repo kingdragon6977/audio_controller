@@ -218,3 +218,49 @@ The hardware BOOT0 authorization input is intentionally not assigned a GPIO or
 polarity yet. The final software gate will be added after the two-high-side-
 switch/RC circuit is built and its normal, authorized, reset, and power-up
 waveforms have been measured.
+
+
+## Safe BOOT authorization bench tests
+
+The STM32 CLI now has a temporary PA0-only test. These commands never issue an
+ESP boot command and never touch NRST:
+
+```text
+bootauth status
+bootauth on
+bootauth off
+bootauth test
+```
+
+`bootauth test` drives PA0 LOW for approximately 250 ms, confirms the PA0 pin
+reads LOW, then automatically restores PA0 HIGH and confirms release.
+
+The ESP also has a matching gate-only UDP test:
+
+```bash
+python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(2); s.sendto(b"STM32_GATE_TEST\n",("ESP_IP",5004)); print(s.recvfrom(2048)[0].decode(),end=""); print(s.recvfrom(2048)[0].decode(),end="")'
+```
+
+`STM32_GATE_TEST` turns only the ESP-controlled 4407 ON for 250 ms, then OFF.
+It explicitly keeps the ESP NRST-control stage in the released state and never
+pulses reset.
+
+Recommended logic-analyzer channels:
+
+```text
+CH0 PA0 / Q1 gate
+CH1 ESP GPIO0 / Q2 gate
+CH2 STM32 BOOT0
+CH3 STM32 NRST
+```
+
+Useful bench sequence:
+
+1. Run `bootauth test` alone. BOOT0 should remain LOW because Q2 is OFF.
+2. Run `STM32_GATE_TEST` alone. BOOT0 should remain LOW because Q1 is OFF.
+3. Assert `bootauth on`, then run `STM32_GATE_TEST`. BOOT0 should rise while
+   both 4407s are ON and decay through the 10k/0.47 uF network when Q2 releases.
+4. Run `bootauth off` immediately after the capture.
+
+Do not press the manual NRST button during these gate-only tests. None of these
+test paths issue erase/write commands.
