@@ -66,7 +66,19 @@ def validate_image(data: bytes) -> dict:
     last_page = (last_byte - FLASH_BASE) // FLASH_PAGE_SIZE
     page_count = last_page - first_page + 1
 
-    return {
+    pages = []
+    for page_index in range(first_page, last_page + 1):
+        start = page_index * FLASH_PAGE_SIZE
+        end = min(start + FLASH_PAGE_SIZE, len(data))
+        page = data[start:end]
+        pages.append({
+            "index": page_index,
+            "address": f"0x{FLASH_BASE + start:08X}",
+            "size": len(page),
+            "sha256": hashlib.sha256(page).hexdigest(),
+        })
+
+    manifest = {
         "format": 1,
         "target": TARGET,
         "board": BOARD,
@@ -83,7 +95,14 @@ def validate_image(data: bytes) -> dict:
         "first_page": first_page,
         "last_page": last_page,
         "page_count": page_count,
+        "pages": pages,
     }
+
+    canonical = json.dumps(
+        manifest, sort_keys=True, separators=(",", ":")
+    ).encode("utf-8")
+    manifest["manifest_sha256"] = hashlib.sha256(canonical).hexdigest()
+    return manifest
 
 
 def main() -> int:
