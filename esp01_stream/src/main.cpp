@@ -301,10 +301,8 @@ static bool stm32PrepareBoot()
 
                     for (size_t i = 0u; i < sizeof(BOOT_PREP_TARGET_TAG); ++i) {
                         int b = serialReadTimeout(100u);
-                        if (b < 0 || (uint8_t)b != BOOT_PREP_TARGET_TAG[i]) {
+                        if (b < 0 || (uint8_t)b != BOOT_PREP_TARGET_TAG[i])
                             targetOk = false;
-                            break;
-                        }
                     }
 
                     return status == BOOT_PREP_PASS &&
