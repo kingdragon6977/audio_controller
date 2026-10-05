@@ -21,6 +21,8 @@ static const uint8_t CTRL_READY = 0xF0u;
 static const uint8_t CTRL_STOP = 0xF1u;
 static const uint8_t CTRL_BOOT_PREP = 0xF2u;
 static const uint8_t BOOT_PREP_PASS = 0x01u;
+static const uint8_t BOOT_PREP_PROTOCOL = 0x01u;
+static const uint8_t BOOT_PREP_TARGET_TAG[] = {'R', 'C', 'T', '6'};
 static const uint32_t BOOT_PREP_TIMEOUT_MS = 750u;
 static const uint32_t BOOT1_LOW_SETTLE_MS = 250u;
 static const uint8_t BOOT_PREP_ACK_MAGIC[] = {
@@ -294,7 +296,20 @@ static bool stm32PrepareBoot()
                 matched++;
                 if (matched == sizeof(BOOT_PREP_ACK_MAGIC)) {
                     int status = serialReadTimeout(100u);
-                    return status == BOOT_PREP_PASS;
+                    int protocol = serialReadTimeout(100u);
+                    bool targetOk = true;
+
+                    for (size_t i = 0u; i < sizeof(BOOT_PREP_TARGET_TAG); ++i) {
+                        int b = serialReadTimeout(100u);
+                        if (b < 0 || (uint8_t)b != BOOT_PREP_TARGET_TAG[i]) {
+                            targetOk = false;
+                            break;
+                        }
+                    }
+
+                    return status == BOOT_PREP_PASS &&
+                           protocol == BOOT_PREP_PROTOCOL &&
+                           targetOk;
                 }
             } else {
                 matched = (b == BOOT_PREP_ACK_MAGIC[0]) ? 1u : 0u;
