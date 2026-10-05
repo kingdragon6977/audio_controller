@@ -9,6 +9,9 @@ static const uint8_t VERSION = 1u;
 static const uint16_t PAGE_SIZE = 2048u;
 static const uint16_t CHUNK_SIZE = 256u;
 static const uint16_t MAX_PAGES = 128u;
+static const uint16_t EXPECTED_PID = 0x0414u;
+static const uint16_t EXPECTED_FLASH_KB = 256u;
+static const uint32_t FLASH_BASE = 0x08000000u;
 
 enum PacketType {
     PKT_MANIFEST_BEGIN = 1,
@@ -330,9 +333,12 @@ bool stm32UpdateTransportHandlePacket(
 
         Sha256Ctx manifestCtx;
         uint8_t computedManifestHash[32];
-        uint8_t meta[6];
+        uint8_t meta[14];
         writeLe32(meta, st.imageSize);
         writeLe16(meta + 4, st.pageCount);
+        writeLe16(meta + 6, EXPECTED_PID);
+        writeLe16(meta + 8, EXPECTED_FLASH_KB);
+        writeLe32(meta + 10, FLASH_BASE);
 
         sha256Init(manifestCtx);
         sha256Update(manifestCtx, meta, sizeof(meta));
