@@ -45,6 +45,9 @@ static const uint8_t STM32_BOOT_PIN = 0u;
 static const uint8_t STM32_RESET_PIN = 2u;
 static const uint32_t STM32_ROM_BAUD = 115200u;
 static const uint8_t STM32_ACK = 0x79u;
+static const uint16_t STM32_EXPECTED_PID = 0x0414u;
+static const uint16_t STM32_EXPECTED_FLASH_KB = 256u;
+static const uint32_t STM32_FLASH_SIZE_REG = 0x1FFFF7E0u;
 
 // Keep the listener separate from outbound traffic. beginPacket() sets the
 // UDP PCB's remote endpoint, which would make a shared socket reject control
@@ -229,6 +232,48 @@ static bool stm32SendCommand(uint8_t command)
     return serialReadTimeout(500u) == STM32_ACK;
 }
 
+static bool stm32SendAddress(uint32_t address)
+{
+    uint8_t bytes[5];
+    bytes[0] = (uint8_t)(address >> 24);
+    bytes[1] = (uint8_t)(address >> 16);
+    bytes[2] = (uint8_t)(address >> 8);
+    bytes[3] = (uint8_t)address;
+    bytes[4] = (uint8_t)(bytes[0] ^ bytes[1] ^ bytes[2] ^ bytes[3]);
+
+    Serial.write(bytes, sizeof(bytes));
+    Serial.flush();
+    return serialReadTimeout(500u) == STM32_ACK;
+}
+
+static bool stm32ReadMemory(uint32_t address, uint8_t *data, size_t length)
+{
+    if (data == NULL || length == 0u || length > 256u)
+        return false;
+
+    if (!stm32SendCommand(0x11u))
+        return false;
+    if (!stm32SendAddress(address))
+        return false;
+
+    uint8_t count = (uint8_t)(length - 1u);
+    uint8_t pair[2] = {count, (uint8_t)(count ^ 0xFFu)};
+    Serial.write(pair, sizeof(pair));
+    Serial.flush();
+
+    if (serialReadTimeout(500u) != STM32_ACK)
+        return false;
+
+    for (size_t i = 0u; i < length; ++i) {
+        int b = serialReadTimeout(500u);
+        if (b < 0)
+            return false;
+        data[i] = (uint8_t)b;
+    }
+
+    return true;
+}
+
 static bool stm32PrepareBoot()
 {
     size_t matched = 0u;
@@ -277,10 +322,13 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     bool syncOk = false;
     bool getOk = false;
     bool idOk = false;
+    bool flashSizeOk = false;
+    bool targetMatch = false;
     int syncResponse = -1;
     char syncStatus[16];
     uint8_t bootVersion = 0u;
     uint16_t productId = 0u;
+    uint16_t flashKb = 0u;
 
     resetParser();
     udpFill = 0u;
@@ -366,6 +414,22 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
         }
     }
 
+    if (idOk && productId == STM32_EXPECTED_PID) {
+        uint8_t flashSizeBytes[2];
+        if (stm32ReadMemory(STM32_FLASH_SIZE_REG,
+                            flashSizeBytes,
+                            sizeof(flashSizeBytes))) {
+            flashKb = (uint16_t)flashSizeBytes[0] |
+                      ((uint16_t)flashSizeBytes[1] << 8);
+            flashSizeOk = true;
+        }
+    }
+
+    targetMatch = idOk &&
+                  productId == STM32_EXPECTED_PID &&
+                  flashSizeOk &&
+                  flashKb == STM32_EXPECTED_FLASH_KB;
+
     // Return the shared UART and STM32 to the normal PCM application.
     digitalWrite(STM32_BOOT_PIN, HIGH); // BOOT0 low
     Serial.end();
@@ -400,6 +464,13 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     if (idOk && used < sizeof(result))
         used += (size_t)snprintf(result + used, sizeof(result) - used,
                                  " pid=0x%04X", productId);
+    if (flashSizeOk && used < sizeof(result))
+        used += (size_t)snprintf(result + used, sizeof(result) - used,
+                                 " flash_kb=%u", (unsigned int)flashKb);
+    if (used < sizeof(result))
+        used += (size_t)snprintf(result + used, sizeof(result) - used,
+                                 " target=%s",
+                                 targetMatch ? "PASS" : "FAIL");
     if (used < sizeof(result) - 2u) {
         result[used++] = '\n';
         result[used] = '\0';
