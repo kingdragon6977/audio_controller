@@ -130,3 +130,8 @@ identifies the STM32F10xxx high-density family.
 
 This diagnostic contains no erase, write-memory, write-protect, or
 readout-protect commands.
+
+
+## Safe STM32 flashing design
+
+The ROM diagnostic now requires `pid=0x0414` and `flash_kb=256` for `target=PASS`. See [`doc/stm32-safe-flash.md`](../doc/stm32-safe-flash.md) for the fail-closed flashing procedure. The current test remains read-only.
