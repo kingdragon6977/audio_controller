@@ -158,7 +158,8 @@ def stage(args) -> int:
         )
         return 0
 
-    target = (args.host, args.port)
+    resolved_host = socket.gethostbyname(args.host)
+    target = (resolved_host, args.port)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.settimeout(args.timeout)
 
