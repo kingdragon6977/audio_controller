@@ -119,14 +119,18 @@ the normal application, restores the UART to 1,000,000 8N1, and sends READY so
 PCM streaming can resume. A failed sync reports `TIMEOUT` or the actual byte
 received as `RX_0xNN`.
 
-A successful result has this form:
+A successful result now has this form:
 
 ```text
-STM32_BOOT_TEST sync=ACK get=OK getid=OK bootprep_initial=PASS bootprep_settled=PASS bootver=0x22 pid=0x0414
+STM32_BOOT_TEST sync=ACK get=OK getid=OK bootprep_initial=PASS bootprep_settled=PASS bootver=0x22 cmds=R+W+E+ pid=0x0414 flash_kb=256 target=PASS
 ```
 
-This exact result was verified on the STM32F103RCT6 hardware. Device ID 0x0414
-identifies the STM32F10xxx high-density family.
+The boot-prep response also carries protocol version 1 plus the application target
+tag `RCT6`; either mismatch blocks the reset.  After reset, `target=PASS` requires
+the independent ROM identity checks `pid=0x0414` and `flash_kb=256`.
+
+Device ID 0x0414 identifies the STM32F10xxx high-density family.  The exact command
+capabilities are taken from the ROM `GET` response rather than inferred from that ID.
 
 This diagnostic contains no erase, write-memory, write-protect, or
 readout-protect commands.
@@ -134,4 +138,18 @@ readout-protect commands.
 
 ## Safe STM32 flashing design
 
-The ROM diagnostic now requires `pid=0x0414` and `flash_kb=256` for `target=PASS`. See [`doc/stm32-safe-flash.md`](../doc/stm32-safe-flash.md) for the fail-closed flashing procedure. The current test remains read-only.
+The ROM diagnostic now requires `pid=0x0414` and `flash_kb=256` for `target=PASS`.
+See [`doc/stm32-safe-flash.md`](../doc/stm32-safe-flash.md) for the fail-closed
+flashing procedure. The current test remains read-only.
+
+From the repository root, validate the built STM32 image and generate the frozen manifest:
+
+```bash
+make manifest-test
+make manifest
+cat build/audio_controller.manifest.json
+```
+
+The manifest records the complete image SHA-256 plus one SHA-256 per 2 KiB flash page.
+That permits the future ESP programmer to receive and verify only one page at a time
+instead of buffering the entire 256 KiB STM32 address space.
