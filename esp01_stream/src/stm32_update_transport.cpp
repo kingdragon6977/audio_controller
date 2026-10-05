@@ -51,6 +51,8 @@ struct SessionState {
     bool pageHashPresent[MAX_PAGES];
 
     bool pageActive;
+    bool haveLastVerifiedPage;
+    uint16_t lastVerifiedPage;
     uint16_t pageIndex;
     uint16_t pageLength;
     uint16_t pageReceived;
@@ -355,12 +357,22 @@ bool stm32UpdateTransportHandlePacket(
     }
 
     if (type == PKT_PAGE_BEGIN) {
-        if (packetLen != 16u || st.pageActive) {
-            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_STATE, session, 0);
+        if (packetLen != 16u) {
+            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_PACKET, session, 0);
             return true;
         }
         const uint16_t index = readLe16(packet + 12);
         const uint16_t length = readLe16(packet + 14);
+
+        if (st.pageActive) {
+            if (index == st.pageIndex && length == st.pageLength &&
+                st.pageReceived == 0u) {
+                reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, index);
+            } else {
+                reply(replySocket, replyIp, replyPort, type, REPLY_BAD_STATE, session, index);
+            }
+            return true;
+        }
         const uint16_t expectedLength =
             (index + 1u == st.pageCount)
                 ? (uint16_t)(st.imageSize - (uint32_t)index * PAGE_SIZE)
@@ -388,9 +400,23 @@ bool stm32UpdateTransportHandlePacket(
         const uint16_t offset = readLe16(packet + 14);
         const size_t dataLen = packetLen - 16u;
 
-        if (index != st.pageIndex || offset != st.pageReceived ||
-            dataLen == 0u || dataLen > CHUNK_SIZE ||
+        if (index != st.pageIndex || dataLen == 0u || dataLen > CHUNK_SIZE ||
             (uint32_t)offset + dataLen > st.pageLength) {
+            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_RANGE, session, index);
+            return true;
+        }
+
+        if (offset < st.pageReceived) {
+            if ((uint32_t)offset + dataLen <= st.pageReceived &&
+                memcmp(st.pageBuffer + offset, packet + 16, dataLen) == 0) {
+                reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, index);
+            } else {
+                reply(replySocket, replyIp, replyPort, type, REPLY_BAD_STATE, session, index);
+            }
+            return true;
+        }
+
+        if (offset != st.pageReceived) {
             reply(replySocket, replyIp, replyPort, type, REPLY_BAD_RANGE, session, index);
             return true;
         }
@@ -402,11 +428,19 @@ bool stm32UpdateTransportHandlePacket(
     }
 
     if (type == PKT_PAGE_SEAL) {
-        if (!st.pageActive || packetLen != 14u) {
-            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_STATE, session, 0);
+        if (packetLen != 14u) {
+            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_PACKET, session, 0);
             return true;
         }
         const uint16_t index = readLe16(packet + 12);
+
+        if (!st.pageActive) {
+            if (st.haveLastVerifiedPage && index == st.lastVerifiedPage)
+                reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, index);
+            else
+                reply(replySocket, replyIp, replyPort, type, REPLY_BAD_STATE, session, index);
+            return true;
+        }
         if (index != st.pageIndex || st.pageReceived != st.pageLength) {
             reply(replySocket, replyIp, replyPort, type, REPLY_INCOMPLETE, session, index);
             return true;
@@ -427,6 +461,8 @@ bool stm32UpdateTransportHandlePacket(
          */
         st.pageActive = false;
         st.pageReceived = 0u;
+        st.haveLastVerifiedPage = true;
+        st.lastVerifiedPage = index;
         reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, index);
         return true;
     }
