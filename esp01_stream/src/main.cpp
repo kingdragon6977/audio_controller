@@ -3,6 +3,7 @@
 #include <ESP8266WiFi.h>
 #include <WiFiUdp.h>
 #include "wifi_config.h"
+#include "stm32_update_transport.h"
 
 #ifndef OTA_HOSTNAME
 #define OTA_HOSTNAME "audio-esp01"
@@ -520,10 +521,26 @@ static void handleUdpControl()
     if (packetSize <= 0)
         return;
 
-    char command[40];
-    int count = udpControl.read(command, sizeof(command) - 1u);
+    static uint8_t packet[300];
+    int count = udpControl.read(packet, sizeof(packet));
     if (count < 0)
         return;
+
+    IPAddress replyIp = udpControl.remoteIP();
+    uint16_t replyPort = udpControl.remotePort();
+
+    if (stm32UpdateTransportHandlePacket(packet, (size_t)count,
+                                         udpTx, replyIp, replyPort))
+        return;
+
+    if ((size_t)count >= sizeof(packet))
+        return;
+
+    char command[40];
+    if ((size_t)count >= sizeof(command))
+        return;
+
+    memcpy(command, packet, (size_t)count);
     command[count] = '\0';
 
     while (count > 0 &&
@@ -531,9 +548,6 @@ static void handleUdpControl()
             command[count - 1] == ' ' || command[count - 1] == '\t')) {
         command[--count] = '\0';
     }
-
-    IPAddress replyIp = udpControl.remoteIP();
-    uint16_t replyPort = udpControl.remotePort();
 
     if (strcmp(command, "STM32_BOOT_TEST") == 0) {
         udpReply(replyIp, replyPort, "STM32_BOOT_TEST starting (read-only)\n");
@@ -558,6 +572,7 @@ static void setupOta()
     }
 
     ArduinoOTA.onStart([]() {
+        stm32UpdateTransportReset();
         otaActive = true;
         Serial.write(CTRL_STOP);
         Serial.flush();
@@ -594,6 +609,7 @@ static void connectWifi()
     }
 
     targetIp.fromString(UDP_TARGET_IP);
+    stm32UpdateTransportReset();
     udpControl.stop();
     udpControl.begin(UDP_CONTROL_PORT);
 
