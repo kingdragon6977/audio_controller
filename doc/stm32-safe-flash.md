@@ -88,21 +88,57 @@ Before requesting bootloader entry, the candidate must pass all of the following
 6. After clearing the Thumb bit, the reset-vector address lies inside the candidate
    application image in flash.
 7. A SHA-256 (or stronger) digest is calculated for the exact bytes that will be written.
-8. The validated digest, image length, target profile and update-session number are frozen
-   into the destructive-operation authorization record.
+8. The manifest contains a SHA-256 for every 2 KiB flash page (the final page may be shorter).
+9. A canonical manifest SHA-256 covers the fixed target metadata and complete page-hash list.
+10. The validated image digest, manifest digest, image length, target profile and update-session
+    number are frozen into the destructive-operation authorization record.
 
-A changed byte means a changed digest and invalidates authorization.
+A changed byte changes its page hash and the full-image digest.  A changed page list or target
+field changes the manifest digest.  Any of those changes invalidates authorization.
+
+
+## Low-memory transport strategy
+
+The ESP-01 must not need to buffer the full STM32 image.  The intended transport is therefore
+manifest-first and page-at-a-time:
+
+1. The PC/laptop validates the complete `.bin` with `tools/stm32_image_manifest.py`.
+2. It sends the complete manifest before STM32 reset or erase.
+3. The ESP validates/fixes the session metadata and stores the page-hash list.  At the maximum
+   256 KiB RCT6 image size there are 128 x 2 KiB pages, so raw SHA-256 page hashes require only
+   4096 bytes plus small metadata.
+4. The running STM32 grants boot preparation and the hardware BOOT0 authorization condition is
+   verified.
+5. The ESP enters the ROM bootloader and independently verifies ROM capabilities, PID and flash
+   size.
+6. Only then may a page transfer begin.
+7. The ESP receives one complete page into a 2 KiB RAM buffer and hashes it **before erasing or
+   writing that page**.
+8. The received page hash must exactly equal the hash frozen in the original manifest.
+9. Only a validated page buffer may be erased/programmed, in <=256-byte ROM write blocks.
+10. After programming, the ESP reads the page back and hashes/compares it before advancing.
+
+This arrangement prevents an out-of-order, truncated, stale, or changed network transfer from
+being treated as the image that was authorized earlier.  The network sender never supplies a
+free-form flash address during the destructive phase; page addresses are derived only from the
+frozen manifest page index.
+
+The full-image SHA-256 is checked again over read-back data after all pages pass their individual
+verification.
 
 ## ROM target identification
 
 After bootloader sync (`0x7F -> ACK 0x79`), the ESP must:
 
 1. Run ROM `GET (0x00)` and record the advertised bootloader version and supported commands.
-2. Run ROM `GET ID (0x02)`.
-3. Require product ID `0x0414`.
-4. Use ROM `READ MEMORY (0x11)` to read two bytes at `0x1FFFF7E0`.
-5. Require a little-endian value of `256` KiB.
-6. Optionally read the 96-bit unique-ID area and log it as extra evidence; it is not a
+2. Require `READ MEMORY (0x11)` before using the ROM for identification.
+3. Record whether `WRITE MEMORY (0x31)` and an erase command (`0x43` or `0x44`) are actually
+   advertised; destructive flashing is not eligible unless both are present.
+4. Run ROM `GET ID (0x02)`.
+5. Require product ID `0x0414`.
+6. Use ROM `READ MEMORY (0x11)` to read two bytes at `0x1FFFF7E0`.
+7. Require a little-endian value of `256` KiB.
+8. Optionally read the 96-bit unique-ID area and log it as extra evidence; it is not a
    substitute for product-ID/flash-size validation.
 
 The ESP must state how it identified the target.  A write authorization is never represented
@@ -203,15 +239,18 @@ The current ESP firmware already provides a read-only ROM bootloader test:
 - executes `GET ID`,
 - returns to the normal application.
 
+Implemented groundwork now includes ROM read-memory, PID/flash-size verification, advertised
+ROM command tracking, pre-reset application identity, and a manifest generator with whole-image,
+per-page, and canonical-manifest SHA-256 values.
+
 The next safe implementation steps are:
 
-1. add ROM read-memory support and require `PID=0x0414` plus `flash_kb=256`;
-2. add the external BOOT0 authorization proof once the hardware is finalized;
-3. define the candidate-image transport/container;
-4. implement validation with a frozen image/session digest;
-5. implement page erase;
-6. implement 256-byte writes;
-7. implement full read-back verification;
-8. only then expose a destructive remote update command.
+1. add the external BOOT0 authorization proof once the hardware is finalized;
+2. implement the manifest-first/page-at-a-time transport without destructive commands;
+3. bind the received manifest to an update session;
+4. implement page erase behind the complete authorization gate;
+5. implement <=256-byte writes from a pre-hashed 2 KiB page buffer;
+6. implement per-page and final full-image read-back verification;
+7. only then expose a destructive remote update command.
 
 Until all prerequisites exist, `STM32_BOOT_TEST` remains read-only.
