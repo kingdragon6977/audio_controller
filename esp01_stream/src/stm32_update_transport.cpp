@@ -325,6 +325,25 @@ bool stm32UpdateTransportHandlePacket(
             reply(replySocket, replyIp, replyPort, type, REPLY_INCOMPLETE, session, 0);
             return true;
         }
+
+        Sha256Ctx manifestCtx;
+        uint8_t computedManifestHash[32];
+        uint8_t meta[6];
+        writeLe32(meta, st.imageSize);
+        writeLe16(meta + 4, st.pageCount);
+
+        sha256Init(manifestCtx);
+        sha256Update(manifestCtx, meta, sizeof(meta));
+        sha256Update(manifestCtx, st.imageHash, sizeof(st.imageHash));
+        for (uint16_t i = 0u; i < st.pageCount; ++i)
+            sha256Update(manifestCtx, st.pageHashes[i], 32u);
+        sha256Final(manifestCtx, computedManifestHash);
+
+        if (!sameHash(computedManifestHash, st.manifestHash)) {
+            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_HASH, session, 0);
+            return true;
+        }
+
         st.manifestCommitted = true;
         reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, st.pageCount);
         return true;
