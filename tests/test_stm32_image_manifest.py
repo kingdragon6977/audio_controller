@@ -36,7 +36,14 @@ class ImageManifestTests(unittest.TestCase):
         self.assertEqual(len(result["transport_manifest_sha256"]), 64)
 
         canonical = (
-            struct.pack("<IH", result["image_size"], result["page_count"])
+            struct.pack(
+                "<IHHHI",
+                result["image_size"],
+                result["page_count"],
+                manifest.EXPECTED_PID,
+                manifest.EXPECTED_FLASH_KB,
+                manifest.FLASH_BASE,
+            )
             + bytes.fromhex(result["sha256"])
             + b"".join(bytes.fromhex(p["sha256"]) for p in result["pages"])
         )
