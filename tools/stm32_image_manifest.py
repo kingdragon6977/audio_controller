@@ -79,7 +79,14 @@ def validate_image(data: bytes) -> dict:
         })
 
     transport_canonical = (
-        struct.pack("<IH", len(data), page_count)
+        struct.pack(
+            "<IHHHI",
+            len(data),
+            page_count,
+            EXPECTED_PID,
+            EXPECTED_FLASH_KB,
+            FLASH_BASE,
+        )
         + hashlib.sha256(data).digest()
         + b"".join(bytes.fromhex(page["sha256"]) for page in pages)
     )
