@@ -321,6 +321,9 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     bool bootPrepSettledOk = false;
     bool syncOk = false;
     bool getOk = false;
+    bool romReadSupported = false;
+    bool romWriteSupported = false;
+    bool romEraseSupported = false;
     bool idOk = false;
     bool flashSizeOk = false;
     bool targetMatch = false;
@@ -383,10 +386,19 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
                 bootVersion = (uint8_t)version;
                 bool bytesOk = true;
                 for (int i = 0; i < n; ++i) {
-                    if (serialReadTimeout(500u) < 0) {
+                    int command = serialReadTimeout(500u);
+                    if (command < 0) {
                         bytesOk = false;
                         break;
                     }
+
+                    if ((uint8_t)command == 0x11u)
+                        romReadSupported = true;
+                    else if ((uint8_t)command == 0x31u)
+                        romWriteSupported = true;
+                    else if ((uint8_t)command == 0x43u ||
+                             (uint8_t)command == 0x44u)
+                        romEraseSupported = true;
                 }
                 if (bytesOk && serialReadTimeout(500u) == STM32_ACK)
                     getOk = true;
@@ -414,7 +426,8 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
         }
     }
 
-    if (idOk && productId == STM32_EXPECTED_PID) {
+    if (getOk && romReadSupported &&
+        idOk && productId == STM32_EXPECTED_PID) {
         uint8_t flashSizeBytes[2];
         if (stm32ReadMemory(STM32_FLASH_SIZE_REG,
                             flashSizeBytes,
@@ -425,7 +438,9 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
         }
     }
 
-    targetMatch = idOk &&
+    targetMatch = getOk &&
+                  romReadSupported &&
+                  idOk &&
                   productId == STM32_EXPECTED_PID &&
                   flashSizeOk &&
                   flashKb == STM32_EXPECTED_FLASH_KB;
@@ -460,7 +475,11 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
                             idOk ? "OK" : "FAIL");
     if (getOk && used < sizeof(result))
         used += (size_t)snprintf(result + used, sizeof(result) - used,
-                                 " bootver=0x%02X", bootVersion);
+                                 " bootver=0x%02X cmds=R%cW%cE%c",
+                                 bootVersion,
+                                 romReadSupported ? '+' : '-',
+                                 romWriteSupported ? '+' : '-',
+                                 romEraseSupported ? '+' : '-');
     if (idOk && used < sizeof(result))
         used += (size_t)snprintf(result + used, sizeof(result) - used,
                                  " pid=0x%04X", productId);
