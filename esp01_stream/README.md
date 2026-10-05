@@ -153,3 +153,68 @@ cat build/audio_controller.manifest.json
 The manifest records the complete image SHA-256 plus one SHA-256 per 2 KiB flash page.
 That permits the future ESP programmer to receive and verify only one page at a time
 instead of buffering the entire 256 KiB STM32 address space.
+
+
+## Non-destructive STM32 update staging
+
+The `stm32-safe-flash` branch also contains a binary staging protocol on the
+same UDP control port. It validates the complete update transport without
+erasing or writing STM32 flash.
+
+Build and validate the STM32 image first:
+
+```bash
+make manifest-test
+make
+make manifest
+```
+
+Perform only local host-side checks:
+
+```bash
+python3 tools/stage_stm32_update.py \
+  127.0.0.1 \
+  build/audio_controller.bin \
+  build/audio_controller.manifest.json \
+  --dry-run
+```
+
+After the matching ESP firmware is installed, stage a single page through the
+ESP:
+
+```bash
+python3 tools/stage_stm32_update.py \
+  ESP_IP \
+  build/audio_controller.bin \
+  build/audio_controller.manifest.json \
+  --page 0
+```
+
+Or stage every page:
+
+```bash
+python3 tools/stage_stm32_update.py \
+  ESP_IP \
+  build/audio_controller.bin \
+  build/audio_controller.manifest.json
+```
+
+For each page the PC sends ordered chunks of at most 256 bytes. The ESP buffers
+one page (maximum 2048 bytes), calculates SHA-256 locally, and accepts the page
+only when it equals the page hash frozen into the manifest.
+
+Expected host output includes:
+
+```text
+MANIFEST_ACCEPTED session=0x........ pages=...
+STAGED_VERIFIED page=0 size=2048 sha256=...
+```
+
+`STAGED_VERIFIED` means only that the page survived the complete
+manifest/session/network/hash path. The staging module contains **no STM32
+erase or write call**.
+
+The hardware BOOT0 authorization input is intentionally not assigned a GPIO or
+polarity yet. The final software gate will be added after the two-high-side-
+switch/RC circuit is built and its normal, authorized, reset, and power-up
+waveforms have been measured.
