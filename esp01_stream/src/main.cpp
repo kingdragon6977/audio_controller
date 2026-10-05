@@ -515,6 +515,25 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     sendReady();
 }
 
+
+static void stm32BootGateOnlyTest(const IPAddress &replyIp, uint16_t replyPort)
+{
+    /*
+     * Bench-only hardware test:
+     * assert the ESP-controlled high-side 4407 for 250 ms, but NEVER touch NRST.
+     * BOOT0 can rise only if the STM32's PA0-controlled authorization 4407 is
+     * simultaneously enabled.
+     */
+    digitalWrite(STM32_RESET_PIN, LOW);  // positively keep NRST stage released
+    digitalWrite(STM32_BOOT_PIN, LOW);   // ESP 4407 ON
+    udpReply(replyIp, replyPort,
+             "STM32_GATE_TEST gate=ON reset=UNTOUCHED duration_ms=250\n");
+    delay(250u);
+    digitalWrite(STM32_BOOT_PIN, HIGH);  // ESP 4407 OFF
+    udpReply(replyIp, replyPort,
+             "STM32_GATE_TEST gate=OFF reset=UNTOUCHED done\n");
+}
+
 static void handleUdpControl()
 {
     int packetSize = udpControl.parsePacket();
@@ -552,6 +571,12 @@ static void handleUdpControl()
     if (strcmp(command, "STM32_BOOT_TEST") == 0) {
         udpReply(replyIp, replyPort, "STM32_BOOT_TEST starting (read-only)\n");
         stm32BootloaderTest(replyIp, replyPort);
+        return;
+    }
+
+    if (strcmp(command, "STM32_GATE_TEST") == 0) {
+        stm32BootGateOnlyTest(replyIp, replyPort);
+        return;
     }
 }
 
