@@ -42,6 +42,9 @@ REPLY_NAMES = {
 
 PAGE_SIZE = 2048
 CHUNK_SIZE = 256
+EXPECTED_PID = 0x0414
+EXPECTED_FLASH_KB = 256
+FLASH_BASE = 0x08000000
 
 
 def header(packet_type: int, session: int) -> bytes:
@@ -125,7 +128,14 @@ def load_manifest(path: pathlib.Path) -> dict:
 def canonical_transport_hash(m: dict) -> bytes:
     image_hash = bytes.fromhex(m["sha256"])
     page_hashes = b"".join(bytes.fromhex(p["sha256"]) for p in m["pages"])
-    canonical = struct.pack("<IH", int(m["image_size"]), int(m["page_count"]))
+    canonical = struct.pack(
+        "<IHHHI",
+        int(m["image_size"]),
+        int(m["page_count"]),
+        EXPECTED_PID,
+        EXPECTED_FLASH_KB,
+        FLASH_BASE,
+    )
     canonical += image_hash + page_hashes
     return hashlib.sha256(canonical).digest()
 
