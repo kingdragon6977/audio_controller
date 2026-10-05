@@ -51,7 +51,7 @@ SRC := \
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
 OBJ += $(BUILD)/startup/startup_stm32f10x_hd.o
 
-.PHONY: all clean size
+.PHONY: all clean size manifest
 
 all: $(BUILD)/$(TARGET).bin $(BUILD)/$(TARGET).hex
 
@@ -77,6 +77,9 @@ $(BUILD)/$(TARGET).hex: $(BUILD)/$(TARGET).elf
 
 size: $(BUILD)/$(TARGET).elf
 	$(SIZE) $<
+
+manifest: $(BUILD)/$(TARGET).bin
+	python3 tools/stm32_image_manifest.py $< -o $(BUILD)/$(TARGET).manifest.json
 
 clean:
 	rm -rf $(BUILD)
