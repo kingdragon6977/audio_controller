@@ -78,6 +78,12 @@ def validate_image(data: bytes) -> dict:
             "sha256": hashlib.sha256(page).hexdigest(),
         })
 
+    transport_canonical = (
+        struct.pack("<IH", len(data), page_count)
+        + hashlib.sha256(data).digest()
+        + b"".join(bytes.fromhex(page["sha256"]) for page in pages)
+    )
+
     manifest = {
         "format": 1,
         "target": TARGET,
@@ -96,6 +102,7 @@ def validate_image(data: bytes) -> dict:
         "last_page": last_page,
         "page_count": page_count,
         "pages": pages,
+        "transport_manifest_sha256": hashlib.sha256(transport_canonical).hexdigest(),
     }
 
     canonical = json.dumps(
