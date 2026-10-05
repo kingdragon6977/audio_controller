@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import hashlib
 import pathlib
 import struct
 import sys
@@ -32,6 +33,17 @@ class ImageManifestTests(unittest.TestCase):
         self.assertEqual(result["pages"][0]["size"], 64)
         self.assertEqual(len(result["sha256"]), 64)
         self.assertEqual(len(result["manifest_sha256"]), 64)
+        self.assertEqual(len(result["transport_manifest_sha256"]), 64)
+
+        canonical = (
+            struct.pack("<IH", result["image_size"], result["page_count"])
+            + bytes.fromhex(result["sha256"])
+            + b"".join(bytes.fromhex(p["sha256"]) for p in result["pages"])
+        )
+        self.assertEqual(
+            result["transport_manifest_sha256"],
+            hashlib.sha256(canonical).hexdigest(),
+        )
 
     def test_rejects_unaligned_msp(self):
         with self.assertRaises(ValueError):
