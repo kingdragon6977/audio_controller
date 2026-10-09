@@ -662,11 +662,19 @@ bool stm32UpdateTransportHandlePacket(
 
         st.flashActive = false;
         st.flashCompleted = true;
+
+        /*
+         * Acknowledge the verified flash BEFORE resetting the STM32 back into
+         * the application.  The completion state is already durable in this
+         * ESP session, so an ACK retry remains idempotent if the UDP packet is
+         * lost.
+         */
+        reply(replySocket, replyIp, replyPort, type,
+              REPLY_OK, session, st.flashedPages);
+
         if (flashEndCallback)
             flashEndCallback(true, flashCallbackContext);
 
-        reply(replySocket, replyIp, replyPort, type,
-              REPLY_OK, session, st.flashedPages);
         return true;
     }
 
