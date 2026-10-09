@@ -29,6 +29,8 @@ PKT_PAGE_DATA = 5
 PKT_PAGE_SEAL = 6
 PKT_ABORT = 7
 PKT_STATUS = 8
+PKT_FLASH_BEGIN = 9
+PKT_FLASH_FINISH = 10
 
 REPLY_NAMES = {
     0: "OK",
@@ -38,6 +40,8 @@ REPLY_NAMES = {
     4: "BAD_RANGE",
     5: "BAD_HASH",
     6: "INCOMPLETE",
+    7: "FLASH_FAILED",
+    8: "VERIFY_FAILED",
 }
 
 PAGE_SIZE = 2048
@@ -72,6 +76,7 @@ def parse_status(data: bytes, expected_type: int, expected_session: int):
 
 def transact(sock, target, packet_type, session, payload=b"", retries=5, timeout=0.8):
     packet = header(packet_type, session) + payload
+    sock.settimeout(timeout)
     last_error = None
     for attempt in range(1, retries + 1):
         sock.sendto(packet, target)
@@ -212,6 +217,19 @@ def stage(args) -> int:
         )
         return 0
 
+    if args.flash:
+        require_ok(
+            transact(
+                sock, target, PKT_FLASH_BEGIN, session, b"",
+                args.retries, max(args.timeout, 5.0),
+            ),
+            "FLASH_BEGIN",
+        )
+        print(
+            f"FLASH_SESSION_READY session=0x{session:08X} "
+            f"pages={manifest['page_count']} image={manifest['image_size']}"
+        )
+
     pages_to_send = manifest["pages"]
     if args.page is not None:
         if args.page < 0 or args.page >= len(pages_to_send):
@@ -253,13 +271,26 @@ def stage(args) -> int:
             transact(
                 sock, target, PKT_PAGE_SEAL, session,
                 struct.pack("<H", index),
-                args.retries, args.timeout,
+                args.retries, max(args.timeout, 5.0) if args.flash else args.timeout,
             ),
             f"PAGE_SEAL[{index}]",
         )
         print(
-            f"STAGED_VERIFIED page={index} size={length} "
-            f"sha256={page['sha256']}"
+            f"{'FLASHED_VERIFIED' if args.flash else 'STAGED_VERIFIED'} "
+            f"page={index} size={length} sha256={page['sha256']}"
+        )
+
+    if args.flash:
+        require_ok(
+            transact(
+                sock, target, PKT_FLASH_FINISH, session, b"",
+                args.retries, max(args.timeout, 20.0),
+            ),
+            "FLASH_FINISH",
+        )
+        print(
+            f"FLASH_COMPLETE session=0x{session:08X} "
+            f"image={manifest['image_size']} sha256={manifest['sha256']}"
         )
 
     return 0
@@ -277,6 +308,11 @@ def main() -> int:
         action="store_true",
         help="commit only the frozen manifest/page hashes; send no image page data",
     )
+    p.add_argument(
+        "--flash",
+        action="store_true",
+        help="erase/program manifest pages through the authorized STM32 ROM session",
+    )
     p.add_argument("--retries", type=int, default=5)
     p.add_argument("--timeout", type=float, default=0.8)
     p.add_argument("--dry-run", action="store_true")
@@ -284,6 +320,10 @@ def main() -> int:
 
     if args.manifest_only and args.page is not None:
         p.error("--manifest-only and --page cannot be used together")
+    if args.manifest_only and args.flash:
+        p.error("--manifest-only and --flash cannot be used together")
+    if args.flash and args.page is not None:
+        p.error("--flash requires the complete manifest image; --page is not allowed")
 
     try:
         return stage(args)
