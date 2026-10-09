@@ -291,6 +291,26 @@ static bool stm32ReadMemory(uint32_t address, uint8_t *data, size_t length)
     return true;
 }
 
+static bool stm32RomReadCallback(
+    uint32_t address,
+    uint8_t *data,
+    size_t length,
+    void *context)
+{
+    (void)context;
+    return stm32ReadMemory(address, data, length);
+}
+
+static void hashToHex(const uint8_t hash[32], char out[65])
+{
+    static const char hex[] = "0123456789abcdef";
+    for (size_t i = 0u; i < 32u; ++i) {
+        out[i * 2u] = hex[(hash[i] >> 4) & 0x0Fu];
+        out[i * 2u + 1u] = hex[hash[i] & 0x0Fu];
+    }
+    out[64] = '\0';
+}
+
 static bool stm32PrepareBoot()
 {
     size_t matched = 0u;
@@ -356,6 +376,7 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     bool flashSizeOk = false;
     bool targetMatch = false;
     bool flashHeadOk = false;
+    Stm32UpdateVerifyResult flashVerifyResult = STM32_VERIFY_NO_MANIFEST;
     int syncResponse = -1;
     char syncStatus[16];
     uint8_t bootVersion = 0u;
@@ -364,6 +385,9 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     uint8_t flashHead[64];
     uint32_t initialMsp = 0u;
     uint32_t resetVector = 0u;
+    uint32_t verifyImageSize = 0u;
+    uint8_t verifyActualHash[32];
+    uint8_t verifyExpectedHash[32];
 
     resetParser();
     udpFill = 0u;
@@ -517,6 +541,45 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
         udpReply(replyIp, replyPort, dump);
     }
 
+    /*
+     * If a frozen manifest has already been committed by the staging
+     * transport, hash the installed application directly through ROM
+     * READ MEMORY and compare it to that manifest.  Still read-only.
+     */
+    if (targetMatch) {
+        flashVerifyResult = stm32UpdateTransportVerifyCommittedImage(
+            stm32RomReadCallback,
+            NULL,
+            &verifyImageSize,
+            verifyActualHash,
+            verifyExpectedHash);
+
+        if (flashVerifyResult != STM32_VERIFY_NO_MANIFEST) {
+            char verifyMsg[256];
+            char actualHex[65];
+            char expectedHex[65];
+            const char *status;
+
+            hashToHex(verifyActualHash, actualHex);
+            hashToHex(verifyExpectedHash, expectedHex);
+
+            if (flashVerifyResult == STM32_VERIFY_OK)
+                status = "PASS";
+            else if (flashVerifyResult == STM32_VERIFY_HASH_MISMATCH)
+                status = "MISMATCH";
+            else
+                status = "READ_FAIL";
+
+            snprintf(verifyMsg, sizeof(verifyMsg),
+                     "STM32_FLASH_VERIFY status=%s size=%lu actual=%s expected=%s\n",
+                     status,
+                     (unsigned long)verifyImageSize,
+                     actualHex,
+                     expectedHex);
+            udpReply(replyIp, replyPort, verifyMsg);
+        }
+    }
+
     // Return the shared UART and STM32 to the normal PCM application.
     digitalWrite(STM32_BOOT_PIN, HIGH); // BOOT0 low
     Serial.end();
@@ -560,9 +623,13 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
                                  " flash_kb=%u", (unsigned int)flashKb);
     if (used < sizeof(result))
         used += (size_t)snprintf(result + used, sizeof(result) - used,
-                                 " target=%s flash_head=%s",
+                                 " target=%s flash_head=%s flash_verify=%s",
                                  targetMatch ? "PASS" : "FAIL",
-                                 flashHeadOk ? "OK" : "FAIL");
+                                 flashHeadOk ? "OK" : "FAIL",
+                                 flashVerifyResult == STM32_VERIFY_OK ? "PASS" :
+                                 flashVerifyResult == STM32_VERIFY_HASH_MISMATCH ? "MISMATCH" :
+                                 flashVerifyResult == STM32_VERIFY_READ_FAILED ? "READ_FAIL" :
+                                 "NO_MANIFEST");
     if (used < sizeof(result) - 2u) {
         result[used++] = '\n';
         result[used] = '\0';
