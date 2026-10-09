@@ -119,14 +119,148 @@ the normal application, restores the UART to 1,000,000 8N1, and sends READY so
 PCM streaming can resume. A failed sync reports `TIMEOUT` or the actual byte
 received as `RX_0xNN`.
 
-A successful result has this form:
+A successful result now has this form:
 
 ```text
-STM32_BOOT_TEST sync=ACK get=OK getid=OK bootprep_initial=PASS bootprep_settled=PASS bootver=0x22 pid=0x0414
+STM32_BOOT_TEST sync=ACK get=OK getid=OK bootprep_initial=PASS bootprep_settled=PASS bootver=0x22 cmds=R+W+E+ pid=0x0414 flash_kb=256 target=PASS
 ```
 
-This exact result was verified on the STM32F103RCT6 hardware. Device ID 0x0414
-identifies the STM32F10xxx high-density family.
+The boot-prep response also carries protocol version 1 plus the application target
+tag `RCT6`; either mismatch blocks the reset.  After reset, `target=PASS` requires
+the independent ROM identity checks `pid=0x0414` and `flash_kb=256`.
+
+Device ID 0x0414 identifies the STM32F10xxx high-density family.  The exact command
+capabilities are taken from the ROM `GET` response rather than inferred from that ID.
 
 This diagnostic contains no erase, write-memory, write-protect, or
 readout-protect commands.
+
+
+## Safe STM32 flashing design
+
+The ROM diagnostic now requires `pid=0x0414` and `flash_kb=256` for `target=PASS`.
+See [`doc/stm32-safe-flash.md`](../doc/stm32-safe-flash.md) for the fail-closed
+flashing procedure. The current test remains read-only.
+
+From the repository root, validate the built STM32 image and generate the frozen manifest:
+
+```bash
+make manifest-test
+make manifest
+cat build/audio_controller.manifest.json
+```
+
+The manifest records the complete image SHA-256 plus one SHA-256 per 2 KiB flash page.
+That permits the future ESP programmer to receive and verify only one page at a time
+instead of buffering the entire 256 KiB STM32 address space.
+
+
+## Non-destructive STM32 update staging
+
+The `stm32-safe-flash` branch also contains a binary staging protocol on the
+same UDP control port. It validates the complete update transport without
+erasing or writing STM32 flash.
+
+Build and validate the STM32 image first:
+
+```bash
+make manifest-test
+make
+make manifest
+```
+
+Perform only local host-side checks:
+
+```bash
+python3 tools/stage_stm32_update.py \
+  127.0.0.1 \
+  build/audio_controller.bin \
+  build/audio_controller.manifest.json \
+  --dry-run
+```
+
+After the matching ESP firmware is installed, stage a single page through the
+ESP:
+
+```bash
+python3 tools/stage_stm32_update.py \
+  ESP_IP \
+  build/audio_controller.bin \
+  build/audio_controller.manifest.json \
+  --page 0
+```
+
+Or stage every page:
+
+```bash
+python3 tools/stage_stm32_update.py \
+  ESP_IP \
+  build/audio_controller.bin \
+  build/audio_controller.manifest.json
+```
+
+For each page the PC sends ordered chunks of at most 256 bytes. The ESP buffers
+one page (maximum 2048 bytes), calculates SHA-256 locally, and accepts the page
+only when it equals the page hash frozen into the manifest.
+
+Expected host output includes:
+
+```text
+MANIFEST_ACCEPTED session=0x........ pages=...
+STAGED_VERIFIED page=0 size=2048 sha256=...
+```
+
+`STAGED_VERIFIED` means only that the page survived the complete
+manifest/session/network/hash path. The staging module contains **no STM32
+erase or write call**.
+
+The hardware BOOT0 authorization input is intentionally not assigned a GPIO or
+polarity yet. The final software gate will be added after the two-high-side-
+switch/RC circuit is built and its normal, authorized, reset, and power-up
+waveforms have been measured.
+
+
+## Safe BOOT authorization bench tests
+
+The STM32 CLI now has a temporary PA0-only test. These commands never issue an
+ESP boot command and never touch NRST:
+
+```text
+bootauth status
+bootauth on
+bootauth off
+bootauth test
+```
+
+`bootauth test` drives PA0 LOW for approximately 250 ms, confirms the PA0 pin
+reads LOW, then automatically restores PA0 HIGH and confirms release.
+
+The ESP also has a matching gate-only UDP test:
+
+```bash
+python3 -c 'import socket; s=socket.socket(socket.AF_INET,socket.SOCK_DGRAM); s.settimeout(2); s.sendto(b"STM32_GATE_TEST\n",("ESP_IP",5004)); print(s.recvfrom(2048)[0].decode(),end=""); print(s.recvfrom(2048)[0].decode(),end="")'
+```
+
+`STM32_GATE_TEST` turns only the ESP-controlled 4407 ON for 250 ms, then OFF.
+It explicitly keeps the ESP NRST-control stage in the released state and never
+pulses reset.
+
+Recommended logic-analyzer channels:
+
+```text
+CH0 PA0 / Q1 gate
+CH1 ESP GPIO0 / Q2 gate
+CH2 STM32 BOOT0
+CH3 STM32 NRST
+```
+
+Useful bench sequence:
+
+1. Run `bootauth test` alone. BOOT0 should remain LOW because Q2 is OFF.
+2. Run `STM32_GATE_TEST` alone. BOOT0 should remain LOW because Q1 is OFF.
+3. Assert `bootauth on`, then run `STM32_GATE_TEST`. BOOT0 should rise while
+   both 4407s are ON and decay through the 10k/0.47 uF network when Q2 releases.
+4. Run `bootauth off` immediately after the capture.
+
+Do not press the manual NRST button during these gate-only tests. None of these
+test paths issue erase/write commands.

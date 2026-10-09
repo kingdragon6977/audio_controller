@@ -6,6 +6,7 @@
 #include "i2s_rx.h"
 #include "i2s_meter.h"
 #include "audio_stream.h"
+#include "board.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -309,6 +310,35 @@ static void print_esp_status(void)
                 " baud_check=WARNING (expected BRR 0x0048 at PCLK2 72 MHz)\r\n");
 }
 
+
+static void bootauth_delay_ms(unsigned int ms)
+{
+    /*
+     * Temporary bench-test delay only. Exact pulse width is intentionally not
+     * used as a safety parameter; the logic analyzer measurement is authoritative.
+     * At the present 72 MHz core clock this produces an easily visible pulse.
+     */
+    while (ms--)
+    {
+        volatile uint32_t n = 18000u;
+        while (n--)
+            __asm__("nop");
+    }
+}
+
+static void print_bootauth_status(void)
+{
+    char buf[128];
+    int active = board_boot_auth_is_on();
+
+    sprintf(buf,
+            "BOOT_AUTH PA0: %s  ODR=%u IDR=%u\r\n",
+            active ? "ON (LOW)" : "OFF (HIGH)",
+            (GPIOA->ODR & GPIO_Pin_0) ? 1u : 0u,
+            (GPIOA->IDR & GPIO_Pin_0) ? 1u : 0u);
+    uart2_print(buf);
+}
+
 static void execute(char *cmd)
 {
     unsigned int capture_count;
@@ -319,7 +349,12 @@ static void execute(char *cmd)
         uart2_print("\r\nCommands:\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
-        uart2_print(" esp status         (USART1 + stream diagnostics)\r\n reboot\r\n led on\r\n led off\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
+        uart2_print(" esp status         (USART1 + stream diagnostics)\r\n");
+        uart2_print(" bootauth status    (read PA0 authorization state)\r\n");
+        uart2_print(" bootauth on        (PA0 LOW only; does NOT reset or command ESP)\r\n");
+        uart2_print(" bootauth off       (PA0 HIGH / safe default)\r\n");
+        uart2_print(" bootauth test      (PA0 LOW ~250 ms then automatically HIGH)\r\n");
+        uart2_print(" reboot\r\n led on\r\n led off\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
         return;
     }
 
@@ -445,6 +480,53 @@ static void execute(char *cmd)
     {
         GPIO_ResetBits(GPIOB, GPIO_Pin_2);
         uart2_print("LED OFF\r\n");
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth status") == 0)
+    {
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth on") == 0)
+    {
+        board_boot_auth_on();
+        uart2_print("BOOT_AUTH asserted: PA0 LOW. No BOOT0/NRST/ESP command issued.\r\n");
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth off") == 0)
+    {
+        board_boot_auth_off();
+        uart2_print("BOOT_AUTH released: PA0 HIGH (safe default).\r\n");
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth test") == 0)
+    {
+        uart2_print("BOOT_AUTH TEST: PA0 LOW only for ~250 ms; BOOT0/NRST untouched.\r\n");
+        uart2_print("Capture PA0, ESP boot gate, BOOT0, and NRST with the logic analyzer now.\r\n");
+
+        board_boot_auth_on();
+        if (!board_boot_auth_is_on())
+        {
+            board_boot_auth_off();
+            uart2_print("BOOT_AUTH TEST FAIL: PA0 did not read LOW; forced OFF.\r\n");
+            return;
+        }
+
+        bootauth_delay_ms(250u);
+        board_boot_auth_off();
+
+        if (board_boot_auth_is_on())
+            uart2_print("BOOT_AUTH TEST FAIL: PA0 still reads LOW after release.\r\n");
+        else
+            uart2_print("BOOT_AUTH TEST PASS: PA0 returned HIGH; no reset was commanded.\r\n");
+
+        print_bootauth_status();
         return;
     }
 
