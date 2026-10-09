@@ -205,6 +205,13 @@ def stage(args) -> int:
         f"pages={manifest['page_count']}"
     )
 
+    if args.manifest_only:
+        print(
+            f"MANIFEST_ONLY_READY image={manifest['image_size']} "
+            f"sha256={manifest['sha256']}"
+        )
+        return 0
+
     pages_to_send = manifest["pages"]
     if args.page is not None:
         if args.page < 0 or args.page >= len(pages_to_send):
@@ -265,10 +272,18 @@ def main() -> int:
     p.add_argument("manifest", type=pathlib.Path)
     p.add_argument("--port", type=int, default=5004)
     p.add_argument("--page", type=int, help="stage only one page")
+    p.add_argument(
+        "--manifest-only",
+        action="store_true",
+        help="commit only the frozen manifest/page hashes; send no image page data",
+    )
     p.add_argument("--retries", type=int, default=5)
     p.add_argument("--timeout", type=float, default=0.8)
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
+
+    if args.manifest_only and args.page is not None:
+        p.error("--manifest-only and --page cannot be used together")
 
     try:
         return stage(args)
