@@ -24,7 +24,31 @@ typedef enum {
     STM32_VERIFY_OK = 3
 } Stm32UpdateVerifyResult;
 
+typedef bool (*Stm32UpdateFlashBeginCallback)(
+    uint32_t session,
+    uint32_t imageSize,
+    uint16_t pageCount,
+    void *context);
+
+typedef bool (*Stm32UpdateFlashPageCallback)(
+    uint16_t pageIndex,
+    uint32_t address,
+    const uint8_t *data,
+    uint16_t length,
+    void *context);
+
+typedef void (*Stm32UpdateFlashEndCallback)(
+    bool success,
+    void *context);
+
 void stm32UpdateTransportReset();
+
+void stm32UpdateTransportSetFlashCallbacks(
+    Stm32UpdateFlashBeginCallback beginCallback,
+    Stm32UpdateFlashPageCallback pageCallback,
+    Stm32UpdateReadCallback readCallback,
+    Stm32UpdateFlashEndCallback endCallback,
+    void *context);
 
 /*
  * Read-only verification against the currently committed frozen manifest.
