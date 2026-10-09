@@ -61,6 +61,7 @@ struct SessionState {
     bool haveLastVerifiedPage;
 
     bool flashActive;
+    bool flashCompleted;
     uint16_t flashedPages;
     uint16_t lastVerifiedPage;
     uint16_t pageIndex;
@@ -414,6 +415,7 @@ bool stm32UpdateTransportHandlePacket(
         }
 
         st.flashActive = true;
+        st.flashCompleted = false;
         st.flashedPages = 0u;
         st.haveLastVerifiedPage = false;
         st.pageActive = false;
@@ -622,6 +624,16 @@ bool stm32UpdateTransportHandlePacket(
         uint8_t expected[32];
         uint32_t imageSize = 0u;
 
+        /* A successful final ACK may be lost after we have already rebooted
+           the STM32. Treat an identical retry as success rather than turning
+           a completed flash into an ambiguous INCOMPLETE result. */
+        if (packetLen == 12u && st.flashCompleted &&
+            st.flashedPages == st.pageCount) {
+            reply(replySocket, replyIp, replyPort, type,
+                  REPLY_OK, session, st.flashedPages);
+            return true;
+        }
+
         if (packetLen != 12u || !st.flashActive ||
             st.pageActive || st.flashedPages != st.pageCount ||
             flashReadCallback == NULL) {
@@ -649,6 +661,7 @@ bool stm32UpdateTransportHandlePacket(
         }
 
         st.flashActive = false;
+        st.flashCompleted = true;
         if (flashEndCallback)
             flashEndCallback(true, flashCallbackContext);
 
