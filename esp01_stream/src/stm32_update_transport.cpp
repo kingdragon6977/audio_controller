@@ -248,6 +248,65 @@ void stm32UpdateTransportReset()
     resetState();
 }
 
+
+Stm32UpdateVerifyResult stm32UpdateTransportVerifyCommittedImage(
+    Stm32UpdateReadCallback reader,
+    void *context,
+    uint32_t *imageSizeOut,
+    uint8_t actualHashOut[32],
+    uint8_t expectedHashOut[32])
+{
+    if (imageSizeOut)
+        *imageSizeOut = 0u;
+    if (actualHashOut)
+        memset(actualHashOut, 0, 32u);
+    if (expectedHashOut)
+        memset(expectedHashOut, 0, 32u);
+
+    if (!st.active || !st.manifestCommitted || reader == NULL)
+        return STM32_VERIFY_NO_MANIFEST;
+
+    if (imageSizeOut)
+        *imageSizeOut = st.imageSize;
+    if (expectedHashOut)
+        memcpy(expectedHashOut, st.imageHash, 32u);
+
+    Sha256Ctx ctx;
+    uint8_t chunk[CHUNK_SIZE];
+    uint8_t actual[32];
+    uint32_t offset = 0u;
+
+    sha256Init(ctx);
+
+    while (offset < st.imageSize) {
+        size_t length = st.imageSize - offset;
+        if (length > sizeof(chunk))
+            length = sizeof(chunk);
+
+        if (!reader(FLASH_BASE + offset, chunk, length, context))
+            return STM32_VERIFY_READ_FAILED;
+
+        sha256Update(ctx, chunk, length);
+        offset += (uint32_t)length;
+
+        /*
+         * Keep the ESP watchdog/Wi-Fi stack serviced during long ROM reads.
+         * This remains read-only with respect to the STM32.
+         */
+        yield();
+    }
+
+    sha256Final(ctx, actual);
+
+    if (actualHashOut)
+        memcpy(actualHashOut, actual, 32u);
+
+    if (!sameHash(actual, st.imageHash))
+        return STM32_VERIFY_HASH_MISMATCH;
+
+    return STM32_VERIFY_OK;
+}
+
 bool stm32UpdateTransportHandlePacket(
     const uint8_t *packet,
     size_t packetLen,
