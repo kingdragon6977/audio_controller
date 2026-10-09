@@ -355,11 +355,15 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     bool idOk = false;
     bool flashSizeOk = false;
     bool targetMatch = false;
+    bool flashHeadOk = false;
     int syncResponse = -1;
     char syncStatus[16];
     uint8_t bootVersion = 0u;
     uint16_t productId = 0u;
     uint16_t flashKb = 0u;
+    uint8_t flashHead[64];
+    uint32_t initialMsp = 0u;
+    uint32_t resetVector = 0u;
 
     resetParser();
     udpFill = 0u;
@@ -473,6 +477,46 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
                   flashSizeOk &&
                   flashKb == STM32_EXPECTED_FLASH_KB;
 
+    /*
+     * Read-only application-flash proof.  This deliberately reads only the
+     * first 64 bytes at the fixed flash base; it never accepts a host-supplied
+     * address and never issues erase/write commands.
+     */
+    if (targetMatch &&
+        stm32ReadMemory(0x08000000u, flashHead, sizeof(flashHead))) {
+        char dump[196];
+        size_t dumpUsed;
+
+        flashHeadOk = true;
+        initialMsp = (uint32_t)flashHead[0] |
+                     ((uint32_t)flashHead[1] << 8) |
+                     ((uint32_t)flashHead[2] << 16) |
+                     ((uint32_t)flashHead[3] << 24);
+        resetVector = (uint32_t)flashHead[4] |
+                      ((uint32_t)flashHead[5] << 8) |
+                      ((uint32_t)flashHead[6] << 16) |
+                      ((uint32_t)flashHead[7] << 24);
+
+        dumpUsed = (size_t)snprintf(
+            dump, sizeof(dump),
+            "STM32_FLASH_HEAD addr=0x08000000 len=64 msp=0x%08lX reset=0x%08lX data=",
+            (unsigned long)initialMsp,
+            (unsigned long)resetVector);
+
+        for (size_t i = 0u;
+             i < sizeof(flashHead) && dumpUsed + 2u < sizeof(dump);
+             ++i) {
+            static const char hex[] = "0123456789ABCDEF";
+            dump[dumpUsed++] = hex[(flashHead[i] >> 4) & 0x0Fu];
+            dump[dumpUsed++] = hex[flashHead[i] & 0x0Fu];
+        }
+
+        if (dumpUsed + 1u < sizeof(dump))
+            dump[dumpUsed++] = '\n';
+        dump[dumpUsed] = '\0';
+        udpReply(replyIp, replyPort, dump);
+    }
+
     // Return the shared UART and STM32 to the normal PCM application.
     digitalWrite(STM32_BOOT_PIN, HIGH); // BOOT0 low
     Serial.end();
@@ -516,8 +560,9 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
                                  " flash_kb=%u", (unsigned int)flashKb);
     if (used < sizeof(result))
         used += (size_t)snprintf(result + used, sizeof(result) - used,
-                                 " target=%s",
-                                 targetMatch ? "PASS" : "FAIL");
+                                 " target=%s flash_head=%s",
+                                 targetMatch ? "PASS" : "FAIL",
+                                 flashHeadOk ? "OK" : "FAIL");
     if (used < sizeof(result) - 2u) {
         result[used++] = '\n';
         result[used] = '\0';
