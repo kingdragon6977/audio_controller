@@ -201,11 +201,25 @@ static void stm32NormalPins()
 
 static void stm32Reset(bool bootloader)
 {
-    // Select boot source before releasing reset.
+    /*
+     * BOOT0 is RC-held after the running STM32 loses PA0 authorization at reset.
+     * For ROM entry, fully precharge BOOT0 while PA0 authorization is still
+     * active, then keep NRST low only briefly so the RC hold easily spans the
+     * reset-release sampling interval.
+     *
+     * Bench measurements with 10 kOhm / 0.47 uF show ~4 ms digital hold after
+     * the ESP gate releases, so 20 ms precharge + 2 ms reset is deliberately
+     * conservative compared with the former 2 ms precharge + 25 ms reset.
+     */
     digitalWrite(STM32_BOOT_PIN, bootloader ? LOW : HIGH);
-    delay(2);
+
+    if (bootloader)
+        delay(20);
+    else
+        delay(2);
+
     digitalWrite(STM32_RESET_PIN, HIGH); // assert NRST low
-    delay(25);
+    delay(2);
     digitalWrite(STM32_RESET_PIN, LOW);  // release NRST
     delay(60);
 }
