@@ -487,12 +487,31 @@ static bool stm32FlashBeginCallback(
         pcmSeen = false;
         announcedReady = false;
 
-        if (!stm32PrepareFlash())
+        /*
+         * New STM32 firmware understands FLASH_PREP and explicitly reports
+         * PA0 BOOT_AUTH.  The currently installed pre-upgrade firmware only
+         * knows BOOT_PREP, so allow that as a bootstrap fallback.  The physical
+         * PA0 gate is still mandatory: without manual 'bootauth on', BOOT0
+         * cannot rise and the ROM sync below fails before any erase/write.
+         */
+        bool explicitFlashPrep = stm32PrepareFlash();
+        if (!explicitFlashPrep && !stm32PrepareBoot()) {
+            sendReady();
             return false;
+        }
 
         delay(BOOT1_LOW_SETTLE_MS);
-        if (!stm32PrepareFlash())
-            return false;
+        if (explicitFlashPrep) {
+            if (!stm32PrepareFlash()) {
+                sendReady();
+                return false;
+            }
+        } else {
+            if (!stm32PrepareBoot()) {
+                sendReady();
+                return false;
+            }
+        }
 
         Serial.end();
         delay(5);
@@ -600,14 +619,21 @@ static bool stm32FlashPageCallback(
 
     while (offset < length) {
         size_t chunk = (size_t)(length - offset);
+        size_t writeLength;
+        const uint8_t *writeData = data + offset;
+        uint8_t padded[256];
+
         if (chunk > 256u)
             chunk = 256u;
 
-        /* Manifest images are word-aligned; keep ROM writes word-aligned too. */
-        if ((chunk & 3u) != 0u)
-            return false;
+        writeLength = (chunk + 3u) & ~3u;
+        if (writeLength != chunk) {
+            memcpy(padded, data + offset, chunk);
+            memset(padded + chunk, 0xFF, writeLength - chunk);
+            writeData = padded;
+        }
 
-        if (!stm32WriteMemory(address + offset, data + offset, chunk))
+        if (!stm32WriteMemory(address + offset, writeData, writeLength))
             return false;
 
         offset += (uint32_t)chunk;
