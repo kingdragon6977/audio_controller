@@ -343,7 +343,7 @@ static void udpReply(const IPAddress &ip, uint16_t port, const char *message)
 
 static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
 {
-    char result[192];
+    char result[256];
     size_t used = 0u;
     bool bootPrepInitialOk = false;
     bool bootPrepSettledOk = false;
@@ -484,7 +484,7 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
      */
     if (targetMatch &&
         stm32ReadMemory(0x08000000u, flashHead, sizeof(flashHead))) {
-        char dump[196];
+        char dump[256];
         size_t dumpUsed;
 
         flashHeadOk = true;
