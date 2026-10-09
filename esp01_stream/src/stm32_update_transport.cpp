@@ -21,7 +21,9 @@ enum PacketType {
     PKT_PAGE_DATA      = 5,
     PKT_PAGE_SEAL      = 6,
     PKT_ABORT          = 7,
-    PKT_STATUS         = 8
+    PKT_STATUS         = 8,
+    PKT_FLASH_BEGIN    = 9,
+    PKT_FLASH_FINISH   = 10
 };
 
 enum ReplyCode {
@@ -31,7 +33,9 @@ enum ReplyCode {
     REPLY_BAD_SESSION = 3,
     REPLY_BAD_RANGE = 4,
     REPLY_BAD_HASH = 5,
-    REPLY_INCOMPLETE = 6
+    REPLY_INCOMPLETE = 6,
+    REPLY_FLASH_FAILED = 7,
+    REPLY_VERIFY_FAILED = 8
 };
 
 struct Sha256Ctx {
@@ -55,6 +59,9 @@ struct SessionState {
 
     bool pageActive;
     bool haveLastVerifiedPage;
+
+    bool flashActive;
+    uint16_t flashedPages;
     uint16_t lastVerifiedPage;
     uint16_t pageIndex;
     uint16_t pageLength;
@@ -63,6 +70,12 @@ struct SessionState {
 };
 
 static SessionState st;
+
+static Stm32UpdateFlashBeginCallback flashBeginCallback = NULL;
+static Stm32UpdateFlashPageCallback flashPageCallback = NULL;
+static Stm32UpdateReadCallback flashReadCallback = NULL;
+static Stm32UpdateFlashEndCallback flashEndCallback = NULL;
+static void *flashCallbackContext = NULL;
 
 static uint32_t rotr32(uint32_t x, uint32_t n)
 {
@@ -248,6 +261,20 @@ void stm32UpdateTransportReset()
     resetState();
 }
 
+void stm32UpdateTransportSetFlashCallbacks(
+    Stm32UpdateFlashBeginCallback beginCallback,
+    Stm32UpdateFlashPageCallback pageCallback,
+    Stm32UpdateReadCallback readCallback,
+    Stm32UpdateFlashEndCallback endCallback,
+    void *context)
+{
+    flashBeginCallback = beginCallback;
+    flashPageCallback = pageCallback;
+    flashReadCallback = readCallback;
+    flashEndCallback = endCallback;
+    flashCallbackContext = context;
+}
+
 
 Stm32UpdateVerifyResult stm32UpdateTransportVerifyCommittedImage(
     Stm32UpdateReadCallback reader,
@@ -321,6 +348,8 @@ bool stm32UpdateTransportHandlePacket(
     const uint32_t session = readLe32(packet + 8);
 
     if (type == PKT_ABORT) {
+        if (st.flashActive && flashEndCallback)
+            flashEndCallback(false, flashCallbackContext);
         resetState();
         reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, 0);
         return true;
@@ -359,6 +388,38 @@ bool stm32UpdateTransportHandlePacket(
     }
     if (session != st.session) {
         reply(replySocket, replyIp, replyPort, type, REPLY_BAD_SESSION, session, 0);
+        return true;
+    }
+
+    if (type == PKT_FLASH_BEGIN) {
+        if (packetLen != 12u || !st.manifestCommitted ||
+            flashBeginCallback == NULL || flashPageCallback == NULL ||
+            flashReadCallback == NULL) {
+            reply(replySocket, replyIp, replyPort, type, REPLY_BAD_STATE, session, 0);
+            return true;
+        }
+
+        /* Idempotent retry if the ACK was lost after ROM entry succeeded. */
+        if (st.flashActive) {
+            reply(replySocket, replyIp, replyPort, type, REPLY_OK,
+                  session, st.flashedPages);
+            return true;
+        }
+
+        if (!flashBeginCallback(st.session, st.imageSize, st.pageCount,
+                                flashCallbackContext)) {
+            reply(replySocket, replyIp, replyPort, type,
+                  REPLY_FLASH_FAILED, session, 0);
+            return true;
+        }
+
+        st.flashActive = true;
+        st.flashedPages = 0u;
+        st.haveLastVerifiedPage = false;
+        st.pageActive = false;
+        st.pageReceived = 0u;
+
+        reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, 0);
         return true;
     }
 
@@ -520,15 +581,79 @@ bool stm32UpdateTransportHandlePacket(
             return true;
         }
 
-        /*
-         * Safety boundary: verified data stops here.
-         * There is intentionally no erase/write call in this module.
-         */
+        if (st.flashActive) {
+            uint32_t address;
+
+            /* Flash mode is deliberately sequential and manifest-bounded. */
+            if (index != st.flashedPages || flashPageCallback == NULL) {
+                reply(replySocket, replyIp, replyPort, type,
+                      REPLY_BAD_STATE, session, index);
+                return true;
+            }
+
+            address = FLASH_BASE + (uint32_t)index * PAGE_SIZE;
+            if (!flashPageCallback(index, address,
+                                   st.pageBuffer, st.pageLength,
+                                   flashCallbackContext)) {
+                /*
+                 * Keep the verified page buffered. Retrying PAGE_SEAL is
+                 * idempotent because the callback erases/reprograms that same
+                 * manifest page before reporting success.
+                 */
+                reply(replySocket, replyIp, replyPort, type,
+                      REPLY_FLASH_FAILED, session, index);
+                return true;
+            }
+
+            st.flashedPages++;
+        }
+
         st.pageActive = false;
         st.pageReceived = 0u;
         st.haveLastVerifiedPage = true;
         st.lastVerifiedPage = index;
         reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, index);
+        return true;
+    }
+
+    if (type == PKT_FLASH_FINISH) {
+        Stm32UpdateVerifyResult verifyResult;
+        uint8_t actual[32];
+        uint8_t expected[32];
+        uint32_t imageSize = 0u;
+
+        if (packetLen != 12u || !st.flashActive ||
+            st.pageActive || st.flashedPages != st.pageCount ||
+            flashReadCallback == NULL) {
+            reply(replySocket, replyIp, replyPort, type,
+                  REPLY_INCOMPLETE, session, st.flashedPages);
+            return true;
+        }
+
+        verifyResult = stm32UpdateTransportVerifyCommittedImage(
+            flashReadCallback,
+            flashCallbackContext,
+            &imageSize,
+            actual,
+            expected);
+
+        if (verifyResult == STM32_VERIFY_HASH_MISMATCH) {
+            reply(replySocket, replyIp, replyPort, type,
+                  REPLY_BAD_HASH, session, st.flashedPages);
+            return true;
+        }
+        if (verifyResult != STM32_VERIFY_OK) {
+            reply(replySocket, replyIp, replyPort, type,
+                  REPLY_VERIFY_FAILED, session, st.flashedPages);
+            return true;
+        }
+
+        st.flashActive = false;
+        if (flashEndCallback)
+            flashEndCallback(true, flashCallbackContext);
+
+        reply(replySocket, replyIp, replyPort, type,
+              REPLY_OK, session, st.flashedPages);
         return true;
     }
 
