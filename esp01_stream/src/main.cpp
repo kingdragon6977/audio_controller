@@ -21,6 +21,7 @@ static const uint16_t UDP_BYTES = PCM_BYTES_PER_FRAME * UDP_FRAMES;
 static const uint8_t CTRL_READY = 0xF0u;
 static const uint8_t CTRL_STOP = 0xF1u;
 static const uint8_t CTRL_BOOT_PREP = 0xF2u;
+static const uint8_t CTRL_FLASH_PREP = 0xF3u;
 static const uint8_t BOOT_PREP_PASS = 0x01u;
 static const uint8_t BOOT_PREP_PROTOCOL = 0x01u;
 static const uint8_t BOOT_PREP_TARGET_TAG[] = {'R', 'C', 'T', '6'};
@@ -71,6 +72,7 @@ static bool otaActive = false;
 static uint32_t lastReadyMs = 0u;
 static uint32_t lastHeartbeatMs = 0u;
 static uint32_t pcmFrames = 0u;
+static bool stm32RomSessionActive = false;
 
 enum ParseState {
     WAIT_A5,
@@ -291,6 +293,81 @@ static bool stm32ReadMemory(uint32_t address, uint8_t *data, size_t length)
     return true;
 }
 
+static bool stm32WriteMemory(
+    uint32_t address,
+    const uint8_t *data,
+    size_t length)
+{
+    uint8_t frame[258];
+    uint8_t checksum;
+
+    if (data == NULL || length == 0u || length > 256u ||
+        (length & 3u) != 0u)
+        return false;
+
+    if (!stm32SendCommand(0x31u))
+        return false;
+    if (!stm32SendAddress(address))
+        return false;
+
+    frame[0] = (uint8_t)(length - 1u);
+    memcpy(frame + 1u, data, length);
+
+    checksum = frame[0];
+    for (size_t i = 0u; i < length; ++i)
+        checksum ^= data[i];
+    frame[length + 1u] = checksum;
+
+    Serial.write(frame, length + 2u);
+    Serial.flush();
+    return serialReadTimeout(1500u) == STM32_ACK;
+}
+
+static bool stm32ErasePage(uint16_t pageIndex)
+{
+    uint8_t frame[3];
+
+    if (pageIndex >= 128u)
+        return false;
+
+    if (!stm32SendCommand(0x43u))
+        return false;
+
+    /* Standard ERASE: N=0 means exactly one page follows. */
+    frame[0] = 0x00u;
+    frame[1] = (uint8_t)pageIndex;
+    frame[2] = (uint8_t)(frame[0] ^ frame[1]);
+
+    Serial.write(frame, sizeof(frame));
+    Serial.flush();
+    return serialReadTimeout(3000u) == STM32_ACK;
+}
+
+static bool stm32VerifyPage(
+    uint32_t address,
+    const uint8_t *expected,
+    uint16_t length)
+{
+    uint8_t verify[256];
+    uint32_t offset = 0u;
+
+    while (offset < length) {
+        size_t chunk = (size_t)(length - offset);
+        if (chunk > sizeof(verify))
+            chunk = sizeof(verify);
+
+        if (!stm32ReadMemory(address + offset, verify, chunk))
+            return false;
+        if (memcmp(verify, expected + offset, chunk) != 0)
+            return false;
+
+        offset += (uint32_t)chunk;
+        yield();
+    }
+
+    return true;
+}
+
 static bool stm32RomReadCallback(
     uint32_t address,
     uint8_t *data,
@@ -311,15 +388,13 @@ static void hashToHex(const uint8_t hash[32], char out[65])
     out[64] = '\0';
 }
 
-static bool stm32PrepareBoot()
+static bool stm32PrepareControl(uint8_t control)
 {
     size_t matched = 0u;
     uint32_t start;
 
-    // Discard complete/partial PCM frames already buffered before requesting
-    // a quiet link and an explicit PB2/BOOT1-low confirmation.
     serialDrainRx();
-    Serial.write(CTRL_BOOT_PREP);
+    Serial.write(control);
     Serial.flush();
 
     start = millis();
@@ -352,6 +427,206 @@ static bool stm32PrepareBoot()
     }
 
     return false;
+}
+
+static bool stm32PrepareBoot()
+{
+    return stm32PrepareControl(CTRL_BOOT_PREP);
+}
+
+static bool stm32PrepareFlash()
+{
+    return stm32PrepareControl(CTRL_FLASH_PREP);
+}
+
+static void stm32RestoreApplication()
+{
+    digitalWrite(STM32_BOOT_PIN, HIGH);
+    Serial.end();
+    delay(5);
+    Serial.setRxBufferSize(2048);
+    Serial.begin(UART_BAUD, SERIAL_8N1);
+    Serial.setDebugOutput(false);
+    stm32Reset(false);
+    stm32RomSessionActive = false;
+
+    resetParser();
+    udpFill = 0u;
+    haveSeq = false;
+    pcmSeen = false;
+    lastReadyMs = 0u;
+}
+
+static bool stm32FlashBeginCallback(
+    uint32_t session,
+    uint32_t imageSize,
+    uint16_t pageCount,
+    void *context)
+{
+    bool readSupported = false;
+    bool writeSupported = false;
+    bool eraseSupported = false;
+    uint16_t productId = 0u;
+    uint16_t flashKb = 0u;
+    int syncResponse;
+
+    (void)session;
+    (void)imageSize;
+    (void)pageCount;
+    (void)context;
+
+    /*
+     * If a previous transport attempt was interrupted while ROM remained
+     * active, first probe that existing session instead of requiring the
+     * application to authorize a second reset.
+     */
+    if (!stm32RomSessionActive) {
+        resetParser();
+        udpFill = 0u;
+        haveSeq = false;
+        pcmSeen = false;
+        announcedReady = false;
+
+        if (!stm32PrepareFlash())
+            return false;
+
+        delay(BOOT1_LOW_SETTLE_MS);
+        if (!stm32PrepareFlash())
+            return false;
+
+        Serial.end();
+        delay(5);
+        Serial.setRxBufferSize(256);
+        Serial.begin(STM32_ROM_BAUD, SERIAL_8E1);
+        Serial.setDebugOutput(false);
+        serialDrainRx();
+
+        stm32Reset(true);
+        serialDrainRx();
+
+        Serial.write((uint8_t)0x7Fu);
+        Serial.flush();
+        syncResponse = serialReadTimeout(1000u);
+        if (syncResponse != STM32_ACK) {
+            stm32RestoreApplication();
+            return false;
+        }
+
+        stm32RomSessionActive = true;
+    }
+
+    /* Require the exact ROM capabilities before any page can be erased. */
+    if (!stm32SendCommand(0x00u))
+        return false;
+    {
+        int n = serialReadTimeout(500u);
+        int version;
+        if (n < 0 || n > 31)
+            return false;
+        version = serialReadTimeout(500u);
+        if (version < 0)
+            return false;
+
+        for (int i = 0; i < n; ++i) {
+            int command = serialReadTimeout(500u);
+            if (command < 0)
+                return false;
+            if ((uint8_t)command == 0x11u)
+                readSupported = true;
+            else if ((uint8_t)command == 0x31u)
+                writeSupported = true;
+            else if ((uint8_t)command == 0x43u)
+                eraseSupported = true;
+        }
+        if (serialReadTimeout(500u) != STM32_ACK)
+            return false;
+    }
+
+    if (!readSupported || !writeSupported || !eraseSupported)
+        return false;
+
+    if (!stm32SendCommand(0x02u))
+        return false;
+    {
+        int n = serialReadTimeout(500u);
+        uint16_t id = 0u;
+        if (n < 0 || n > 3)
+            return false;
+        for (int i = 0; i <= n; ++i) {
+            int b = serialReadTimeout(500u);
+            if (b < 0)
+                return false;
+            id = (uint16_t)((id << 8) | (uint8_t)b);
+        }
+        if (serialReadTimeout(500u) != STM32_ACK)
+            return false;
+        productId = id;
+    }
+
+    if (productId != STM32_EXPECTED_PID)
+        return false;
+
+    {
+        uint8_t flashSizeBytes[2];
+        if (!stm32ReadMemory(STM32_FLASH_SIZE_REG,
+                             flashSizeBytes,
+                             sizeof(flashSizeBytes)))
+            return false;
+        flashKb = (uint16_t)flashSizeBytes[0] |
+                  ((uint16_t)flashSizeBytes[1] << 8);
+    }
+
+    return flashKb == STM32_EXPECTED_FLASH_KB;
+}
+
+static bool stm32FlashPageCallback(
+    uint16_t pageIndex,
+    uint32_t address,
+    const uint8_t *data,
+    uint16_t length,
+    void *context)
+{
+    uint32_t offset = 0u;
+
+    (void)context;
+
+    if (!stm32RomSessionActive || data == NULL ||
+        address != 0x08000000u + (uint32_t)pageIndex * 2048u ||
+        length == 0u || length > 2048u || (length & 3u) != 0u)
+        return false;
+
+    if (!stm32ErasePage(pageIndex))
+        return false;
+
+    while (offset < length) {
+        size_t chunk = (size_t)(length - offset);
+        if (chunk > 256u)
+            chunk = 256u;
+
+        /* Manifest images are word-aligned; keep ROM writes word-aligned too. */
+        if ((chunk & 3u) != 0u)
+            return false;
+
+        if (!stm32WriteMemory(address + offset, data + offset, chunk))
+            return false;
+
+        offset += (uint32_t)chunk;
+        yield();
+    }
+
+    return stm32VerifyPage(address, data, length);
+}
+
+static void stm32FlashEndCallback(bool success, void *context)
+{
+    (void)context;
+
+    /*
+     * On failure/abort leave the core running in ROM so a recovery attempt can
+     * continue without booting a partially programmed application.
+     */
+    if (success)
+        stm32RestoreApplication();
 }
 
 static void udpReply(const IPAddress &ip, uint16_t port, const char *message)
@@ -581,18 +856,7 @@ static void stm32BootloaderTest(const IPAddress &replyIp, uint16_t replyPort)
     }
 
     // Return the shared UART and STM32 to the normal PCM application.
-    digitalWrite(STM32_BOOT_PIN, HIGH); // BOOT0 low
-    Serial.end();
-    delay(5);
-    Serial.setRxBufferSize(2048);
-    Serial.begin(UART_BAUD, SERIAL_8N1);
-    Serial.setDebugOutput(false);
-    stm32Reset(false);
-    resetParser();
-    udpFill = 0u;
-    haveSeq = false;
-    pcmSeen = false;
-    lastReadyMs = 0u;
+    stm32RestoreApplication();
 
     if (syncOk)
         snprintf(syncStatus, sizeof(syncStatus), "ACK");
@@ -760,13 +1024,15 @@ static void connectWifi()
     }
 
     targetIp.fromString(UDP_TARGET_IP);
-    stm32UpdateTransportReset();
+    if (!stm32RomSessionActive)
+        stm32UpdateTransportReset();
     udpControl.stop();
     udpControl.begin(UDP_CONTROL_PORT);
 
     pcmSeen = false;
     pcmFrames = 0u;
-    sendReady();
+    if (!stm32RomSessionActive)
+        sendReady();
     sendHeartbeat();
 }
 
@@ -774,6 +1040,12 @@ void setup()
 {
     // Establish safe STM32 states before Wi-Fi/audio initialization.
     stm32NormalPins();
+    stm32UpdateTransportSetFlashCallbacks(
+        stm32FlashBeginCallback,
+        stm32FlashPageCallback,
+        stm32RomReadCallback,
+        stm32FlashEndCallback,
+        NULL);
 
     Serial.setRxBufferSize(2048);
     Serial.begin(UART_BAUD);
@@ -785,7 +1057,8 @@ void setup()
 
 void loop()
 {
-    ArduinoOTA.handle();
+    if (!stm32RomSessionActive)
+        ArduinoOTA.handle();
 
     if (otaActive) {
         yield();
@@ -793,7 +1066,7 @@ void loop()
     }
 
     if (WiFi.status() != WL_CONNECTED) {
-        if (announcedReady) {
+        if (announcedReady && !stm32RomSessionActive) {
             Serial.write(CTRL_STOP);
             Serial.flush();
             announcedReady = false;
@@ -808,6 +1081,13 @@ void loop()
     }
 
     handleUdpControl();
+
+    if (stm32RomSessionActive) {
+        if ((uint32_t)(millis() - lastHeartbeatMs) >= 1000u)
+            sendHeartbeat();
+        yield();
+        return;
+    }
 
     while (Serial.available() > 0) {
         consumeByte((uint8_t)Serial.read());
