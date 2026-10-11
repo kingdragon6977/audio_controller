@@ -12,11 +12,17 @@
 #define ESP_CTRL_READY         0xF0u
 #define ESP_CTRL_STOP          0xF1u
 #define ESP_CTRL_BOOT_PREP     0xF2u
+#define ESP_CTRL_FLASH_PREP    0xF3u
 #define BOOT_PREP_PASS         0x01u
 #define BOOT_PREP_FAIL         0x00u
+#define BOOT_PREP_PROTOCOL     0x01u
 
 static const uint8_t boot_prep_ack_magic[] = {
     0xB0u, 0x07u, 0x10u, 0xADu
+};
+
+static const uint8_t boot_prep_target_tag[] = {
+    'R', 'C', 'T', '6'
 };
 
 static uint16_t stream_dma_buffer[STREAM_DMA_SLOTS];
@@ -268,21 +274,42 @@ void audio_stream_task(void)
                 uart2_print("ESP-01: stream stopped by receiver.\r\n");
             }
         }
-        else if (control == ESP_CTRL_BOOT_PREP)
+        else if (control == ESP_CTRL_BOOT_PREP ||
+                 control == ESP_CTRL_FLASH_PREP)
         {
             uint8_t status;
+            int boot1_ok;
+            int auth_ok = 1;
 
             esp_ready = 0u;
             audio_stream_stop();
             start_message_printed = 0u;
 
-            status = board_boot1_hold_low() ? BOOT_PREP_PASS : BOOT_PREP_FAIL;
-            esp_uart_write(boot_prep_ack_magic, sizeof(boot_prep_ack_magic));
-            esp_uart_write(&status, 1u);
+            boot1_ok = board_boot1_hold_low();
+            if (control == ESP_CTRL_FLASH_PREP)
+                auth_ok = board_boot_auth_is_on();
 
-            uart2_print(status == BOOT_PREP_PASS
-                        ? "STM32 BOOT PREP: PASS - PCM stopped; PB2/BOOT1 driven and read LOW.\r\n"
-                        : "STM32 BOOT PREP: FAIL - PB2/BOOT1 did not read LOW; ROM test blocked.\r\n");
+            status = (boot1_ok && auth_ok) ? BOOT_PREP_PASS : BOOT_PREP_FAIL;
+            {
+                uint8_t protocol = BOOT_PREP_PROTOCOL;
+                esp_uart_write(boot_prep_ack_magic, sizeof(boot_prep_ack_magic));
+                esp_uart_write(&status, 1u);
+                esp_uart_write(&protocol, 1u);
+                esp_uart_write(boot_prep_target_tag, sizeof(boot_prep_target_tag));
+            }
+
+            if (control == ESP_CTRL_FLASH_PREP)
+            {
+                uart2_print(status == BOOT_PREP_PASS
+                            ? "STM32 FLASH PREP: PASS - PB2/BOOT1 LOW and PA0 BOOT_AUTH active.\r\n"
+                            : "STM32 FLASH PREP: FAIL - requires PB2/BOOT1 LOW and PA0 BOOT_AUTH active.\r\n");
+            }
+            else
+            {
+                uart2_print(status == BOOT_PREP_PASS
+                            ? "STM32 BOOT PREP: PASS - PCM stopped; PB2/BOOT1 driven and read LOW.\r\n"
+                            : "STM32 BOOT PREP: FAIL - PB2/BOOT1 did not read LOW; ROM test blocked.\r\n");
+            }
         }
     }
 

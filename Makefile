@@ -51,7 +51,7 @@ SRC := \
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
 OBJ += $(BUILD)/startup/startup_stm32f10x_hd.o
 
-.PHONY: all clean size
+.PHONY: all clean size manifest manifest-test
 
 all: $(BUILD)/$(TARGET).bin $(BUILD)/$(TARGET).hex
 
@@ -77,6 +77,12 @@ $(BUILD)/$(TARGET).hex: $(BUILD)/$(TARGET).elf
 
 size: $(BUILD)/$(TARGET).elf
 	$(SIZE) $<
+
+manifest: $(BUILD)/$(TARGET).bin
+	python3 tools/stm32_image_manifest.py $< -o $(BUILD)/$(TARGET).manifest.json
+
+manifest-test:
+	python3 -m unittest -v tests/test_stm32_image_manifest.py
 
 clean:
 	rm -rf $(BUILD)
