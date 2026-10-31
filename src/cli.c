@@ -351,7 +351,7 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "help") == 0)
     {
-        uart2_print("\r\nCommands:\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
+        uart2_print("\r\nCommands:\r\n codec clocktest    (fractional/integer/bypass; pauses PCM)\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
         uart2_print(" esp status         (USART1 + stream diagnostics)\r\n");
@@ -403,6 +403,17 @@ static void execute(char *cmd)
         }
 
         codec_dump_profile();
+        return;
+    }
+
+    if (strcmp(cmd, "codec clocktest") == 0) {
+        if (board_boot_auth_is_on()) {
+            uart2_print("CLOCK TEST blocked: boot authorization is active.\r\n");
+            return;
+        }
+        audio_stream_stop();
+        i2s_rx_stop();
+        codec_clock_test();
         return;
     }
 

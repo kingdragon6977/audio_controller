@@ -472,3 +472,33 @@ clock-path/codec problem more likely than polling aliasing; exact root cause
 remains unresolved. Do not bypass the rate gate or label PCM calibrated/24k
 until corrected and measured. Next investigate clock routing and codec clock
 source/PLL behavior. Waveform measurements and analog calibration remain pending.
+
+## Offline clock-path audit and comparison prepared — 2026-10-31
+
+User explicitly reports device unpowered for circuit checks; no hardware access
+or upload attempted in this work. Branch `stm32-safe-flash`, source parent
+`65d0224`. TI Rev B section 10.3.7 and register tables 19–36 confirm current
+P=1/R=1/J=8/D=1920, NADC=8/MADC=2/AOSR=128 and BCLK divider 8 / ADC_CLK
+are the intended 12 MHz-to-48 kHz configuration. PA8 timer register math also
+remains correct. No offline root cause is established. Corrected an IADC
+comment: encoding 0x80 means 256 instructions, not 128; register value unchanged.
+Source: https://www.ti.com/lit/ds/symlink/tlv320adc3101.pdf
+
+Prepared `codec clocktest` to compare fractional PLL (48000 Hz), integer PLL
+(46875 Hz) and direct MCLK bypass (46875 Hz) without changing wiring. Capture
+is paused; ADC data stays muted during diagnostic modes, clock changes occur
+with ADC off, PLL is programmed disabled and settled after power selection,
+mode readback precedes measurement. Configuration/readback failure holds reset.
+At completion normal profile is restored and the normal 48 kHz gate rechecked;
+diagnostic rates never authorize PCM. Active boot authorization blocks test.
+See [procedure](pa8-audio-clock.md#controlled-clock-path-comparison-prepared-not-hardware-tested).
+
+Validation: STM32 cross-build/manifest PASS; seven native executables and
+11 Python tests PASS, including comparison-mode settings, muting, profile
+restoration and injected I2C failure holding reset. Built image
+`build/clock-path-test/audio_controller.bin`: 58984 bytes, SHA-256
+`8f2f2c8069172c44a9005f62a3b1d504a5f67bc091f9f41869de9c02f0fb9107`.
+[Manifest](firmware/clock-path-test-manifest.json). This image has not been
+flashed. Powered comparison is pending user's completion of circuit checks.
+Previous hardware measurement remains approximately 17.08 kHz; no new hardware
+result is implied by the build/tests.

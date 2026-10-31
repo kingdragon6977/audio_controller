@@ -118,3 +118,32 @@ frequency, stopped/overflowed timer, active capture, peripheral conflicts,
 masked interrupts, output pins and cleanup. Simulated tests establish software
 behavior; hardware logs establish the observed board result separately.
 Reference: [ST RM0008, EXTI mapping and general-purpose timers](https://www.st.com/resource/en/reference_manual/rm0008-stm32f103xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf).
+
+## Controlled clock-path comparison (prepared, not hardware-tested)
+
+`codec clocktest` pauses capture and compares these modes with the same PA8
+12 MHz output, analog routing, 16-bit stereo framing and EXTI/TIM2 measurement:
+
+| Mode | Clock path | NADC / MADC / AOSR | Expected WCLK |
+| --- | --- | --- | --- |
+| PLL_FRACTIONAL | 12 MHz x 8.192 = 98.304 MHz | 8 / 2 / 128 | 48000 Hz |
+| PLL_INTEGER | 12 MHz x 8 = 96 MHz | 8 / 2 / 128 | 46875 Hz |
+| MCLK_BYPASS | 12 MHz direct, PLL off | 1 / 2 / 128 | 46875 Hz |
+
+These are diagnostic modes, not alternative production sample rates. ADCs
+remain muted, clock/divider changes occur with ADC power down, PLL P/R/J/D
+are programmed with PLL off, D writes remain adjacent, and a settling delay
+follows PLL power selection. Final mode values are read back before counting.
+IADC register 21 encoding 0x80 represents 256 instructions (not 128); the
+MADC x AOSR product here is 256. A failure in configuration/readback holds
+hardware RESET and blocks capture. Normal clock profile and fresh 48 kHz
+preflight are restored after comparison. An active boot authorization blocks
+the CLI test. The test does not change PA8 or drive WCLK/BCLK/DOUT.
+
+Interpretation remains conditional: integer/bypass success with fractional
+failure points toward fractional-PLL configuration/startup; bypass success
+with both PLL paths failing points toward PLL behavior. Similar wrong results
+in every mode keep routing, reference delivery, power and the measurement
+path under investigation. Register readback is not proof of physical clocks.
+The normal clock values match TI's 12 MHz/48 kHz example (section 10.3.7);
+no confirmed root cause was found in the offline audit.
