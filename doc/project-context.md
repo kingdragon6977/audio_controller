@@ -502,3 +502,38 @@ restoration and injected I2C failure holding reset. Built image
 flashed. Powered comparison is pending user's completion of circuit checks.
 Previous hardware measurement remains approximately 17.08 kHz; no new hardware
 result is implied by the build/tests.
+
+## Controlled clock-path comparison deployed — 2026-10-31
+
+User confirms unpowered continuity checks passed for PA8-to-MCLK24,
+PB12-to-WCLK2, PB13-to-BCLK1, PB15-to-DOUT3 and PB14-to-RESET4, then
+reports power restored and UART2 free. Source commit `18a39a3`, branch
+`stm32-safe-flash`. OTA through ESP `192.168.114.54` installed the
+58,984-byte image with SHA-256
+`8f2f2c8069172c44a9005f62a3b1d504a5f67bc091f9f41869de9c02f0fb9107`.
+All 29 pages and full-image ROM verification PASS; see
+[OTA log](clock-path-ota-2026-10-31.log). PCM/application health acceptance
+remains blocked by the wrong normal WCLK rate; image verification alone
+is not successful PCM recovery. ESP image unchanged.
+
+New powered UART test (`codec clocktest`), all mode register reads accepted:
+
+| Mode | Expected Hz | Observed Hz | Count / gate |
+| --- | --- | --- | --- |
+| Fractional PLL | 48000 | 17080 | 854 / 50000 us |
+| Integer PLL | 46875 | 17100 | 855 / 50000 us |
+| MCLK bypass | 46875 | 0 | 0 / 50000 us |
+
+The bypass result means no WCLK edges were detected; its measurement flag
+is INVALID due to zero count, not a missing TIM2 gate. Normal profile was
+restored, normal preflight remained approximately 17.08–17.10 kHz,
+PA0 boot authorization confirmed OFF/HIGH. Stream STOPPED; DMA error,
+overrun, stall and UART error counters remain zero.
+[UART evidence](clock-path-uart-2026-10-31.log).
+
+Inference, not confirmed root cause: nearly unchanged PLL output and absent
+bypass output point toward missing/unusable reference at the codec, despite
+continuity and register checks. No physical PA8 waveform has been measured.
+Next distinguish actual PA8 output activity from codec-side reference reception
+and input power/clock behavior. Do not repeat continuity claims as proof of
+clock quality or bypass the production rate gate.
