@@ -30,6 +30,10 @@ LDFLAGS := $(CPUFLAGS) \
 SRC := \
     src/main.c \
     src/board.c \
+    src/audio_clock.c \
+    src/audio_frequency.c \
+    src/audio_dma_buffer.c \
+    src/flash_authorization.c \
     src/uart.c \
     src/i2c.c \
     src/codec.c \
@@ -51,7 +55,7 @@ SRC := \
 OBJ := $(patsubst %.c,$(BUILD)/%.o,$(SRC))
 OBJ += $(BUILD)/startup/startup_stm32f10x_hd.o
 
-.PHONY: all clean size
+.PHONY: all clean size manifest manifest-test ota-test test
 
 all: $(BUILD)/$(TARGET).bin $(BUILD)/$(TARGET).hex
 
@@ -77,6 +81,34 @@ $(BUILD)/$(TARGET).hex: $(BUILD)/$(TARGET).elf
 
 size: $(BUILD)/$(TARGET).elf
 	$(SIZE) $<
+
+manifest: $(BUILD)/$(TARGET).bin
+	python3 tools/stm32_image_manifest.py $< -o $(BUILD)/$(TARGET).manifest.json
+
+manifest-test:
+	python3 -m unittest -v tests/test_stm32_image_manifest.py
+
+test: ota-test
+
+ota-test:
+	@mkdir -p $(BUILD)/tests
+	gcc -Wall -Wextra -Werror -Iinc src/flash_authorization.c tests/test_flash_authorization.c -o $(BUILD)/tests/flash_authorization
+	$(BUILD)/tests/flash_authorization
+	gcc -Wall -Wextra -Werror -Itests/board_stubs -Iinc src/board.c tests/test_board_lease.c -o $(BUILD)/tests/board_lease
+	$(BUILD)/tests/board_lease
+	gcc -Wall -Wextra -Werror -Itests/clock_stubs -Iinc src/audio_clock.c tests/test_audio_clock.c -o $(BUILD)/tests/audio_clock
+	$(BUILD)/tests/audio_clock
+	gcc -Wall -Wextra -Werror -Itests/clock_stubs -Iinc src/audio_frequency.c tests/test_audio_frequency.c -o $(BUILD)/tests/audio_frequency
+	$(BUILD)/tests/audio_frequency
+	gcc -Wall -Wextra -Werror -Itests/clock_stubs -Iinc src/codec.c tests/test_codec_clock.c -o $(BUILD)/tests/codec_clock
+	$(BUILD)/tests/codec_clock
+	gcc -Wall -Wextra -Werror -Iinc src/audio_dma_buffer.c tests/test_audio_dma_buffer.c -o $(BUILD)/tests/audio_dma_buffer
+	$(BUILD)/tests/audio_dma_buffer
+	gcc -Wall -Wextra -Werror -Itests/uart_stubs -Iinc src/uart.c tests/test_uart_dma.c -o $(BUILD)/tests/uart_dma
+	$(BUILD)/tests/uart_dma
+	g++ -std=c++11 -Wall -Wextra -Werror -Itests/esp_stubs tests/test_update_transport.cpp -o $(BUILD)/tests/update_transport
+	$(BUILD)/tests/update_transport
+	python3 -m unittest discover -s tests -p 'test_*.py' -v
 
 clean:
 	rm -rf $(BUILD)

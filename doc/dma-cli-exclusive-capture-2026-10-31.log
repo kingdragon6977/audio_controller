@@ -1,0 +1,41 @@
+[2K> i[2K> i2[2K> i2s[2K> i2s [2K> i2s c[2K> i2s ca[2K> i2s cap[2K> i2s capt[2K> i2s captu[2K> i2s captur[2K> i2s capture[2K> i2s capture [2K> i2s capture 1
+Running 1 compact frame-aligned I2S captures...
+  #1 A[min=-54 max=-46 mean=-50 peak=54] B[min=487 max=539 mean=504 peak=539]
+Repeated capture summary: 1/1 PASS
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=84262 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> i[2K> i2[2K> i2s[2K> i2s [2K> i2s m[2K> i2s me[2K> i2s met[2K> i2s mete[2K> i2s meter[2K> i2s meter [2K> i2s meter 1
+Starting long frame-aligned I2S audio meter...
+
+I2S LONG AUDIO METER
+  Requested     = 1 s
+  Target blocks = 378
+  Completed     = 378 blocks
+  Frames/ch     = 48006
+  Channel map follows WS at every DMA handoff
+  LEFT  MIN/MAX  = 463 / 559
+  LEFT  MEAN     = 512
+  LEFT  RMS(AC)  = 21
+  LEFT  PEAK     = 559 (~-36 dBFS)
+  LEFT  CLIPS    = 0
+  RIGHT MIN/MAX  = -56 / -42
+  RIGHT MEAN     = -50
+  RIGHT RMS(AC)  = 7
+  RIGHT PEAK     = 56 (~-56 dBFS)
+  RIGHT CLIPS    = 0
+  RESULT        = PASS
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=85488 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> b[2K> bo[2K> boo[2K> boot[2K> boota[2K> bootau[2K> bootaut[2K> bootauth[2K> bootauth [2K> bootauth s[2K> bootauth st[2K> bootauth sta[2K> bootauth stat[2K> bootauth statu[2K> bootauth status
+BOOT_AUTH PA0: OFF (HIGH)  ODR=1 IDR=1
+> 

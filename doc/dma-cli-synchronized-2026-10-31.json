@@ -1,0 +1,185 @@
+{
+  "packets": 2693,
+  "statuses": [
+    {
+      "t": 0.00815204088576138,
+      "text": "STREAM_STATUS uptime_ms=668303 pcm=234594 udp=58648 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 3.0066011119633913,
+      "text": "STREAM_STATUS uptime_ms=671301 pcm=235722 udp=58930 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 6.013391640968621,
+      "text": "STREAM_STATUS uptime_ms=674310 pcm=236856 udp=59213 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 9.019957910990342,
+      "text": "STREAM_STATUS uptime_ms=677317 pcm=237988 udp=59496 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 12.02586595993489,
+      "text": "STREAM_STATUS uptime_ms=680319 pcm=239118 udp=59779 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 15.032894112868235,
+      "text": "STREAM_STATUS uptime_ms=683329 pcm=240252 udp=60062 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 18.039128737989813,
+      "text": "STREAM_STATUS uptime_ms=686336 pcm=241384 udp=60345 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 21.04562393995002,
+      "text": "STREAM_STATUS uptime_ms=689342 pcm=242516 udp=60628 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 24.05148615478538,
+      "text": "STREAM_STATUS uptime_ms=692348 pcm=243648 udp=60911 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 27.057718665804714,
+      "text": "STREAM_STATUS uptime_ms=695354 pcm=244780 udp=61194 udp_fail=0 missing=2 bad_header=0 target=192.168.114.194 rom=0"
+    }
+  ],
+  "commands": [
+    {
+      "t": 0.0004625469446182251,
+      "command": "esp status"
+    },
+    {
+      "t": 0.8628252199850976,
+      "command": "esp status"
+    },
+    {
+      "t": 1.7231213788036257,
+      "command": "codec dump"
+    },
+    {
+      "t": 2.5833226938266307,
+      "command": "help"
+    },
+    {
+      "t": 3.1936991969123483,
+      "command": "mclk status"
+    },
+    {
+      "t": 4.0991873138118535,
+      "command": "esp status"
+    },
+    {
+      "t": 4.958853070857003,
+      "command": "codec dump"
+    },
+    {
+      "t": 5.82182496599853,
+      "command": "help"
+    },
+    {
+      "t": 6.43402783991769,
+      "command": "mclk status"
+    },
+    {
+      "t": 7.33086156193167,
+      "command": "esp status"
+    },
+    {
+      "t": 8.187206549802795,
+      "command": "codec dump"
+    },
+    {
+      "t": 9.0498221879825,
+      "command": "help"
+    },
+    {
+      "t": 9.660372338956222,
+      "command": "mclk status"
+    },
+    {
+      "t": 10.563408738933504,
+      "command": "esp status"
+    },
+    {
+      "t": 11.42057171696797,
+      "command": "codec dump"
+    },
+    {
+      "t": 12.281628264812753,
+      "command": "help"
+    },
+    {
+      "t": 12.891086934832856,
+      "command": "mclk status"
+    },
+    {
+      "t": 13.79139133892022,
+      "command": "esp status"
+    },
+    {
+      "t": 14.653917603893206,
+      "command": "codec dump"
+    },
+    {
+      "t": 15.517674904782325,
+      "command": "help"
+    },
+    {
+      "t": 16.12931173085235,
+      "command": "mclk status"
+    },
+    {
+      "t": 17.036292522912845,
+      "command": "esp status"
+    },
+    {
+      "t": 17.896653966978192,
+      "command": "codec dump"
+    },
+    {
+      "t": 18.75605769478716,
+      "command": "help"
+    },
+    {
+      "t": 19.368249777005985,
+      "command": "mclk status"
+    },
+    {
+      "t": 20.26579653681256,
+      "command": "esp status"
+    },
+    {
+      "t": 21.121577126905322,
+      "command": "codec dump"
+    },
+    {
+      "t": 21.980345859890804,
+      "command": "help"
+    },
+    {
+      "t": 22.590580655960366,
+      "command": "mclk status"
+    },
+    {
+      "t": 23.491937044775113,
+      "command": "esp status"
+    },
+    {
+      "t": 24.354339573998004,
+      "command": "codec dump"
+    },
+    {
+      "t": 25.216874815989286,
+      "command": "help"
+    },
+    {
+      "t": 25.826718861004338,
+      "command": "mclk status"
+    },
+    {
+      "t": 26.729605046799406,
+      "command": "esp status"
+    }
+  ],
+  "elapsed_s": 28.602214127779007,
+  "pps": 94.15355007025515
+}

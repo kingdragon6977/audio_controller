@@ -1,0 +1,59 @@
+{
+  "packets": 1460,
+  "statuses": [
+    {
+      "t": 0.007495607016608119,
+      "text": "STREAM_STATUS uptime_ms=265091 pcm=77027 udp=19256 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 2.020410133060068,
+      "text": "STREAM_STATUS uptime_ms=267104 pcm=77785 udp=19445 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 4.027821221156046,
+      "text": "STREAM_STATUS uptime_ms=269111 pcm=78541 udp=19634 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 6.035497185075656,
+      "text": "STREAM_STATUS uptime_ms=271119 pcm=79297 udp=19823 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 8.04286034614779,
+      "text": "STREAM_STATUS uptime_ms=273126 pcm=80053 udp=20012 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 10.049754980020225,
+      "text": "STREAM_STATUS uptime_ms=275131 pcm=80807 udp=20201 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 12.058679194189608,
+      "text": "STREAM_STATUS uptime_ms=277142 pcm=81565 udp=20390 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    },
+    {
+      "t": 14.066023576073349,
+      "text": "STREAM_STATUS uptime_ms=279149 pcm=82321 udp=20579 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0"
+    }
+  ],
+  "commands": [
+    "esp status",
+    "codec dump",
+    "help",
+    "esp status",
+    "codec dump",
+    "help",
+    "esp status",
+    "codec dump",
+    "help",
+    "esp status",
+    "codec dump",
+    "help",
+    "esp status",
+    "codec dump",
+    "help",
+    "esp rxtrace",
+    "esp status",
+    "bootauth status"
+  ],
+  "elapsed_s": 15.521173680201173,
+  "pps": 94.06505139894013
+}

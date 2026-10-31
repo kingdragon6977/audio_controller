@@ -1,5 +1,8 @@
 # Firmware diagnostics and safe bring-up standard
 
+The current PA8 clock/profile gates, capture timing budget, UART commands, and
+hardware acceptance procedure are documented in [PA8 audio clock](doc/pa8-audio-clock.md).
+
 This project treats startup diagnostics as part of the firmware architecture, not as temporary debug prints.
 
 ## Boot breadcrumb order
@@ -40,3 +43,6 @@ Where supported by the MCU, startup diagnostics should include:
 - read-back verification of critical configuration
 
 The goal is simple: **let the MCU leave a trail of where it has been and why it stopped, instead of making debugging a search for clues.**
+
+USART1 startup/control timing: `esp rxtrace` reports SR checkpoints, the first
+physical RX error and startup READY coalescing. See [receive timing notes](doc/ota-integration.md#receive-timing-hardening-2026-10-31).

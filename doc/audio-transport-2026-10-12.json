@@ -1,0 +1,123 @@
+[
+  {
+    "mode": "broadcast",
+    "counts_per_second": [
+      9,
+      8,
+      7,
+      8,
+      8,
+      9,
+      8,
+      8
+    ],
+    "packets": 65,
+    "heartbeats": [],
+    "esp_before": {
+      "uptime_ms": "67584",
+      "pcm": "7869",
+      "udp": "1967",
+      "udp_fail": "0",
+      "missing": "0",
+      "bad_header": "0",
+      "target": "(IP",
+      "rom": "0"
+    },
+    "esp_after": {
+      "uptime_ms": "75590",
+      "pcm": "8952",
+      "udp": "2238",
+      "udp_fail": "0",
+      "missing": "0",
+      "bad_header": "0",
+      "target": "(IP",
+      "rom": "0"
+    },
+    "esp_delta": {
+      "pcm": 1083,
+      "udp": 271,
+      "udp_fail": 0,
+      "missing": 0,
+      "bad_header": 0
+    },
+    "esp_interval_ms": 8006,
+    "esp_frames_per_second": 135.27354484136896,
+    "baseline": {
+      "samples": 16640,
+      "min": 227,
+      "max": 273,
+      "mean": 250.65258413461538,
+      "rms_ac": 6.677713853755226,
+      "clips": 0
+    }
+  },
+  {
+    "mode": "unicast",
+    "counts_per_second": [
+      34,
+      34,
+      33,
+      34,
+      34,
+      34,
+      34,
+      34,
+      33,
+      34,
+      34,
+      35
+    ],
+    "packets": 407,
+    "heartbeats": [
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9063 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9198 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9333 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9469 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9604 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9739 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=9875 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=10010 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=10145 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=10280 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=10416 uart=1000000",
+      "ESP01_HEARTBEAT ip=192.168.114.54 pcm=10551 uart=1000000"
+    ],
+    "esp_before": {
+      "uptime_ms": "75605",
+      "pcm": "8954",
+      "udp": "2238",
+      "udp_fail": "0",
+      "missing": "0",
+      "bad_header": "0",
+      "target": "192.168.114.194",
+      "rom": "0"
+    },
+    "esp_after": {
+      "uptime_ms": "87626",
+      "pcm": "10580",
+      "udp": "2645",
+      "udp_fail": "0",
+      "missing": "0",
+      "bad_header": "0",
+      "target": "192.168.114.194",
+      "rom": "0"
+    },
+    "esp_delta": {
+      "pcm": 1626,
+      "udp": 407,
+      "udp_fail": 0,
+      "missing": 0,
+      "bad_header": 0
+    },
+    "esp_interval_ms": 12021,
+    "esp_frames_per_second": 135.26328924382332,
+    "baseline": {
+      "samples": 104192,
+      "min": 227,
+      "max": 274,
+      "mean": 250.46478616400492,
+      "rms_ac": 6.708152998431835,
+      "clips": 0
+    }
+  }
+]

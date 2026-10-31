@@ -2,6 +2,9 @@
 #include "codec.h"
 #include "i2c.h"
 #include "uart.h"
+#include "audio_clock.h"
+#include "audio_frequency.h"
+#include <stdio.h>
 
 /* TLV320ADC3101 Page-0 clock / serial-interface registers. */
 #define CODEC_REG_CLKMUX       0x04u
@@ -37,10 +40,10 @@
 #define CODEC_RESET_PIN       GPIO_Pin_14
 
 /*
- * Known-good 16-MHz MCLK / 48-kHz / 16-bit I2S master configuration.
+ * PA8 12-MHz MCLK / 48-kHz / 16-bit I2S master configuration.
  *
- * PLL: 16 MHz * 6.144 = 98.304 MHz
- *   P=1, R=1, J=6, D=1440
+ * PLL: 12 MHz * 8.192 = 98.304 MHz
+ *   P=1, R=1, J=8, D=1920
  * ADC: 98.304 MHz / 8 / 2 / 128 = 48 kHz
  * BCLK source: ADC_CLK = 98.304 MHz / 8 = 12.288 MHz
  * BCLK: 12.288 MHz / 8 = 1.536 MHz = 32 * 48 kHz
@@ -54,7 +57,7 @@
  * The right analog input paths remain disconnected while both ADC engines
  * stay powered so the already-proven stereo I2S framing remains unchanged.
  */
-static const uint8_t av6301_profile[][2] = {
+static const uint8_t audio_profile[][2] = {
     { CODEC_REG_PAGE,       0x01u },
 
     /* Physical IN1L(P), pin 8 -> left PGA, single-ended, 0 dB. */
@@ -74,14 +77,14 @@ static const uint8_t av6301_profile[][2] = {
 
     { CODEC_REG_CLKMUX,   0x03u }, /* MCLK -> PLL, PLL -> CODEC_CLK */
     { CODEC_REG_PLLPR,    0x91u }, /* PLL on, P=1, R=1 */
-    { CODEC_REG_PLLJ,     0x06u }, /* J=6 */
-    { CODEC_REG_PLLD_MSB, 0x05u }, /* D=1440 = 0x05A0 */
-    { CODEC_REG_PLLD_LSB, 0xA0u },
+    { CODEC_REG_PLLJ,     0x08u }, /* J=8 */
+    { CODEC_REG_PLLD_MSB, 0x07u }, /* D=1920 = 0x0780 */
+    { CODEC_REG_PLLD_LSB, 0x80u },
 
     { CODEC_REG_NADC,     0x88u }, /* NADC=8, enabled */
     { CODEC_REG_MADC,     0x82u }, /* MADC=2, enabled */
     { CODEC_REG_AOSR,     0x80u }, /* AOSR=128 */
-    { CODEC_REG_IADC,     0x80u }, /* IADC=128 */
+    { CODEC_REG_IADC,     0x80u }, /* IADC encoding 128 = 256 instructions */
 
     { CODEC_REG_IFACE,    0x0Cu }, /* I2S, 16-bit, ADC master */
     { CODEC_REG_IFACE2,   0x02u }, /* BCLK divider input = ADC_CLK */
@@ -98,6 +101,47 @@ static void codec_delay(uint32_t count)
         __asm__("nop");
 }
 
+static int profile_verified;
+
+int codec_profile_ready(void)
+{
+    return profile_verified && audio_clock_ready();
+}
+
+static int verify_clock_profile(void)
+{
+    static const uint8_t expected[][2] = {
+        {0x04,0x03}, {0x05,0x91}, {0x06,0x08}, {0x07,0x07}, {0x08,0x80},
+        {0x12,0x88}, {0x13,0x82}, {0x14,0x80}, {0x15,0x80},
+        {0x1b,0x0c}, {0x1d,0x02}, {0x1e,0x88}, {0x35,0x12}, {0x51,0xc2}, {0x52,0x00}
+    };
+    unsigned int i;
+    uint8_t value;
+    char buf[110];
+    if (!i2c1_write(TLV320ADC3101_ADDR, CODEC_REG_PAGE, 0u)) return 0;
+    for (i=0; i<sizeof(expected)/sizeof(expected[0]); ++i) {
+        if (!i2c1_read(TLV320ADC3101_ADDR, expected[i][0], &value)) {
+            uart2_print("CODEC CLOCK READBACK: FAIL - I2C read failed.\r\n");
+            return 0;
+        }
+        if (value != expected[i][1]) {
+            sprintf(buf, "CODEC CLOCK READBACK: FAIL reg=0x%02X actual=0x%02X expected=0x%02X\r\n",
+                    expected[i][0], value, expected[i][1]);
+            uart2_print(buf);
+            return 0;
+        }
+    }
+    uart2_print("CODEC CLOCK READBACK: PASS - calculated PLL 98.304 MHz, ADC 48 kHz, BCLK 1.536 MHz.\r\n");
+    return 1;
+}
+
+void codec_hold_reset(void)
+{
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    GPIO_ResetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
+}
+
 void codec_reset(void)
 {
     GPIO_InitTypeDef gpio;
@@ -109,6 +153,13 @@ void codec_reset(void)
     gpio.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(CODEC_RESET_PORT, &gpio);
 
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    if (!audio_clock_ready()) {
+        GPIO_ResetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
+        uart2_print("CODEC RESET: HELD - reference clock register check failed.\r\n");
+        return;
+    }
     GPIO_SetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
     codec_delay(720000u);
 
@@ -119,19 +170,147 @@ void codec_reset(void)
     codec_delay(720000u);
 }
 
-int codec_apply_av6301_profile(void)
+int codec_apply_audio_profile(void)
 {
     unsigned int i;
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    if (!audio_clock_ready()) goto fail;
 
-    for (i = 0; i < sizeof(av6301_profile) / sizeof(av6301_profile[0]); ++i)
+    for (i = 0; i < sizeof(audio_profile) / sizeof(audio_profile[0]); ++i)
     {
         if (!i2c1_write(TLV320ADC3101_ADDR,
-                        av6301_profile[i][0],
-                        av6301_profile[i][1]))
-            return 0;
+                        audio_profile[i][0],
+                        audio_profile[i][1]))
+            goto fail;
+        if (audio_profile[i][0] == CODEC_REG_PLLD_LSB)
+            codec_delay(720000u); /* Settling after the adjacent D-register pair. */
     }
 
+    profile_verified = verify_clock_profile();
+    if (profile_verified) return 1;
+fail:
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    GPIO_ResetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
+    uart2_print("CODEC PROFILE: FAIL - hardware reset held; capture blocked.\r\n");
+    return 0;
+}
+
+/* Diagnostic modes never authorize PCM; the normal profile/rate must be restored. */
+static int clock_probe_config(unsigned int mode)
+{
+    uint8_t values[][2] = {
+        {0x00,0x00}, {0x52,0x88}, {0x51,0x00},
+        {0x12,0x08}, {0x13,0x02}, {0x1e,0x08}, {0x05,0x11},
+        {0x06,0x08}, {0x07,mode == 0u ? 0x07 : 0x00},
+        {0x08,mode == 0u ? 0x80 : 0x00},
+        {0x05,mode == 2u ? 0x11 : 0x91},
+        {0x04,mode == 2u ? 0x00 : 0x03},
+        {0x14,0x80}, {0x15,0x80}, {0x1b,0x0c}, {0x1d,0x02},
+        {0x12,mode == 2u ? 0x81 : 0x88}, {0x13,0x82}, {0x1e,0x88}, {0x51,0xc2}
+    };
+    unsigned int i;
+    uint8_t value;
+    for (i=0; i<sizeof(values)/sizeof(values[0]); ++i) {
+        if (!i2c1_write(TLV320ADC3101_ADDR, values[i][0], values[i][1])) return 0;
+        /* The duplicate PLLPR power-on write occurs after the adjacent D pair. */
+        if (i == 10u) codec_delay(720000u);
+    }
+    /* Verify final values, skipping earlier power-down values replaced later. */
+    for (i=7u; i<sizeof(values)/sizeof(values[0]); ++i) {
+        if (!i2c1_read(TLV320ADC3101_ADDR, values[i][0], &value) || value != values[i][1]) return 0;
+    }
+    if (!i2c1_read(TLV320ADC3101_ADDR, 0x52u, &value) || value != 0x88u) return 0;
+    codec_delay(720000u);
     return 1;
+}
+
+void codec_clock_test(void)
+{
+    static const char *const names[] = {"PLL_FRACTIONAL", "PLL_INTEGER", "MCLK_BYPASS"};
+    unsigned int mode;
+    char buf[190];
+    uint32_t hz, edges, gate, expected;
+    int measured;
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    uart2_print("CODEC CLOCK TEST: PCM paused; diagnostic rates are not audio acceptance.\r\n");
+    if (!audio_clock_ready()) goto fail;
+    codec_reset();
+    if (!codec_apply_audio_profile()) goto fail;
+    profile_verified = 0;
+    for (mode=0u; mode<3u; ++mode) {
+        if (!clock_probe_config(mode)) goto fail;
+        measured = audio_frequency_measure(&hz, &edges, &gate);
+        expected = mode == 0u ? 48000u : 46875u;
+        sprintf(buf, "CLOCK TEST %s expected_hz=%lu observed_hz=%lu edges=%lu gate_us=%lu measurement=%s rate=%s\r\n",
+                names[mode], (unsigned long)expected, (unsigned long)hz,
+                (unsigned long)edges, (unsigned long)gate,
+                measured ? "VALID" : "INVALID",
+                measured && hz >= expected * 99u / 100u && hz <= expected * 101u / 100u ? "PASS" : "FAIL");
+        uart2_print(buf);
+    }
+    codec_reset();
+    if (!codec_apply_audio_profile()) goto fail;
+    uart2_print("CLOCK TEST: normal profile restored; checking normal 48-kHz gate.\r\n");
+    (void)audio_clock_check_wclk(1);
+    return;
+fail:
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    GPIO_ResetBits(CODEC_RESET_PORT, CODEC_RESET_PIN);
+    uart2_print("CLOCK TEST: configuration/readback failed; RESET held, capture blocked.\r\n");
+}
+
+void codec_mclk_test(void)
+{
+    static const uint8_t config[][2] = {
+        {0x00,0x00}, {0x52,0x88}, {0x51,0x00}, {0x12,0x08}, {0x13,0x02},
+        {0x1e,0x08}, {0x05,0x11}, {0x04,0x00}, {0x19,0x00}, {0x1a,0x80}
+    };
+    unsigned int i, low, high;
+    uint8_t value;
+    uint32_t hz, edges, gate;
+    int measured;
+    char buf[190];
+    profile_verified = 0;
+    audio_clock_invalidate_rate();
+    if (!audio_clock_ready() || (GPIOB->CRH & (3u << 28)) ||
+        (SPI2->I2SCFGR & SPI_I2SCFGR_I2SE) || (DMA1_Channel4->CCR & 1u)) goto fail;
+    codec_reset();
+    for (i=0; i<sizeof(config)/sizeof(config[0]); ++i)
+        if (!i2c1_write(TLV320ADC3101_ADDR, config[i][0], config[i][1])) goto fail;
+    for (i=1; i<sizeof(config)/sizeof(config[0]); ++i)
+        if (!i2c1_read(TLV320ADC3101_ADDR, config[i][0], &value) || value != config[i][1]) goto fail;
+    /* Establish the existing return wire can carry both logic levels first. */
+    if (!i2c1_write(TLV320ADC3101_ADDR, 0x35u, 0x14u)) goto fail;
+    codec_delay(7200u);
+    low = (GPIOB->IDR >> 15) & 1u;
+    if (!i2c1_write(TLV320ADC3101_ADDR, 0x35u, 0x15u)) goto fail;
+    codec_delay(7200u);
+    high = (GPIOB->IDR >> 15) & 1u;
+    sprintf(buf, "CODEC DOUT RETURN: %s driven_low_read=%u driven_high_read=%u (PB15 input)\r\n",
+            !low && high ? "PASS" : "FAIL", low, high);
+    uart2_print(buf);
+    if (!i2c1_write(TLV320ADC3101_ADDR, 0x35u, 0x16u) ||
+        !i2c1_read(TLV320ADC3101_ADDR, 0x35u, &value) || value != 0x16u) goto fail;
+    codec_delay(720000u);
+    measured = audio_frequency_measure_dout(&hz, &edges, &gate);
+    sprintf(buf, "CODEC MCLK RETURN: expected_hz=93750 observed_hz=%lu edges=%lu gate_us=%lu measurement=%s rate=%s inferred_mclk_hz=%lu\r\n",
+            (unsigned long)hz, (unsigned long)edges, (unsigned long)gate,
+            measured ? "VALID" : "INVALID",
+            measured && hz >= 92812u && hz <= 94688u ? "PASS" : "FAIL",
+            (unsigned long)(hz * 128u));
+    uart2_print(buf);
+    codec_reset();
+    if (!codec_apply_audio_profile()) goto fail;
+    uart2_print("MCLK RETURN: normal DOUT/clock profile restored; checking WCLK.\r\n");
+    (void)audio_clock_check_wclk(1);
+    return;
+fail:
+    codec_hold_reset();
+    uart2_print("MCLK RETURN: configuration/readback failed; RESET held, capture blocked.\r\n");
 }
 
 static void print_hex8(uint8_t value)

@@ -1,0 +1,307 @@
+[2K> b[2K> bo[2K> boo[2K> boot[2K> boota[2K> bootau[2K> bootaut[2K> bootauth[2K> bootauth [2K> bootauth o[2K> bootauth on
+BOOT_AUTH asserted: PA0 LOW. No BOOT0/NRST/ESP command issued.
+BOOT_AUTH PA0: ON (LOW)  ODR=0 IDR=0
+> 
+STM32_BOOT_TEST starting (read-only)
+STM32_FLASH_HEAD addr=0x08000000 len=64 msp=0x2000C000 reset=0x08003CCD data=00C00020CD3C0008113D0008113D0008113D0008113D0008113D000800000000000000000000000000000000113D0008113D000800000000113D0008D1070008
+STM32_FLASH_VERIFY status=PASS size=54200 actual=e31a0f89d593a0b3c51f1b4f3375f8f1c2462eff193feccfa4dca05386a433fe expected=e31a0f89d593a0b3c51f1b4f3375f8f1c2462eff193feccfa4dca05386a433fe
+STM32_BOOT_TEST sync=ACK get=OK getid=OK bootprep_initial=PASS bootprep_settled=PASS bootver=0x22 cmds=R+W+E+ pid=0x0414 flash_kb=256 target=PASS flash_head=OK flash_verify=PASS
+STM32 BOOT PREP: PASS - PCM stopped; PB2/BOOT1 driven and read LOW.
+STM32 BOOT PREP: PASS - PCM stopped; PB2/BOOT1 driven and read LOW.
+
+========================================
+ audio_controller - RCT6 bring-up
+========================================
+USART2: PA2=TX PA3=RX 115200 8N1
+USART1: PA9=TX PA10=RX 1000000 8N1 (ESP-01 PCM link)
+
+MCU IDENTITY:
+  DBGMCU_IDCODE = 0x00000000
+  REV_ID        = 0x00000000
+  DEV_ID        = 0x00000000
+  FLASH_SIZE_KB = 256
+  UID           = 05D9FF36-3835474E-51225026
+
+CLOCK TREE:
+  RCC->CR     = 0x03034983
+  RCC->CFGR   = 0x001D040A
+  HSI READY   = YES
+  HSE READY   = YES
+  PLL READY   = YES
+  SYSCLK      = 72000000 Hz
+  HCLK        = 72000000 Hz
+  PCLK1       = 36000000 Hz
+  PCLK2       = 72000000 Hz
+  PLL INPUT   = HSE
+  PLL MULT    = x9
+  AHB DIV     = 1
+  APB1 DIV    = 2
+  APB2 DIV    = 1
+  APB1 LIMIT  = PASS (<=36 MHz)
+  RCC_APB1ENR = 0x00020000
+  RCC_APB2ENR = 0x0000400C
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x00000004 IN_FLOATING level=1
+  PB7  cfg=0x00000004 IN_FLOATING level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=1
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000004 IN_FLOATING level=1
+  GPIOB->CRL = 0x44484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000063D5
+  GPIOB->ODR = 0x00000014
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S PIN SAFETY: PASS - codec-driven pins are not MCU outputs
+
+Initializing I2C1...
+I2C1 initialization returned.
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000004 IN_FLOATING level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x44444444
+  GPIOB->IDR = 0x000063D5
+  GPIOB->ODR = 0x00000014
+I2C1 BUS SAFETY: PASS - AF open-drain and SDA/SCL released HIGH
+
+Resetting TLV320ADC3101 on PB14...
+
+TLV320 reset released.
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=0
+  PB13 cfg=0x00000004 IN_FLOATING level=0
+  PB15 cfg=0x00000004 IN_FLOATING level=1
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000C3D5
+  GPIOB->ODR = 0x00004014
+
+TLV320ADC3101:
+  RESET: PB14 active-low hardware reset
+  I2C1: PB6=SCL PB7=SDA
+  Address: 0x18 (7-bit)
+  Probing... ACK - codec responded
+
+I2C1 HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000401
+  CR2        = 0x00000024
+  OAR1       = 0x00004000
+  CCR        = 0x000000B4
+  TRISE      = 0x00000025
+  SR1        = 0x00000000
+  SR2        = 0x00000000
+I2S PRE-ACTIVATION SAFETY: PASS
+Applying AV6301 codec profile...
+Codec profile appl
+ied.
+Read-back trail follows:
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x06
+  0x07 = 0x05
+  0x08 = 0xA0
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+
+I2S CLOCK OWNERSHIP:
+  MASTER      = TLV320ADC3101
+  STM32 ROLE  = I2S SLAVE / OBSERVER
+  WCLK PB12   = CODEC OUTPUT -> MCU INPUT
+  BCLK PB13   = CODEC OUTPUT -> MCU INPUT
+  DOUT PB15   = CODEC OUTPUT -> MCU INPUT
+  EXPECTED    = 48 kHz WCLK, 1.536 MHz BCLK
+  SAFETY      = STM32 MUST NOT DRIVE CLOCK/DATA PINS
+
+I2S CLOCK ACTIVITY CHECK: PASS - WCLK activity observed on PB12
+  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.
+
+I2S RX DMA ACTIVATION PRE-FLIGHT: PASS
+  DMA1 CH4 = SPI2/I2S RX
+  FORMAT   = Philips I2S, 16-bit, slave RX
+  SYNC     = receiver live first; DMA handoff at PB12 falling edge
+  BUFFER   = 256 x 16-bit slots
+I2S RX DMA START: PASS
+I2S RX DMA CAPTURE: PASS - 256 x 16-bit slots captured
+  FIRST 32 SAMPLES: 0x00FF 0xFFE7 0x00FE 0xFFE7 0x00FF 0xFFE7 0x00FF 0xFFE6 0x0100 0xFFE7 0x0102 0xFFE7 0x0101 0xFFE7 0x00FD 0xFFE6 0x0100 0xFFE7 0x0101 0xFFE7 0x00FF 0xFFE8 0x0104 0xFFE7 0x0100 0xFFE6 0x0100 0xFFE8 0x00FF 0xFFE7 0x00FF 0xFFE6
+  MIN SAMPLE       = 0x00F8
+  MAX SAMPLE       = 0xFFE8
+  ZERO COUNT       = 0x00000000
+  0x8000 COUNT     = 0x00000000
+  0xFFFF COUNT     = 0x00000000
+  IDENTICAL PAIRS  = 0x00000000
+  EVEN SLOT SUM    = 0x00008086
+  ODD SLOT SUM     = 0x007FF350
+
+I2S FRAME-ALIGNED CHANNEL ANALYSIS
+  WS sync     = PASS (CHSIDE-aligned DMA handoff)
+  WS at DMA   = LOW
+  Slot mapping = even LEFT, odd RIGHT
+  Statistics exclude first captured stereo pair
+  LEFT MIN/MAX  = 248 / 266
+  LEFT MEAN     = 257
+  LEFT PEAK     = 266
+  LEFT FS/2     = 2
+  RIGHT MIN/MAX = -28 / -24
+  RIGHT MEAN    = -25
+ 
+ RIGHT PEAK    = 28
+  RIGHT FS/2    = 0
+  FIRST 12 RAW FRAMES (even/odd raw slot order):
+    F00 E=0x00FF (255) O=0xFFE7 (-25)
+    F01 E=0x00FE (254) O=0xFFE7 (-25)
+    F02 E=0x00FF (255) O=0xFFE7 (-25)
+    F03 E=0x00FF (255) O=0xFFE6 (-26)
+    F04 E=0x0100 (256) O=0xFFE7 (-25)
+    F05 E=0x0102 (258) O=0xFFE7 (-25)
+    F06 E=0x0101 (257) O=0xFFE7 (-25)
+    F07 E=0x00FD (253) O=0xFFE6 (-26)
+    F08 E=0x0100 (256) O=0xFFE7 (-25)
+    F09 E=0x0101 (257) O=0xFFE7 (-25)
+    F10 E=0x00FF (255) O=0xFFE8 (-24)
+    F11 E=0x0104 (260) O=0xFFE7 (-25)
+
+
+I2S ~1 SECOND AUDIO METER
+  Target blocks = 375 (about 48,000 stereo frames)
+  Completed     = 375 blocks
+  Channel map follows WS level captured at each DMA handoff
+  LEFT  MIN/MAX  = 229 / 511
+  LEFT  MEAN     = 251
+  LEFT  RMS(AC)  = 22
+  LEFT  PEAK     = 511 (~-21 dBFS)
+  LEFT  CLIPS    = 0
+  RIGHT MIN/MAX  = -54 / -23
+  RIGHT MEAN     = -25
+  RIGHT RMS(AC)  = 5
+  RIGHT PEAK     = 54 (~-21 dBFS)
+  RIGHT CLIPS    = 0
+
+I2S RX DEBUG SNAPSHOT:
+  WS SYNC         = PASS
+  WS AT DMA       = LOW
+  SPI2 SR BEFORE  = 0x00000086
+  SPI2 SR ENABLED = 0x00000006
+  SPI2 SR COMPLETE= 0x00000006
+  SPI2 DR LAST    = 0x0000FFE5
+  DMA1 ISR        = 0x00007000
+  DMA1 CH4 CNDTR  = 0x0000
+I2S RX D
+MA STOP: SAFE
+
+STM32 SPI2/I2S HARDWARE STATE:
+  APB1 CLOCK = ON
+  CR1        = 0x00000000
+  CR2        = 0x00000000
+  SR         = 0x00000003
+  I2SCFGR    = 0x00000900
+  I2SPR      = 0x00000117
+  ROLE       = CODEC MASTER / STM32 SLAVE RX
+  MCU I2S    = DISABLED
+  DMA RX     = DISABLED
+
+AUDIO / BUS GPIO:
+  I2C1: PB6=SCL PB7=SDA
+  PB6  cfg=0x0000000F OUT_50M_AFOD level=1
+  PB7  cfg=0x0000000F OUT_50M_AFOD level=1
+  CODEC I2S: PB12=WCLK PB13=BCLK PB15=DOUT
+  PB12 cfg=0x00000004 IN_FLOATING level=1
+  PB13 cfg=0x00000004 IN_FLOATING level=1
+  PB15 cfg=0x00000004 IN_FLOATING level=0
+  PB14 cfg=0x00000002 OUT_2M_PP level=1
+  GPIOB->CRL = 0xFF484244
+  GPIOB->CRH = 0x42444444
+  GPIOB->IDR = 0x0000D3D5
+  GPIOB->ODR = 0x00004014
+
+Bring-up complete. CLI ready.
+ESP-01 stream waits for Wi-Fi READY token on USART1.
+> ESP-01: Wi-Fi/UDP ready; enabling PCM stream.
+AUDIO STREAM: 24 kHz mono PCM16 -> USART1 1 Mbaud -> ESP-01.
+
+[2K> b[2K> bo[2K> boo[2K> boot[2K> boota[2K> bootau[2K> bootaut[2K> bootauth[2K> bootauth [2K> bootauth s[2K> bootauth st[2K> bootauth sta[2K> bootauth stat[2K> bootauth statu[2K> bootauth status
+BOOT_AUTH PA0: OFF (HIGH)  ODR=1 IDR=1
+> 
+[2K> b[2K> bo[2K> boo[2K> boot[2K> boota[2K> bootau[2K> bootaut[2K> bootauth[2K> bootauth [2K> bootauth o[2K> bootauth of[2K> bootauth off
+BOOT_AUTH released: PA0 HIGH (safe default).
+BOOT_AUTH PA0: OFF (HIGH)  ODR=1 IDR=1
+> 
+PCM packets received: 97
+PCM per-second counts: [8, 8, 8, 8, 8, 8, 8, 8]
+Heartbeats: []
+[2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=11321 dma_errors=0 rx_bytes=1
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> 
+[2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=11828 dma_errors=0 rx_bytes=1
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> 

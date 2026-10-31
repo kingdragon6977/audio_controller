@@ -6,6 +6,8 @@
 #include "i2s_rx.h"
 #include "i2s_meter.h"
 #include "audio_stream.h"
+#include "board.h"
+#include "audio_clock.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -99,6 +101,7 @@ static int run_i2s_capture(unsigned int sequence, int verbose)
     const uint16_t *samples;
     unsigned int i;
 
+    audio_stream_stop();
     if (verbose)
         uart2_print("Starting frame-aligned I2S capture...\r\n");
 
@@ -287,6 +290,10 @@ static void print_esp_status(void)
             (unsigned long)audio_stream_dma_errors(),
             (unsigned long)esp_uart_rx_bytes());
     uart2_print(buf);
+    sprintf(buf, " stream_overruns=%lu clock_stalls=%lu wclk_estimate_hz=%lu\r\n",
+            (unsigned long)audio_stream_overruns(), (unsigned long)audio_stream_stalls(),
+            (unsigned long)audio_clock_wclk_hz());
+    uart2_print(buf);
 
     sprintf(buf,
             " uart_errors: ORE=%lu FE=%lu NE=%lu\r\n",
@@ -309,6 +316,36 @@ static void print_esp_status(void)
                 " baud_check=WARNING (expected BRR 0x0048 at PCLK2 72 MHz)\r\n");
 }
 
+
+static void bootauth_delay_ms(unsigned int ms)
+{
+    /*
+     * Temporary bench-test delay only. Exact pulse width is intentionally not
+     * used as a safety parameter; the logic analyzer measurement is authoritative.
+     * At the present 72 MHz core clock this produces an easily visible pulse.
+     */
+    while (ms--)
+    {
+        volatile uint32_t n = 18000u;
+        audio_stream_service_dma();
+        while (n--)
+            __asm__("nop");
+    }
+}
+
+static void print_bootauth_status(void)
+{
+    char buf[128];
+    int active = board_boot_auth_is_on();
+
+    sprintf(buf,
+            "BOOT_AUTH PA0: %s  ODR=%u IDR=%u\r\n",
+            active ? "ON (LOW)" : "OFF (HIGH)",
+            (GPIOA->ODR & GPIO_Pin_0) ? 1u : 0u,
+            (GPIOA->IDR & GPIO_Pin_0) ? 1u : 0u);
+    uart2_print(buf);
+}
+
 static void execute(char *cmd)
 {
     unsigned int capture_count;
@@ -316,10 +353,16 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "help") == 0)
     {
-        uart2_print("\r\nCommands:\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
+        uart2_print("\r\nCommands:\r\n codec mclkpath     (MCLK/128 via DOUT; pauses PCM)\r\n codec clocktest    (fractional/integer/bypass; pauses PCM)\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
-        uart2_print(" esp status         (USART1 + stream diagnostics)\r\n reboot\r\n led on\r\n led off\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
+        uart2_print(" esp rxtrace        (startup RX/error timing)\r\n esp status         (USART1 + stream diagnostics)\r\n");
+        uart2_print(" i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)\r\n mclk test          (PA8 12-kHz pad counter; pauses PCM)\r\n mclk status        (PA8/TIM1 register readback)\r\n");
+        uart2_print(" bootauth status    (read PA0 authorization state)\r\n");
+        uart2_print(" bootauth on        (PA0 LOW only; does NOT reset or command ESP)\r\n");
+        uart2_print(" bootauth off       (PA0 HIGH / safe default)\r\n");
+        uart2_print(" bootauth test      (PA0 LOW ~250 ms then automatically HIGH)\r\n");
+        uart2_print(" reboot\r\n led on\r\n led off\r\n\r\nLine editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)\r\n");
         return;
     }
 
@@ -365,15 +408,64 @@ static void execute(char *cmd)
         return;
     }
 
+    if (strcmp(cmd, "codec mclkpath") == 0) {
+        if (board_boot_auth_is_on()) {
+            uart2_print("MCLK RETURN blocked: boot authorization is active.\r\n");
+            return;
+        }
+        audio_stream_stop();
+        i2s_rx_stop();
+        codec_mclk_test();
+        return;
+    }
+    if (strcmp(cmd, "codec clocktest") == 0) {
+        if (board_boot_auth_is_on()) {
+            uart2_print("CLOCK TEST blocked: boot authorization is active.\r\n");
+            return;
+        }
+        audio_stream_stop();
+        i2s_rx_stop();
+        codec_clock_test();
+        return;
+    }
+
     if (strcmp(cmd, "codec apply") == 0)
     {
-        uart2_print("Applying captured AV6301 TLV320ADC3101 profile...\r\nWARNING: this drives the shared I2C bus; use only after isolating the AV6301.\r\n");
-        uart2_print(codec_apply_av6301_profile() ?
+        audio_stream_stop();
+        i2s_rx_stop();
+        uart2_print("Applying PA8 12-MHz TLV320ADC3101 profile...\r\nWARNING: this drives the shared I2C bus; use only after isolating the AV6301.\r\n");
+        uart2_print(codec_apply_audio_profile() ?
                     "Codec profile applied successfully.\r\n" :
                     "Codec profile FAILED (I2C timeout/NACK).\r\n");
         return;
     }
 
+    if (strcmp(cmd, "mclk test") == 0) {
+        if (board_boot_auth_is_on()) {
+            uart2_print("MCLK TEST blocked: boot authorization is active.\r\n");
+            return;
+        }
+        audio_stream_stop();
+        i2s_rx_stop();
+        codec_hold_reset();
+        if (audio_clock_test_output()) {
+            codec_reset();
+            if (codec_apply_audio_profile()) (void)audio_clock_check_wclk(1);
+        } else {
+            uart2_print("MCLK TEST failed: codec remains RESET, capture blocked.\r\n");
+        }
+        return;
+    }
+    if (strcmp(cmd, "mclk status") == 0) {
+        audio_clock_print();
+        return;
+    }
+    if (strcmp(cmd, "i2s rate") == 0) {
+        audio_stream_stop();
+        (void)audio_clock_check_wclk(1);
+        uart2_print("EXTI12 edges / TIM2 gate; waveform quality unverified. PCM resumes only with valid clock/profile.\r\n");
+        return;
+    }
     if (strcmp(cmd, "i2s capture") == 0)
     {
         (void)run_i2s_capture(1u, 1);
@@ -402,12 +494,14 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "i2s meter") == 0)
     {
+        audio_stream_stop();
         (void)i2s_meter_run(5u);
         return;
     }
 
     if (parse_meter_seconds(cmd, &meter_seconds))
     {
+        audio_stream_stop();
         (void)i2s_meter_run(meter_seconds);
         return;
     }
@@ -448,6 +542,57 @@ static void execute(char *cmd)
         return;
     }
 
+    if (strcmp(cmd, "bootauth status") == 0)
+    {
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth on") == 0)
+    {
+        board_boot_auth_on();
+        uart2_print("BOOT_AUTH asserted: PA0 LOW. No BOOT0/NRST/ESP command issued.\r\n");
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth off") == 0)
+    {
+        board_boot_auth_off();
+        uart2_print("BOOT_AUTH released: PA0 HIGH (safe default).\r\n");
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "bootauth test") == 0)
+    {
+        uart2_print("BOOT_AUTH TEST: PA0 LOW only for ~250 ms; BOOT0/NRST untouched.\r\n");
+        uart2_print("Capture PA0, ESP boot gate, BOOT0, and NRST with the logic analyzer now.\r\n");
+
+        board_boot_auth_on();
+        if (!board_boot_auth_is_on())
+        {
+            board_boot_auth_off();
+            uart2_print("BOOT_AUTH TEST FAIL: PA0 did not read LOW; forced OFF.\r\n");
+            return;
+        }
+
+        bootauth_delay_ms(250u);
+        board_boot_auth_off();
+
+        if (board_boot_auth_is_on())
+            uart2_print("BOOT_AUTH TEST FAIL: PA0 still reads LOW after release.\r\n");
+        else
+            uart2_print("BOOT_AUTH TEST PASS: PA0 returned HIGH; no reset was commanded.\r\n");
+
+        print_bootauth_status();
+        return;
+    }
+
+    if (strcmp(cmd, "esp rxtrace") == 0) {
+        esp_uart_print_rx_trace();
+        return;
+    }
     if (strcmp(cmd, "esp status") == 0)
     {
         print_esp_status();
@@ -479,6 +624,7 @@ void cli_task(void)
         unsigned char c = (unsigned char)uart2_getc();
         int i;
 
+        audio_stream_service_dma();
         if (esc_state == 1u)
         {
             if (c == '[' || c == 'O')
