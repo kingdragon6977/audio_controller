@@ -396,3 +396,22 @@ fourth ChatGPT chat and additional local Codex tasks,
 and choose the intended ChatGPT project if the original chats should be moved.
 The available ChatGPT project is named `apm32f030 wifi mic`; its membership in
 this RCT6 project has not been confirmed.
+
+## PA8 firmware OTA deployed — 2026-10-31
+
+On branch `stm32-safe-flash`, firmware source commit `423693a`, user authorized
+OTA via ESP `192.168.114.54`. Host `stage_stm32_update.py --flash` installed
+the 57,264-byte PA8 image (SHA-256
+`ea8d57569d1af89555980df71ca2bdbbac8d59a2fee1458896e07502803630d2`).
+All 28 programmed pages and complete-image ROM readback passed. Session
+`0x7E75CDEA` completed with `application=PASS pcm=PASS bootauth=OFF`.
+This was STM32 OTA through the existing ESP firmware; ESP itself was not reflashed.
+
+Post-update unicast observation: 866 packets / 20.011 seconds = 43.28 packets/s.
+ESP reported `missing=0 bad_header=0 udp_fail=0 rom=0` throughout; however,
+this is below the intended 93.75 packets/s (24 ksample/s). Source counter
+throughput was also low, so full-rate acceptance remains unresolved despite
+application-health PASS. `/dev/ttyACM1` was absent, preventing new UART2
+clock/register/DMA diagnostic collection. No separate independent readback
+was run beyond the updater's complete-image verification. Scope waveform,
+physical fault injection, and analog calibration remain pending.
