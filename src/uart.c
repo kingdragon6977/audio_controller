@@ -1,5 +1,6 @@
 #include "stm32f10x.h"
 #include "uart.h"
+#include "audio_stream.h"
 
 static uint32_t esp_rx_bytes;
 static uint32_t esp_ore_errors;
@@ -51,8 +52,11 @@ char uart2_getc(void)
 
 void uart2_putc(char c)
 {
+    /* Debug output must not monopolize the foreground while capture runs.
+     * The DMA-only service is reentrancy guarded and never parses ESP control. */
+    audio_stream_service_dma();
     while (!(USART2->SR & USART_SR_TXE))
-        ;
+        audio_stream_service_dma();
 
     USART2->DR = (uint16_t)c;
 }

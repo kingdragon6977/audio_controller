@@ -104,6 +104,8 @@ ota-test:
 	$(BUILD)/tests/codec_clock
 	gcc -Wall -Wextra -Werror -Iinc src/audio_dma_buffer.c tests/test_audio_dma_buffer.c -o $(BUILD)/tests/audio_dma_buffer
 	$(BUILD)/tests/audio_dma_buffer
+	gcc -Wall -Wextra -Werror -Itests/uart_stubs -Iinc src/uart.c tests/test_uart_dma.c -o $(BUILD)/tests/uart_dma
+	$(BUILD)/tests/uart_dma
 	g++ -std=c++11 -Wall -Wextra -Werror -Itests/esp_stubs tests/test_update_transport.cpp -o $(BUILD)/tests/update_transport
 	$(BUILD)/tests/update_transport
 	python3 -m unittest discover -s tests -p 'test_*.py' -v

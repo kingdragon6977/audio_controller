@@ -189,3 +189,27 @@ codec-processed reference returned over DOUT, not MCLK voltage or ringing.
 If LOW/HIGH return works but CLKOUT has no edges, the return wire works at
 DC while the reference/CLKOUT path still fails; zero edges alone do not
 uniquely establish an open wire or damaged input.
+
+## DMA servicing during CLI output
+
+Debug UART2 output now yields to `audio_stream_service_dma()` before each
+character and while waiting for TXE. CLI input processing and the bench delay
+also yield. The service consumes only completed stream DMA halves: it does not
+parse ESP commands, grant authorization, restart capture, or enter the codec.
+A reentrancy guard prevents recursive DMA processing when an error report
+itself writes to UART2. Inactive capture makes the yield a no-op.
+
+The service checks DMA enable and CMAR ownership before reading flags; it
+never consumes another diagnostic capture's buffer. One-shot capture and
+meter commands explicitly stop streaming before taking DMA1 CH4. They remain
+intentional pauses, unlike read-only status/help/codec-dump/clock output.
+Existing snapshot ownership, missed-half and progress-timeout checks remain.
+No log bytes are intentionally dropped, no extra UART ISR/buffer is added,
+and SysTick authorization expiry continues running. UART1 protocol handling
+stays in the main task, outside this DMA-only yield path.
+
+Native UART tests exercise actual UART2 transmit code against simulated UART
+readiness and DMA deadlines (2.76 ms work every 5.333 ms) during long output;
+existing board-lease, frequency, snapshot and OTA tests remain required. Real
+load tests must also show unchanged overruns/stalls and source sequence-loss
+counters while `esp status`, `codec dump`, `help` and `mclk status` repeat.

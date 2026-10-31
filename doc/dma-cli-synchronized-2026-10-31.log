@@ -1,0 +1,623 @@
+[2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=52948 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=53274 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=54490 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=55708 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=56926 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=58142 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=59362 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=60578 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=61796 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec d[2K> codec du[2K> codec dum[2K> codec dump
+
+TLV320ADC3101 Page-0 clock/interface/ADC dump
+  0x00 = 0x00
+  0x04 = 0x03
+  0x05 = 0x91
+  0x06 = 0x08
+  0x07 = 0x07
+  0x08 = 0x80
+  0x12 = 0x88
+  0x13 = 0x82
+  0x14 = 0x80
+  0x15 = 0x80
+  0x1B = 0x0C
+  0x1C = 0x00
+  0x1D = 0x02
+  0x1E = 0x88
+  0x1F = 0x00
+  0x20 = 0x00
+  0x21 = 0x10
+  0x24 = 0xCC
+  0x3D = 0x01
+  0x35 = 0x12
+  0x51 = 0xC2
+  0x52 = 0x00
+
+TLV320ADC3101 Page-1 analog-input dump
+  0x33 = 0x00
+  0x34 = 0xFC
+  0x37 = 0xFF
+  0x39 = 0x3F
+  0x3B = 0x00
+  0x3C = 0x00
+  0x3E = 0x03
+> [2K> h[2K> he[2K> hel[2K> help
+
+Commands:
+ codec mclkpath     (MCLK/128 via DOUT; pauses PCM)
+ codec clocktest    (fractional/integer/bypass; pauses PCM)
+ help
+ id
+ uid
+ clock
+ codec
+ codec dump
+ codec apply
+ i2s capture        (full one-shot report)
+ i2s capture N      (compact repeated captures, N=1..50)
+ i2s meter          (5-second long audio meter)
+ i2s meter N        (long meter, N=1..10 seconds)
+ esp status         (USART1 + stream diagnostics)
+ i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)
+ mclk test          (PA8 12-kHz pad counter; pauses PCM)
+ mclk status        (PA8/TIM1 register readback)
+ bootauth status    (read PA0 authorization state)
+ bootauth on        (PA0 LOW only; does NOT reset or command ESP)
+ bootauth off       (PA0 HIGH / safe default)
+ bootauth test      (PA0 LOW ~250 ms then automatically HIGH)
+ reboot
+ led on
+ led off
+
+Line editing: Backspace/Delete, Left/Right arrows, Up/Down history (8 commands)
+> [2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk s[2K> mclk st[2K> mclk sta[2K> mclk stat[2K> mclk statu[2K> mclk status
+
+CODEC MCLK: PA8 TIM1_CH1 -> 40 ohm -> TLV pin 24; IOVDD=3.3 V
+ TIM1 PSC=0 ARR=5 CCR1=3 CR1=0081 CCER=0001 BDTR=8000 GPIOA_CRH=888444BB
+ MCLK REGISTER CHECK: PASS - calculated 12000000 Hz, 50% duty; no timer IRQ/DMA.
+ Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=63014 dma_errors=0 rx_bytes=2
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=1 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> 

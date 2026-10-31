@@ -421,6 +421,11 @@ void audio_stream_task(void)
         return;
     }
 
+    audio_stream_service_dma();
+}
+
+static void service_dma_once(void)
+{
     if (DMA_GetFlagStatus(DMA1_FLAG_TE4))
     {
         dma_error_count++;
@@ -455,6 +460,22 @@ overrun:
     ++packet_sequence; /* signal a transport discontinuity instead of hiding it */
     audio_stream_stop();
     uart2_print("AUDIO STREAM: missed DMA half-buffer; stopped, resynchronizing.\r\n");
+}
+
+void audio_stream_service_dma(void)
+{
+    static uint8_t busy;
+    if (busy || !running) return;
+    /* A diagnostic capture may own the same channel with a different buffer.
+     * Never consume its flags or stop its hardware from the debug yield path. */
+    if (!(DMA1_Channel4->CCR & 1u) ||
+        DMA1_Channel4->CMAR != (uint32_t)stream_dma_buffer) {
+        running = 0u;
+        return;
+    }
+    busy = 1u;
+    service_dma_once();
+    busy = 0u;
 }
 
 int audio_stream_running(void)

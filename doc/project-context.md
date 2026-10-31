@@ -617,3 +617,54 @@ checks share its reference, and precise absolute frequency/audio calibration
 remains unestablished. No waveform measurement or calibrated audio input
 was used. Remaining firmware issue: avoid/coordinate blocking CLI output
 with capture so diagnostics do not themselves cause recoverable loss.
+
+## DMA repair under CLI load implemented/deployed — 2026-10-31
+
+User requests DMA repair. Branch `stm32-safe-flash`, source parent `f8df029`.
+UART2 TX previously waited for each debug byte without servicing capture,
+exceeding the 5.333 ms DMA-half budget during normal status/dump output.
+Now UART2 yields before each byte and while waiting for TXE to a DMA-only
+foreground service. It is reentrancy guarded, checks channel enable/CMAR
+ownership, and retains snapshot/error/stall checks. It does not parse ESP
+control, restart streaming or enter codec code. CLI input and bench delays
+also yield. One-shot capture and meter explicitly stop streaming before
+taking DMA1 CH4. No debug log bytes are intentionally dropped and no new
+UART interrupts/buffers were added. SysTick authorization expiry is unchanged.
+See [design](pa8-audio-clock.md#dma-servicing-during-cli-output).
+
+Build/manifest/flash dry-run PASS; eight native executables and 11 Python
+tests PASS. New native UART test uses the actual debug transmit code with
+simulated UART readiness and DMA deadlines. STM32 image 61256 bytes, SHA-256
+`f77712354e16c422706e1d42585e79a7bd767e52808949a83250ddbd681aa9fb`,
+[manifest](firmware/dma-cli-repair-manifest.json). New deployed image: all
+30 pages and whole-image ROM verification PASS, then `FLASH_COMPLETE` with
+application PASS, PCM PASS, bootauth OFF ([OTA](dma-cli-ota-2026-10-31.log)).
+ESP unchanged.
+
+Hardware load test 1: ten cycles of status/codec dump/help/MCLK status, plus
+baseline/final safety/status checks, kept stream RUNNING with DMA errors,
+overruns and clock stalls all zero ([UART](dma-cli-load-uart-2026-10-31.log)).
+A separate 30-second receive observation measured 2825 packets, 94.14 pps
+([log](dma-cli-load-stream-2026-10-31.log)); exact overlap with the first
+CLI run was not established, so the following synchronized test is decisive.
+
+Synchronized hardware test: 34 CLI commands (32-command heavy load plus
+baseline/final status) while receiving 2693 packets / 28.602 seconds =
+94.15 pps. DMA errors/overruns/stalls stayed zero; WCLK estimate 48000 Hz.
+Every ESP sample retained `missing=2 bad_header=0 udp_fail=0`: no new source
+sequence losses. [UART](dma-cli-synchronized-2026-10-31.log),
+[timestamped commands/transport counters](dma-cli-synchronized-2026-10-31.json).
+
+Intentional diagnostic ownership/recovery: `i2s capture 1` PASS; `i2s meter 1`
+completed 378 blocks / 48006 frames per channel, PASS. Both resumed streaming
+with DMA errors/overruns/stalls still zero. PA0 OFF/HIGH confirmed afterward
+([evidence](dma-cli-exclusive-capture-2026-10-31.log)). These commands
+intentionally pause PCM; do not describe them as continuous-stream tests.
+
+Limitations: USART1 RX ORE was 1 at the first post-OTA baseline and remained
+1 throughout both load tests and diagnostic recovery; FE/NE stayed zero.
+Its initial cause was not isolated and is not claimed repaired. No new RX
+overrun occurred during the observations. Absolute clock/audio calibration,
+waveform integrity and analog transfer validation remain pending; packet rate
+still reads approximately 0.4% above nominal against host wall time. Hardware
+authorization expiry/fault injection was not remeasured by these CLI tests.

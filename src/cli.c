@@ -101,6 +101,7 @@ static int run_i2s_capture(unsigned int sequence, int verbose)
     const uint16_t *samples;
     unsigned int i;
 
+    audio_stream_stop();
     if (verbose)
         uart2_print("Starting frame-aligned I2S capture...\r\n");
 
@@ -326,6 +327,7 @@ static void bootauth_delay_ms(unsigned int ms)
     while (ms--)
     {
         volatile uint32_t n = 18000u;
+        audio_stream_service_dma();
         while (n--)
             __asm__("nop");
     }
@@ -492,12 +494,14 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "i2s meter") == 0)
     {
+        audio_stream_stop();
         (void)i2s_meter_run(5u);
         return;
     }
 
     if (parse_meter_seconds(cmd, &meter_seconds))
     {
+        audio_stream_stop();
         (void)i2s_meter_run(meter_seconds);
         return;
     }
@@ -616,6 +620,7 @@ void cli_task(void)
         unsigned char c = (unsigned char)uart2_getc();
         int i;
 
+        audio_stream_service_dma();
         if (esc_state == 1u)
         {
             if (c == '[' || c == 'O')
