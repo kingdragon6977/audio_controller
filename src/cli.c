@@ -355,7 +355,7 @@ static void execute(char *cmd)
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
         uart2_print(" esp status         (USART1 + stream diagnostics)\r\n");
-        uart2_print(" i2s rate           (20 ms rate preflight; pauses PCM)\r\n mclk status        (PA8/TIM1 register readback)\r\n");
+        uart2_print(" i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)\r\n mclk status        (PA8/TIM1 register readback)\r\n");
         uart2_print(" bootauth status    (read PA0 authorization state)\r\n");
         uart2_print(" bootauth on        (PA0 LOW only; does NOT reset or command ESP)\r\n");
         uart2_print(" bootauth off       (PA0 HIGH / safe default)\r\n");
@@ -424,7 +424,7 @@ static void execute(char *cmd)
     if (strcmp(cmd, "i2s rate") == 0) {
         audio_stream_stop();
         (void)audio_clock_check_wclk(1);
-        uart2_print("GPIO polling estimate; scope/analyzer remains authoritative. PCM resumes only with valid clock/profile.\r\n");
+        uart2_print("EXTI12 edges / TIM2 gate; waveform quality unverified. PCM resumes only with valid clock/profile.\r\n");
         return;
     }
     if (strcmp(cmd, "i2s capture") == 0)

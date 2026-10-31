@@ -1,6 +1,7 @@
 #include "stm32f10x.h"
 #include "audio_clock.h"
 #include "board.h"
+#include "audio_frequency.h"
 #include "uart.h"
 #include <stdio.h>
 
@@ -87,32 +88,17 @@ uint32_t audio_clock_wclk_hz(void) { return observed_wclk; }
 
 int audio_clock_check_wclk(int verbose)
 {
-    uint32_t start, elapsed = 0u, edges = 0u, budget = 2000000u;
-    unsigned int previous, current;
-    int ok = 0;
+    uint32_t edges = 0u, gate_us = 0u;
+    int measured = 0, ok = 0;
     observed_wclk = 0u;
-    if (!audio_clock_ready() || !(SysTick->CTRL & SysTick_CTRL_ENABLE_Msk)) goto report;
-    /* Align to a tick so the first partial millisecond cannot bias a short window. */
-    start = board_millis();
-    while (board_millis() == start && budget) --budget;
-    if (!budget) goto report;
-    start = board_millis();
-    previous = (GPIOB->IDR & GPIO_Pin_12) != 0u;
-    budget = 2000000u;
-    do {
-        current = (GPIOB->IDR & GPIO_Pin_12) != 0u;
-        if (current && !previous) ++edges;
-        previous = current;
-        elapsed = board_millis() - start;
-    } while (elapsed < 20u && --budget);
-    if (!budget || !elapsed) goto report;
-    observed_wclk = edges * 1000u / elapsed;
-    ok = observed_wclk >= 47520u && observed_wclk <= 48480u; /* +/-1% estimate gate */
-report:
+    if (audio_clock_ready() && (SysTick->CTRL & SysTick_CTRL_ENABLE_Msk))
+        measured = audio_frequency_measure(&observed_wclk, &edges, &gate_us);
+    ok = measured && observed_wclk >= 47520u && observed_wclk <= 48480u;
     if (verbose || ok != last_rate_result) {
-        char buf[160];
-        sprintf(buf, "I2S RATE PREFLIGHT: %s observed_hz=%lu expected_hz=48000 window_ms=%lu (GPIO estimate)\r\n",
-                ok ? "PASS" : "FAIL", (unsigned long)observed_wclk, (unsigned long)elapsed);
+        char buf[190];
+        sprintf(buf, "I2S RATE PREFLIGHT: %s observed_hz=%lu expected_hz=48000 edges=%lu gate_us=%lu method=EXTI12_TIM2 measurement=%s\r\n",
+                ok ? "PASS" : "FAIL", (unsigned long)observed_wclk,
+                (unsigned long)edges, (unsigned long)gate_us, measured ? "VALID" : "INVALID");
         uart2_print(buf);
     }
     last_rate_result = ok;

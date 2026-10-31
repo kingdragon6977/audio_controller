@@ -31,6 +31,7 @@ SRC := \
     src/main.c \
     src/board.c \
     src/audio_clock.c \
+    src/audio_frequency.c \
     src/audio_dma_buffer.c \
     src/flash_authorization.c \
     src/uart.c \
@@ -97,6 +98,8 @@ ota-test:
 	$(BUILD)/tests/board_lease
 	gcc -Wall -Wextra -Werror -Itests/clock_stubs -Iinc src/audio_clock.c tests/test_audio_clock.c -o $(BUILD)/tests/audio_clock
 	$(BUILD)/tests/audio_clock
+	gcc -Wall -Wextra -Werror -Itests/clock_stubs -Iinc src/audio_frequency.c tests/test_audio_frequency.c -o $(BUILD)/tests/audio_frequency
+	$(BUILD)/tests/audio_frequency
 	gcc -Wall -Wextra -Werror -Itests/clock_stubs -Iinc src/codec.c tests/test_codec_clock.c -o $(BUILD)/tests/codec_clock
 	$(BUILD)/tests/codec_clock
 	gcc -Wall -Wextra -Werror -Iinc src/audio_dma_buffer.c tests/test_audio_dma_buffer.c -o $(BUILD)/tests/audio_dma_buffer

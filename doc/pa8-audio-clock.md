@@ -38,9 +38,9 @@ References: [ST pin/clock specifications](https://www.st.com/resource/en/datashe
 5. Read back critical PLL/divider/interface/power/mute registers. A mismatch
    blocks the profile-ready flag and holds hardware RESET LOW; I2C write errors
    also hold reset, avoiding a blind mute write when the page is unknown.
-6. With capture stopped, count PB12 WCLK rising edges in a tick-aligned 20 ms
-   window. Require a polling estimate within 1% of 48 kHz before DMA activation.
-   The polling loop is bounded even if SysTick stops. Profile reset/application
+6. With capture stopped, count PB12 WCLK rising-edge interrupts over a 50 ms
+   TIM2 window. Require a measured rate within 1% of 48 kHz before DMA activation.
+   The counter wait is bounded even if TIM2 stops. Profile reset/application
    invalidates the cached rate; streaming rechecks the rate before each start.
 
 These are register checks and a GPIO estimate, not proof of MCLK voltage,
@@ -93,3 +93,28 @@ readback, check PA0 OFF and codec/profile/rate PASS, then observe sustained
 unicast at approximately 93.75 512-byte packets/s with stable error counters.
 Also exercise removed/incorrect clock and heavy CLI activity. The existing
 unconnected-input noise observation is not a calibrated analog baseline.
+
+## Independent WCLK counter (2026-10-31)
+
+The GPIO polling rate gate is replaced by PB12 rising-edge EXTI12 counting
+over a 50 ms, 1 MHz TIM2 gate. This uses the existing WCLK wire and does not
+drive any codec signal. TIM2 derives 72 MHz from APB1 (36 MHz bus, timer x2),
+then divides by 72. Both measurements still share the MCU reference oscillator;
+this is independent of GPIO polling speed, not a calibrated external reference.
+The EXTI handler is used only during preflight with I2S/DMA stopped.
+`i2s rate` prints Hz, edge count, actual gate microseconds, method and measurement
+validity. Acceptance remains 48 kHz +/-1%; health still requires valid rate.
+
+The measurement rejects active capture, masked interrupts, an owned TIM2 clock,
+shared EXTI10..15 ownership/pending state, or a GPIO output configuration. It
+restores EXTI routing, edge settings, IRQ priority and peripheral clock ownership.
+A loop budget bounds a stopped TIM2; timer overflow/late gates are rejected;
+3000 edges masks the interrupt and invalidates the measurement to bound CPU
+load on excessive input frequencies. SysTick and authorization expiry remain
+enabled. No interrupt is attached to the MHz BCLK/MCLK signals.
+
+Native tests cover correct and incorrect frequency, absent clock, excessive
+frequency, stopped/overflowed timer, active capture, peripheral conflicts,
+masked interrupts, output pins and cleanup. Simulated tests establish software
+behavior; hardware logs establish the observed board result separately.
+Reference: [ST RM0008, EXTI mapping and general-purpose timers](https://www.st.com/resource/en/reference_manual/rm0008-stm32f103xx-advanced-armbased-32bit-mcus-stmicroelectronics.pdf).

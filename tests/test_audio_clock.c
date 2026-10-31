@@ -10,6 +10,7 @@ TIM_TypeDef tim;
 RCC_ClocksTypeDef clocks;
 static uint32_t us, rate=48000u;
 static int stalled_tick;
+int audio_frequency_measure(uint32_t *hz,uint32_t *edges,uint32_t *gate) { *hz=stalled_tick ? 0u : rate; *gate=50000; *edges=*hz/20; return !stalled_tick && systick.CTRL; }
 uint32_t board_millis(void) { if(!stalled_tick) ++us; return us/1000u; }
 GPIO_TypeDef *clock_test_gpio(void) {
     gb.IDR = (((uint64_t)us*rate*2u/1000000u)&1u) ? GPIO_Pin_12 : 0u;
@@ -21,7 +22,7 @@ static void reset(void) {
     ga.CRH=0x44444444u; rcc.CR=RCC_CR_HSERDY|RCC_CR_PLLRDY;
     rcc.CFGR=RCC_CFGR_SWS_PLL|RCC_CFGR_PLLSRC; rcc.APB2ENR=0;
     afio.MAPR=0; systick.CTRL=1;
-    clocks=(RCC_ClocksTypeDef){72000000u,72000000u,72000000u};
+    clocks=(RCC_ClocksTypeDef){72000000u,72000000u,72000000u,36000000u};
     us=0; rate=48000u; stalled_tick=0;
 }
 int main(void) {

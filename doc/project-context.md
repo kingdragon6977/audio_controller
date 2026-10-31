@@ -438,3 +438,37 @@ the low delivery rate and inconsistent previous rate acceptance. A new scope
 measurement is still unavailable. The codec dump also demonstrates that long
 blocking CLI output interrupts capture and needs a deliberate pause/recovery
 policy. STM32 reboot resets its counters; ESP was not rebooted/reflashed.
+
+## Independent WCLK measurement implemented and deployed — 2026-10-31
+
+Branch `stm32-safe-flash`, source parent `5173d0a`. Replaced GPIO polling
+preflight with rising-edge EXTI12 counting on existing PB12 against a TIM2
+1 MHz/50 ms gate. No rewiring or GPIO output is introduced. Preflight retains
+48 kHz +/-1% acceptance and runs only with capture stopped. It rejects resource
+conflicts and invalid timing, bounds stuck-timer loops/excessive interrupts,
+and restores owned resources. SysTick/boot authorization expiry stays enabled.
+Both methods share the MCU oscillator; this is not external clock calibration
+or proof of MCLK voltage/waveform integrity. See [counter design](pa8-audio-clock.md#independent-wclk-counter-2026-10-31).
+
+Validation: STM32 cross-build, manifest, flash dry-run, seven native executables
+and 11 Python tests PASS. New native tests cover correct/incorrect/absent clock,
+excessive edge rate, stuck/overflowed timer, resource conflicts, interrupt mask,
+active capture, GPIO output rejection, and resource cleanup. ESP source/image
+was unchanged. STM32 image is 57,832 bytes, SHA-256
+`202f2af61735ccfd2b8ba4ae4c08d27db6edef7285a7ba96e90719a47d3d573b`;
+[manifest](firmware/exti-clock-manifest.json).
+
+New hardware verification via ESP `192.168.114.54`: all 29 pages plus complete
+image ROM verification PASS ([OTA log](exti-clock-ota-2026-10-31.log)).
+Application/PCM recovery timed out because the new measurement correctly
+blocked capture; do not describe the OTA transaction as FLASH_COMPLETE.
+Startup measured 853 edges / 50000 us = 17060 Hz; two manual `i2s rate`
+checks each measured 854 edges / 50000 us = 17080 Hz ([UART log](exti-clock-uart-2026-10-31.log)).
+`bootauth status` confirms PA0 OFF/HIGH. Stream STOPPED, no DMA errors,
+overruns, stalls or UART errors on the new boot. No automatic reflash attempted.
+
+The independent result agrees with previous GPIO estimates, making a real
+clock-path/codec problem more likely than polling aliasing; exact root cause
+remains unresolved. Do not bypass the rate gate or label PCM calibrated/24k
+until corrected and measured. Next investigate clock routing and codec clock
+source/PLL behavior. Waveform measurements and analog calibration remain pending.
