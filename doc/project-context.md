@@ -415,3 +415,26 @@ application-health PASS. `/dev/ttyACM1` was absent, preventing new UART2
 clock/register/DMA diagnostic collection. No separate independent readback
 was run beyond the updater's complete-image verification. Scope waveform,
 physical fault injection, and analog calibration remain pending.
+
+## UART2 investigation — 2026-10-31
+
+UART2 `/dev/ttyACM1` became accessible after user closed Minicom. CLI requires
+paced characters: an initial burst lost input bytes; subsequent commands used
+35–40 ms spacing. See [UART diagnostics](pa8-uart-diagnostics-2026-10-31.log)
+and [fresh startup](pa8-startup-diagnostics-2026-10-31.log).
+
+MCLK TIM1/PA8 register checks PASS; codec PLL/interface/divider readback matches
+the intended profile. Initial stream status showed no DMA errors, overruns,
+stalls, or UART errors and a cached WCLK estimate of 48000 Hz. A blocking
+`codec dump` caused one missed-half overrun. Subsequent live WCLK checks
+estimated 17050–17100 Hz, blocking recovery. A software reboot reproduced
+17050 Hz before DMA activation; the board is now STOPPED with capture blocked
+by the existing rate gate. No firmware was changed or safety gate bypassed.
+The previous OTA health PASS is not proof of sustained correct sample timing.
+
+Unresolved: distinguish actual clock/routing/codec behavior from GPIO polling
+measurement aliasing using an independent counter measurement; reconcile
+the low delivery rate and inconsistent previous rate acceptance. A new scope
+measurement is still unavailable. The codec dump also demonstrates that long
+blocking CLI output interrupts capture and needs a deliberate pause/recovery
+policy. STM32 reboot resets its counters; ESP was not rebooted/reflashed.
