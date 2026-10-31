@@ -84,6 +84,38 @@ void audio_clock_print(void)
     uart2_print(" Scope at TLV MCLK remains authoritative for frequency, voltage and ringing.\r\n");
 }
 
+int audio_clock_test_output(void)
+{
+    uint32_t hz = 0u, edges = 0u, gate = 0u;
+    int measured, restored;
+    char buf[190];
+    audio_clock_invalidate_rate();
+    if (!audio_clock_ready() || ((GPIOB->ODR | GPIOB->IDR) & GPIO_Pin_14) ||
+        (SPI2->I2SCFGR & SPI_I2SCFGR_I2SE) || (DMA1_Channel4->CCR & 1u)) {
+        uart2_print("PA8 OUTPUT TEST: BLOCKED - require valid clock, codec RESET LOW and stopped capture.\r\n");
+        return 0;
+    }
+    TIM1->CCER = 0u;
+    TIM1->CR1 = TIM_CR1_ARPE;
+    TIM1->ARR = 5999u;
+    TIM1->CCR1 = 3000u;
+    TIM1->CNT = 0u;
+    TIM1->EGR = TIM_EGR_UG;
+    TIM1->SR = 0u;
+    TIM1->CR1 |= TIM_CR1_CEN;
+    TIM1->CCER = TIM_CCER_CC1E;
+    measured = audio_frequency_measure_pa8(&hz, &edges, &gate);
+    restored = audio_clock_init();
+    sprintf(buf, "PA8 OUTPUT TEST: expected_hz=12000 observed_hz=%lu edges=%lu gate_us=%lu measurement=%s rate=%s restore_12MHz=%s\r\n",
+            (unsigned long)hz, (unsigned long)edges, (unsigned long)gate,
+            measured ? "VALID" : "INVALID",
+            measured && hz >= 11880u && hz <= 12120u ? "PASS" : "FAIL",
+            restored ? "PASS" : "FAIL");
+    uart2_print(buf);
+    uart2_print("PA8 pad readback at 12 kHz; TLV-side 12-MHz waveform is not verified.\r\n");
+    return measured && hz >= 11880u && hz <= 12120u && restored;
+}
+
 uint32_t audio_clock_wclk_hz(void) { return observed_wclk; }
 
 int audio_clock_check_wclk(int verbose)

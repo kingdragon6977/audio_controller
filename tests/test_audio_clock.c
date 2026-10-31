@@ -7,6 +7,14 @@ RCC_TypeDef rcc;
 AFIO_TypeDef afio;
 SysTick_Type systick;
 TIM_TypeDef tim;
+SPI_TypeDef spi;
+DMA_Channel_TypeDef dma;
+static unsigned pad_rate=12000u;
+int audio_frequency_measure_pa8(uint32_t *hz,uint32_t *edges,uint32_t *gate) {
+ assert(tim.ARR==5999 && tim.CCR1==3000 && tim.CCER==1);
+ assert(!(gb.ODR & GPIO_Pin_14));
+ *hz=pad_rate;*edges=pad_rate/20;*gate=50000;return pad_rate!=0;
+}
 RCC_ClocksTypeDef clocks;
 static uint32_t us, rate=48000u;
 static int stalled_tick;
@@ -40,5 +48,10 @@ int main(void) {
     tim.CCR1=2; assert(!audio_clock_ready()); assert(!audio_clock_check_wclk(1));
     tim.CCR1=3; stalled_tick=1; assert(!audio_clock_check_wclk(1));
     reset(); assert(audio_clock_init()); systick.CTRL=0; assert(!audio_clock_check_wclk(1));
+    reset();assert(audio_clock_init());assert(audio_clock_test_output());assert(audio_clock_ready());
+    pad_rate=0;assert(!audio_clock_test_output());assert(audio_clock_ready());
+    pad_rate=11000;assert(!audio_clock_test_output());assert(audio_clock_ready());
+    gb.ODR=GPIO_Pin_14;assert(!audio_clock_test_output());assert(tim.ARR==5);
+    gb.ODR=0;dma.CCR=1;assert(!audio_clock_test_output());assert(tim.ARR==5);dma.CCR=0;
     puts("PA8 clock and WCLK preflight tests PASS");
 }

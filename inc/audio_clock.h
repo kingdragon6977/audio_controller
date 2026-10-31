@@ -7,6 +7,8 @@
 int audio_clock_init(void);
 int audio_clock_ready(void);
 void audio_clock_print(void);
+/* Capture stopped, codec held RESET. Restores 12 MHz even if measurement fails. */
+int audio_clock_test_output(void);
 /* Called only while capture/stream DMA is stopped. EXTI/TIM2 count, not waveform proof. */
 int audio_clock_check_wclk(int verbose);
 uint32_t audio_clock_wclk_hz(void);

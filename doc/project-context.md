@@ -537,3 +537,49 @@ continuity and register checks. No physical PA8 waveform has been measured.
 Next distinguish actual PA8 output activity from codec-side reference reception
 and input power/clock behavior. Do not repeat continuity claims as proof of
 clock quality or bypass the production rate gate.
+
+## PA8 pad and codec-side MCLK return diagnostics — 2026-10-31
+
+User asks to continue with board powered and UART2 free. Branch
+`stm32-safe-flash`, source parent `49be14a`. Implemented `mclk test`: hold
+codec reset and stop capture, slow PA8 TIM1 to 12 kHz, count PA8 pad via
+EXTI8/TIM2, restore 12 MHz even on measurement failure. Only a successful
+self-test releases reset/reapplies normal profile and normal WCLK gate.
+The 12 kHz test exercises the pad/counter but does not prove 12 MHz waveform
+quality or reception after the series resistor. Added `codec mclkpath`: with
+ADC/dividers and PLL off, select MCLK/128 CLKOUT and route to existing
+DOUT/PB15; test DOUT LOW/HIGH first, then count EXTI15 over 20 ms. PB15
+remains input; active capture, shared interrupt ownership or boot authorization
+blocks relevant tests. Config readback failure holds reset. Both tests restore
+normal production configuration; no diagnostic rate can authorize PCM.
+
+Two STM32 builds/OTA deployments occurred, both passing programmed-page and
+full-image ROM readback; neither met final application/PCM acceptance because
+the WCLK gate remained wrong. ESP unchanged. Intermediate PA8-only image:
+60080 bytes, SHA-256
+`2db76caa5e05e8537543cbd6f2f5bcd6fb4a4ca0dc8cc633b9ceee9a8a0c8fff`,
+[manifest](firmware/pa8-pad-test-manifest.json), [OTA](pa8-pad-ota-2026-10-31.log),
+[UART](pa8-pad-uart-2026-10-31.log). Current deployed image with both diagnostics:
+61168 bytes, SHA-256
+`fa46958bc438a8e5315d930c23dc5d03b043c8226965cb162af93650bd51187c`,
+[manifest](firmware/mclk-return-test-manifest.json), [OTA](mclk-return-ota-2026-10-31.log),
+[UART](mclk-return-uart-2026-10-31.log). STM32 builds/manifests/dry-runs, seven
+native executables and 11 Python tests PASS. Tests cover PA8 restoration after
+good/bad counts, reset/active-capture guards, EXTI routing/cleanup, DOUT
+93.75 kHz counting, codec routing/ADC/PLL shutdown and normal DOUT restoration.
+
+New hardware: PA8 pad measured 600 edges / 50000 us = 12000 Hz, then 12 MHz
+register restoration PASS. Codec DOUT LOW/HIGH returned 0/1 on PB15 PASS.
+Two MCLK/128 return measurements each found 0 edges / 20000 us (93750 Hz
+expected). Normal profile restored, WCLK still approximately 17.06 kHz,
+stream STOPPED; PA0 OFF, DMA/overrun/stall/UART error counters zero.
+This supports investigating reference delivery/operating-frequency integrity
+or codec reference handling; it does not prove a particular open/clamp or
+damaged chip. MCLK electrical waveform remains unmeasured.
+
+Requested next user evidence with board powered: DC averages at PA8 before
+40-ohm resistor and TLV MCLK pin24 after resistor, plus whether pin24 retains
+a connection to unpowered AV6301 circuitry. DC averages may reveal clamping
+but cannot certify frequency or waveform. No further circuit modification
+requested. Reference for clock return routes: TI Rev B tables 31, 32 and 57,
+https://www.ti.com/lit/ds/symlink/tlv320adc3101.pdf .

@@ -351,11 +351,11 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "help") == 0)
     {
-        uart2_print("\r\nCommands:\r\n codec clocktest    (fractional/integer/bypass; pauses PCM)\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
+        uart2_print("\r\nCommands:\r\n codec mclkpath     (MCLK/128 via DOUT; pauses PCM)\r\n codec clocktest    (fractional/integer/bypass; pauses PCM)\r\n help\r\n id\r\n uid\r\n clock\r\n codec\r\n codec dump\r\n codec apply\r\n");
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
         uart2_print(" esp status         (USART1 + stream diagnostics)\r\n");
-        uart2_print(" i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)\r\n mclk status        (PA8/TIM1 register readback)\r\n");
+        uart2_print(" i2s rate           (50 ms EXTI/TIM2 rate preflight; pauses PCM)\r\n mclk test          (PA8 12-kHz pad counter; pauses PCM)\r\n mclk status        (PA8/TIM1 register readback)\r\n");
         uart2_print(" bootauth status    (read PA0 authorization state)\r\n");
         uart2_print(" bootauth on        (PA0 LOW only; does NOT reset or command ESP)\r\n");
         uart2_print(" bootauth off       (PA0 HIGH / safe default)\r\n");
@@ -406,6 +406,16 @@ static void execute(char *cmd)
         return;
     }
 
+    if (strcmp(cmd, "codec mclkpath") == 0) {
+        if (board_boot_auth_is_on()) {
+            uart2_print("MCLK RETURN blocked: boot authorization is active.\r\n");
+            return;
+        }
+        audio_stream_stop();
+        i2s_rx_stop();
+        codec_mclk_test();
+        return;
+    }
     if (strcmp(cmd, "codec clocktest") == 0) {
         if (board_boot_auth_is_on()) {
             uart2_print("CLOCK TEST blocked: boot authorization is active.\r\n");
@@ -428,6 +438,22 @@ static void execute(char *cmd)
         return;
     }
 
+    if (strcmp(cmd, "mclk test") == 0) {
+        if (board_boot_auth_is_on()) {
+            uart2_print("MCLK TEST blocked: boot authorization is active.\r\n");
+            return;
+        }
+        audio_stream_stop();
+        i2s_rx_stop();
+        codec_hold_reset();
+        if (audio_clock_test_output()) {
+            codec_reset();
+            if (codec_apply_audio_profile()) (void)audio_clock_check_wclk(1);
+        } else {
+            uart2_print("MCLK TEST failed: codec remains RESET, capture blocked.\r\n");
+        }
+        return;
+    }
     if (strcmp(cmd, "mclk status") == 0) {
         audio_clock_print();
         return;

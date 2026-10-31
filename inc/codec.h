@@ -8,6 +8,7 @@
 
 /* Hardware reset on STM32 PB14, active low. */
 void codec_reset(void);
+void codec_hold_reset(void);
 
 /* Apply/verify the PA8 12-MHz clock and isolated analog-input profile. */
 int codec_profile_ready(void);
@@ -15,6 +16,7 @@ int codec_apply_audio_profile(void);
 
 /* Capture must be stopped. Tests three clock paths, then restores normal profile. */
 void codec_clock_test(void);
+void codec_mclk_test(void);
 
 /* Read and print the key Page-0 registers used by the captured profile. */
 void codec_dump_profile(void);

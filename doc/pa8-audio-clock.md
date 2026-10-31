@@ -147,3 +147,45 @@ in every mode keep routing, reference delivery, power and the measurement
 path under investigation. Register readback is not proof of physical clocks.
 The normal clock values match TI's 12 MHz/48 kHz example (section 10.3.7);
 no confirmed root cause was found in the offline audit.
+
+## PA8 output self-test
+
+`mclk test` pauses capture, rejects active boot authorization and holds codec
+RESET LOW, invalidating profile/rate acceptance. Only then does TIM1 change
+from ARR=5/CCR1=3 (12 MHz) to ARR=5999/CCR1=3000 (12 kHz). EXTI8 reads
+the PA8 pad over the same 50 ms TIM2 gate; no additional wire is needed.
+The counter rejects a released codec reset, wrong GPIO/timer configuration,
+active capture or EXTI5..9/TIM2 conflicts. The normal 12 MHz configuration
+is restored after measurement even if counting fails. A failed self-test
+leaves the codec held reset. On success the normal codec profile is reapplied
+and the normal WCLK check still decides whether PCM may resume.
+
+This tests the PA8 pad at low frequency and exercises the counter against a
+known generated signal. It cannot establish the waveform after the resistor,
+12 MHz signal integrity, voltage margins, or the codec's received reference.
+The original PB12 counter still uses EXTI12; both shared IRQ groups are owned
+only during their measurement windows and restored afterward. Native tests
+cover PA8 route cleanup, reset/configuration/conflict rejection, and restoring
+12 MHz after both good and bad low-frequency measurements.
+
+## Codec-side MCLK return test
+
+`codec mclkpath` stops capture and rejects active boot authorization. It
+resets the codec, mutes/powers down ADCs and divider paths, powers PLL off,
+selects MCLK for CLKOUT (P0 R25=0), enables divide-by-128 (R26=0x80), then
+checks the existing DOUT-to-PB15 wire by driving codec DOUT LOW/HIGH (R53
+0x14/0x15). PB15 must remain an MCU input. Finally R53=0x16 selects CLKOUT
+on DOUT, and EXTI15/TIM2 counts for 20 ms (1875 expected edges, 93750 Hz
+for a usable 12 MHz MCLK). All configuration is read back. ADC data is not
+streamed during this mode. It changes no physical wiring or PA8 frequency.
+
+Normal RESET/profile/DOUT and fresh WCLK acceptance are restored afterward;
+configuration/readback failures hold codec reset. The 20 ms gate limits edge
+load below the existing 3000-edge cap. Counter tests cover the PB15 route,
+input-only enforcement and 93.75 kHz measurement; codec tests check ADC/PLL
+off, divider/mux values, normal DOUT restoration and active-capture rejection.
+TI Rev B tables 31, 32 and 57 define these routes. This test measures a
+codec-processed reference returned over DOUT, not MCLK voltage or ringing.
+If LOW/HIGH return works but CLKOUT has no edges, the return wire works at
+DC while the reference/CLKOUT path still fails; zero edges alone do not
+uniquely establish an open wire or damaged input.

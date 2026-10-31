@@ -84,3 +84,6 @@ static inline void NVIC_EnableIRQ(unsigned irq) { nvic.ISER[irq/32]|=1u<<(irq%32
 static inline void NVIC_DisableIRQ(unsigned irq) { nvic.ISER[irq/32]&=~(1u<<(irq%32)); }
 static inline void RCC_APB1PeriphClockCmd(unsigned p,unsigned e) { if(e)rcc.APB1ENR|=p;else rcc.APB1ENR&=~p; }
 static inline void RCC_APB1PeriphResetCmd(unsigned p,unsigned e) { (void)p;if(e)memset(&timer2,0,sizeof(timer2)); }
+
+typedef unsigned IRQn_Type;
+#define EXTI9_5_IRQn 23u
