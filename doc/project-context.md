@@ -668,3 +668,77 @@ overrun occurred during the observations. Absolute clock/audio calibration,
 waveform integrity and analog transfer validation remain pending; packet rate
 still reads approximately 0.4% above nominal against host wall time. Hardware
 authorization expiry/fault injection was not remeasured by these CLI tests.
+
+## USART1 overrun isolated and repaired — 2026-10-31
+
+User requests isolation of the remaining RX ORE. Source parent `2a0114f`,
+branch `stm32-safe-flash`. Added `esp rxtrace`: five startup SR checkpoints,
+last eight physically read bytes with timestamps/phase/SR, first error snapshot,
+and startup READY/ignored counters. Checkpoints read SR without clearing DR;
+actual errors remain sticky/counted. Native snapshot tests pass.
+
+**Confirmed original cause:** instrumented hardware boot showed RXNE=1/ORE=0
+at 243 and 713 ms; RXNE=1/ORE=1 at 2095 ms; first read at 2209 ms retained
+byte F0 (READY), phase 4/main loop, SR=0xF8, with no FE/NE. ESP sends READY
+once per second until PCM, while STM32 originally did not read USART1 during
+the approximately 2.2-second startup report. This directly establishes a
+startup receive-servicing gap, not an adapter-based explanation for this event.
+[Trace](uart-rx-isolation-uart-2026-10-31.log),
+[instrumented manifest](firmware/uart-rx-isolation-manifest.json),
+[verified diagnostic deployment](uart-rx-isolation-newesp-ota-2026-10-31.log).
+Instrumented image: 62144 bytes, SHA-256
+`7d8bd58e97c86d41e01a6963a94d8121050d3bc563af47b646c9ee16bebe411e`.
+
+During investigation, two F4 authorization attempts failed before erase/write,
+released PA0 and resumed streaming. ORE increased from 1 to 3, FE/NE stayed 0
+([before-fix counters](uart-rx-isolation-before-2026-10-31.log),
+[first attempt](uart-rx-isolation-ota-attempt1-2026-10-31.log),
+[second attempt](uart-rx-isolation-ota-2026-10-31.log)). Source showed the
+ESP's 2-ms F4-to-payload delay was less than the 2.76-ms PCM-half transmit
+time. Changed that guard to 10 ms, keeping CRC/session/100-ms frame/2-s lease
+checks intact. Later diagnostic and final repair updates both passed their
+normal authorization/programming/recovery sequence with the corrected ESP.
+This supports the timing-race explanation; original F4 bytes were not individually
+timestamped because the trace image was not yet installed.
+
+ESP deployment recovery note: the first guard-only ESP image uploaded OK
+(SHA-256 `3a62f000a8d351705c4a209f3c859239ae3174b4ac9c0c25bb03c4100180fd56`),
+but reboot returned delivery to broadcast and control requests timed out under
+continuous full-rate serial processing ([timeout](uart-rx-isolation-starved-2026-10-31.log)).
+Pausing PCM with `i2s meter 10` immediately restored a STREAM_STATUS response.
+Bounded normal ESP serial parsing to 512 bytes/loop so control/OTA cannot be
+indefinitely bypassed by a nonempty RX stream. Uploaded this final ESP while
+PCM was temporarily paused ([pause evidence](uart-isolation-esp-pause-2026-10-31.log),
+[upload](uart-isolation-esp-bounded-ota-2026-10-31.log)). Initial broadcast
+control replies after reboot still timed out twice, but subscription was applied
+and subsequent unicast control was responsive ([evidence](uart-isolation-esp-control-2026-10-31.log)).
+Do not claim reliable broadcast delivery from this test; LAN broadcast latency
+remains a limitation. ESP final image: 332256 bytes, SHA-256
+`8f7afa07104118fdf80d4caed66bad92149ecfd914c5f4107ee4f4f149437408`.
+
+Final STM32 repair drains RX during startup debug output, counts/traces errors,
+and coalesces ONLY F0 READY until main initialization is complete. Other
+startup bytes are discarded and counted, never deferred into authorization.
+No boot action runs in the startup pump; normal protocol parsing remains in
+the main task. Native tests exercise repeated READY delivered once, genuine
+error snapshots/counters, and startup F4 not being exposed afterward.
+No UART IRQ or general protocol queue introduced.
+
+STM32 final image: 62440 bytes, SHA-256
+`d94e3b2124bef6f1526355bc1b592e34ddb335c799f90f4bf7feaed7835100e6`;
+[manifest](firmware/uart-startup-repair-manifest.json). STM32/ESP builds PASS;
+eight native executables and 11 Python tests PASS. OTA 31-page/full-image
+readback PASS and FLASH_COMPLETE with application/PCM PASS, bootauth OFF
+([OTA](uart-startup-repair-ota-2026-10-31.log)). New hardware boot observed
+three READY bytes, ignored=0, every startup checkpoint ORE=0 and FIRST ERROR
+none ([startup/CLI evidence](uart-startup-repair-uart-2026-10-31.log)).
+
+Final synchronized regression: 18 CLI commands while receiving 1460 packets
+in 15.521 s (94.07 pps). Every UDP status had missing=0, bad_header=0,
+udp_fail=0, rom=0. STM32 RX ORE/FE/NE, DMA errors/overruns/stalls all stayed
+zero, WCLK 48000 Hz, stream RUNNING and PA0 OFF.
+[UART](uart-startup-repair-load-2026-10-31.log),
+[timed UDP/command record](uart-startup-repair-load-2026-10-31.json).
+Wiring/USB adapter was unchanged throughout. Electrical waveform margins,
+absolute frequency/audio calibration and hardware fault injection remain
+unverified by these software tests.

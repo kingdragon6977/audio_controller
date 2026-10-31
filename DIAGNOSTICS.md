@@ -43,3 +43,6 @@ Where supported by the MCU, startup diagnostics should include:
 - read-back verification of critical configuration
 
 The goal is simple: **let the MCU leave a trail of where it has been and why it stopped, instead of making debugging a search for clues.**
+
+USART1 startup/control timing: `esp rxtrace` reports SR checkpoints, the first
+physical RX error and startup READY coalescing. See [receive timing notes](doc/ota-integration.md#receive-timing-hardening-2026-10-31).

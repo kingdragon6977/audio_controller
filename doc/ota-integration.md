@@ -87,3 +87,27 @@ Bench acceptance still needs malformed/truncated request rejection, measured
 PA0 expiry during a busy main loop, settled grant/reset timing, complete automatic
 update, lost completion ACK retry, application startup failure, independent
 readback, and continuing PCM with PA0 released.
+
+## Receive timing hardening (2026-10-31)
+
+ESP now waits 10 ms after F4 before sending payload byte zero. The previous
+2 ms wait was shorter than the approximately 2.76 ms required to send a PCM
+half-buffer; two failed authorization attempts each added one STM32 ORE
+and released PA0 before erase/programming. A 10 ms guard plus the paced
+42-byte frame remains inside the application's 100 ms framing budget under
+normal servicing. Long unrelated foreground blocking can still cause a safe
+authorization rejection; this change does not weaken CRC/session/lease gates.
+
+STM32 boot now drains USART1 during UART2 startup output, traces errors and
+coalesces only idempotent READY bytes until initialization completes. Other
+startup bytes are counted/traced and discarded, never deferred for boot
+authorization. Normal protocol parsing stays in the main task.
+`esp rxtrace` exposes startup status checkpoints, physical RX byte timing,
+first errored byte and startup READY/ignored counts. Genuine errors are still
+counted; no counter-clearing workaround is used.
+
+ESP normal-loop serial parsing is bounded to 512 bytes per iteration so
+continuous PCM cannot indefinitely bypass control/OTA handling. Broadcast
+delivery/latency remains less reliable on this LAN; use STREAM_SUBSCRIBE
+for measurement. During investigation an unbounded-loop image required a
+temporary `i2s meter 10` pause to regain OTA servicing and install the bound.

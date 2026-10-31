@@ -128,6 +128,7 @@ int main(void)
     uart2_print(i2c_safe ? "PASS - AF open-drain and SDA/SCL released HIGH\r\n"
                          : "FAIL - refusing I2C transaction because pin/bus state is unsafe\r\n");
 
+    esp_uart_mark_phase(1u);
     uart2_print("\r\nResetting TLV320ADC3101 on PB14...\r\n");
     codec_reset();
     uart2_print(audio_clock_ready() ? "TLV320 reset released.\r\n"
@@ -168,6 +169,7 @@ int main(void)
 
             diagnostics_print_i2s_clock_ownership();
             uart2_print("\r\nI2S CLOCK ACTIVITY CHECK: ");
+            esp_uart_mark_phase(2u);
             i2s_clock_active = audio_clock_check_wclk(1);
             uart2_print(i2s_clock_active
                         ? "PASS - PB12 WCLK estimate within 1% of 48 kHz\r\n"
@@ -321,6 +323,7 @@ int main(void)
         uart2_print("Codec profile NOT applied because no ACK was received.\r\n");
     }
 
+    esp_uart_mark_phase(3u);
     diagnostics_print_i2s2();
     diagnostics_print_audio_pins();
 
@@ -330,6 +333,7 @@ int main(void)
     uart2_print("ESP-01 stream waits for Wi-Fi READY token on USART1.\r\n");
     uart2_print("> ");
 
+    esp_uart_mark_phase(4u);
     while (1)
     {
         cli_task();

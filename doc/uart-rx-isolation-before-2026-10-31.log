@@ -1,0 +1,10 @@
+[2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=314688 dma_errors=0 rx_bytes=88
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=3 FE=0 NE=0
+ USART1: SR=000000C0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> [2K> b[2K> bo[2K> boo[2K> boot[2K> boota[2K> bootau[2K> bootaut[2K> bootauth[2K> bootauth [2K> bootauth s[2K> bootauth st[2K> bootauth sta[2K> bootauth stat[2K> bootauth statu[2K> bootauth status
+BOOT_AUTH PA0: OFF (HIGH)  ODR=1 IDR=1
+> 

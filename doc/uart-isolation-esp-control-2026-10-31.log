@@ -1,0 +1,3 @@
+STREAM_STATUS TIMEOUT
+STREAM_SUBSCRIBE TIMEOUT
+STREAM_STATUS uptime_ms=24896 pcm=5812 udp=1453 udp_fail=0 missing=0 bad_header=0 target=192.168.114.194 rom=0

@@ -409,9 +409,11 @@ static bool stm32PrepareControl(uint8_t control, const uint8_t *request = NULL)
     serialDrainRx();
     Serial.write(control);
     if (request) {
-        /* STM32 USART1 is polled: let it stop DMA, then pace the small frame. */
+        /* STM32 may be transmitting a 2.76-ms PCM half when F4 arrives.
+         * Give it time to consume F4 and stop DMA before payload byte zero.
+         * The 10-ms guard plus paced frame still fits its 100-ms receive budget. */
         Serial.flush();
-        delay(2);
+        delay(10);
         uint16_t checksum = flash_auth_crc16(request);
         for (size_t i = 0; i < 40u; ++i) {
             Serial.write(request[i]);
@@ -1177,7 +1179,11 @@ void loop()
         return;
     }
 
-    while (Serial.available() > 0) {
+    /* Full-rate PCM (especially broadcast forwarding) can keep RX nonempty.
+     * Bound work so control/OTA/Wi-Fi handling cannot be starved indefinitely. */
+    size_t rxBudget = 512u;
+    while (rxBudget && Serial.available() > 0) {
+        --rxBudget;
         consumeByte((uint8_t)Serial.read());
     }
 
