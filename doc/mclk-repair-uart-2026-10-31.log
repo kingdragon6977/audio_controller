@@ -1,0 +1,32 @@
+[2K> m[2K> mc[2K> mcl[2K> mclk[2K> mclk [2K> mclk t[2K> mclk te[2K> mclk tes[2K> mclk test
+PA8 OUTPUT TEST: expected_hz=12000 observed_hz=12000 edges=600 gate_us=50000 measurement=VALID rate=PASS restore_12MHz=PASS
+PA8 pad readback at 12 kHz; TLV-side 12-MHz waveform is not verified.
+CODEC CLOCK READBACK: PASS - calculated PLL 98.304 MHz, ADC 48 kHz, BCLK 1.536 MHz.
+I2S RATE PREFLIGHT: PASS observed_hz=48000 expected_hz=48000 edges=2400 gate_us=50000 method=EXTI12_TIM2 measurement=VALID
+> [2K> c[2K> co[2K> cod[2K> code[2K> codec[2K> codec [2K> codec m[2K> codec mc[2K> codec mcl[2K> codec mclk[2K> codec mclkp[2K> codec mclkpa[2K> codec mclkpat[2K> codec mclkpath
+CODEC DOUT RETURN: PASS driven_low_read=0 driven_high_read=1 (PB15 input)
+CODEC MCLK RETURN: expected_hz=93750 observed_hz=93750 edges=1875 gate_us=20000 measurement=VALID rate=PASS inferred_mclk_hz=12000000
+CODEC CLOCK READBACK: PASS - calculated PLL 98.304 MHz, ADC 48 kHz, BCLK 1.536 MHz.
+MCLK RETURN: normal DOUT/clock profile restored; checking WCLK.
+I2S RATE PREFLIGHT: PASS observed_hz=48000 expected_hz=48000 edges=2400 gate_us=50000 method=EXTI12_TIM2 measurement=VALID
+> [2K> i[2K> i2[2K> i2s[2K> i2s [2K> i2s r[2K> i2s ra[2K> i2s rat[2K> i2s rate
+I2S RATE PREFLIGHT: PASS observed_hz=48000 expected_hz=48000 edges=2400 gate_us=50000 method=EXTI12_TIM2 measurement=VALID
+EXTI12 edges / TIM2 gate; waveform quality unverified. PCM resumes only with valid clock/profile.
+> [2K> b[2K> bo[2K> boo[2K> boot[2K> boota[2K> bootau[2K> bootaut[2K> bootauth[2K> bootauth [2K> bootauth s[2K> bootauth st[2K> bootauth sta[2K> bootauth stat[2K> bootauth statu[2K> bootauth status
+BOOT_AUTH PA0: OFF (HIGH)  ODR=1 IDR=1
+> [2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=25352 dma_errors=0 rx_bytes=1
+ stream_overruns=0 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=0 FE=0 NE=0
+ USART1: SR=000000D0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> AUDIO STREAM: missed DMA half-buffer; stopped, resynchronizing.
+[2K> e[2K> es[2K> esp[2K> esp [2K> esp s[2K> esp st[2K> esp sta[2K> esp stat[2K> esp statu[2K> esp status
+ESP-01 / USART1 status:
+ stream=RUNNING packets=28028 dma_errors=0 rx_bytes=1
+ stream_overruns=1 clock_stalls=0 wclk_estimate_hz=48000
+ uart_errors: ORE=0 FE=0 NE=0
+ USART1: SR=000000D0 BRR=00000048 CR1=0000200C CR2=00000000 CR3=00000000
+ baud_check=PASS (PCLK2 72 MHz / BRR 0x0048 = 1 Mbaud)
+> AUDIO STREAM: missed DMA half-buffer; stopped, resynchronizing.

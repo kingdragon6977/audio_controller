@@ -583,3 +583,37 @@ a connection to unpowered AV6301 circuitry. DC averages may reveal clamping
 but cannot certify frequency or waveform. No further circuit modification
 requested. Reference for clock return routes: TI Rev B tables 31, 32 and 57,
 https://www.ti.com/lit/ds/symlink/tlv320adc3101.pdf .
+
+## MCLK short repaired; powered software checks pass — 2026-10-31
+
+User reports finding/fixing approximately 130 ohms to ground on MCLK; powered
+DC reading changed from 0.64 V to approximately 1.6 V. Those resistance/DC
+readings are user measurements. No firmware change or upload was performed
+for this verification: source remains `89234a3` on `stm32-safe-flash`, deployed
+STM32 SHA-256
+`fa46958bc438a8e5315d930c23dc5d03b043c8226965cb162af93650bd51187c`.
+
+New powered checks via UART2 ([log](mclk-repair-uart-2026-10-31.log)):
+PA8 self-test 600 edges / 50000 us = 12000 Hz PASS; normal timer restored.
+Codec DOUT LOW/HIGH readback 0/1 PASS. Codec MCLK/128 return measured
+1875 edges / 20000 us = 93750 Hz PASS, inferring 12 MHz reference reception.
+Normal codec profile readback PASS, WCLK 2400 edges / 50000 us = 48000 Hz
+PASS, PA0 authorization OFF/HIGH, stream RUNNING. This before/after result
+strongly supports the repaired MCLK loading fault as the cause of the prior
+clock failures. It does not establish analog accuracy or waveform margins.
+
+Long blocking `esp status` UART output still causes missed DMA half-buffers
+and automatic resynchronization. Two such diagnostic interruptions appeared
+in the first mixed observation ([stream log](mclk-repair-stream-2026-10-31.log));
+no DMA transfer errors, clock stalls or UART errors were reported.
+Do not describe this as zero-overrun operation under CLI load.
+
+A separate quiet 20.003-second unicast observation received 1883 packets
+(94.14 packets/s, nominal target 93.75). Every sampled ESP status retained
+`missing=2 bad_header=0 udp_fail=0 rom=0`: no new missing-frame count during
+the quiet window. [Quiet stream evidence](mclk-repair-quiet-stream-2026-10-31.log).
+The wall-time packet rate is approximately 0.4% above nominal; MCU clock
+checks share its reference, and precise absolute frequency/audio calibration
+remains unestablished. No waveform measurement or calibrated audio input
+was used. Remaining firmware issue: avoid/coordinate blocking CLI output
+with capture so diagnostics do not themselves cause recoverable loss.
