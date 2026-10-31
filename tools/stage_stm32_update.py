@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Stage a validated STM32 image through the ESP-01 without touching STM32 flash.
-
-The ESP accepts a manifest, verifies the canonical manifest digest, then receives
-one 2 KiB page at a time in ordered <=256-byte chunks and verifies each page
-locally with SHA-256.  The current ESP transport intentionally stops at
-STAGED_VERIFIED and has no erase/write call path.
-"""
+"""Validate/stage STM32 images, or explicitly flash with verified recovery."""
 
 from __future__ import annotations
 
@@ -31,6 +25,7 @@ PKT_ABORT = 7
 PKT_STATUS = 8
 PKT_FLASH_BEGIN = 9
 PKT_FLASH_FINISH = 10
+PKT_APPLICATION_STATUS = 11
 
 REPLY_NAMES = {
     0: "OK",
@@ -106,6 +101,22 @@ def require_ok(status, label):
             f"arg={arg} hashes={hashes} received={received}"
         )
     return arg, hashes, received
+
+
+def wait_application(sock, target, session, timeout=60.0):
+    deadline = time.monotonic() + timeout
+    while time.monotonic() < deadline:
+        try:
+            status = transact(sock, target, PKT_APPLICATION_STATUS, session,
+                              retries=1, timeout=min(2.0, deadline-time.monotonic()))
+        except RuntimeError:
+            continue
+        if status[0] == 0:
+            return
+        if status[0] != 6:
+            require_ok(status, 'APPLICATION_STATUS')
+        time.sleep(min(0.25, max(0.0, deadline-time.monotonic())))
+    raise RuntimeError('image verified, but application/PCM recovery was not confirmed')
 
 
 def load_manifest(path: pathlib.Path) -> dict:
@@ -289,9 +300,11 @@ def stage(args) -> int:
             "FLASH_FINISH",
         )
         print(
-            f"FLASH_COMPLETE session=0x{session:08X} "
+            f"FLASH_IMAGE_VERIFIED session=0x{session:08X} "
             f"image={manifest['image_size']} sha256={manifest['sha256']}"
         )
+        wait_application(sock, target, session)
+        print(f"FLASH_COMPLETE session=0x{session:08X} application=PASS pcm=PASS bootauth=OFF")
 
     return 0
 

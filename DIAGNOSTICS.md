@@ -1,5 +1,8 @@
 # Firmware diagnostics and safe bring-up standard
 
+The current PA8 clock/profile gates, capture timing budget, UART commands, and
+hardware acceptance procedure are documented in [PA8 audio clock](doc/pa8-audio-clock.md).
+
 This project treats startup diagnostics as part of the firmware architecture, not as temporary debug prints.
 
 ## Boot breadcrumb order

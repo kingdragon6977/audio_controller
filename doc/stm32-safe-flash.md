@@ -26,12 +26,12 @@ relaxing these checks.
 The ESP-01 is the transport/programmer, but it must not be the sole authority that decides
 whether the STM32 enters its ROM bootloader.
 
-Normal application firmware must first approve the operation.  The planned external
-BOOT0-verify circuit is the hardware enforcement for that approval.
+Normal application firmware must first approve the operation.  The external PA0
+BOOT0 authorization circuit is the hardware enforcement for that approval.
 
-The existing `CTRL_BOOT_PREP` / PB2 BOOT1-low check remains a prerequisite.  Once the new
-BOOT0 permission circuit is installed, its proof must become an additional prerequisite
-before the ESP is allowed to pulse NRST.
+PB2 BOOT1-low remains a prerequisite. Automatic flashing requires the timed
+`CTRL_FLASH_AUTH` session/manifest-bound PA0 grant and settled readback before
+the ESP may pulse NRST. PA0 reset/default HIGH releases authorization.
 
 If any prerequisite is missing, timing out, contradictory, or unreadable, the operation
 fails closed and no erase/write ROM command is sent.
@@ -226,31 +226,15 @@ FAILED_VERIFY offset=...
 FLASH_VERIFIED
 ```
 
-## Existing implementation status
+## Implementation status
 
-The current ESP firmware already provides a read-only ROM bootloader test:
+Page programming and whole-image readback have been exercised on hardware.
+Independent ROM readback on 2026-10-12 confirmed the 53,168-byte installed image.
+Timed automatic authorization and application recovery polling passed coordinated
+deployment and a complete automatic update on 2026-10-12. Electrical expiry and
+failure-injection bench checks remain pending.
 
-- asks the running STM32 to stop PCM,
-- requires PB2/BOOT1 low acknowledgment,
-- repeats the PB2 test after the 250 ms settling interval,
-- resets into system memory,
-- syncs the ROM protocol,
-- executes `GET`,
-- executes `GET ID`,
-- returns to the normal application.
-
-Implemented groundwork now includes ROM read-memory, PID/flash-size verification, advertised
-ROM command tracking, pre-reset application identity, and a manifest generator with whole-image,
-per-page, and canonical-manifest SHA-256 values.
-
-The next safe implementation steps are:
-
-1. add the external BOOT0 authorization proof once the hardware is finalized;
-2. implement the manifest-first/page-at-a-time transport without destructive commands;
-3. bind the received manifest to an update session;
-4. implement page erase behind the complete authorization gate;
-5. implement <=256-byte writes from a pre-hashed 2 KiB page buffer;
-6. implement per-page and final full-image read-back verification;
-7. only then expose a destructive remote update command.
-
-Until all prerequisites exist, `STM32_BOOT_TEST` remains read-only.
+See [OTA integration](ota-integration.md) for the current protocol, routine,
+migration order, and remaining bench checks. Staging without `--flash` and
+`STM32_BOOT_TEST` remain non-destructive. Explicit `--flash` invokes bounded
+page erase/write and mandatory page/full-image verification.

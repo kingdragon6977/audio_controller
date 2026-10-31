@@ -1,0 +1,12 @@
+[2K> i[2K> i2[2K> i2s[2K> i2s [2K> i2s r[2K> i2s ra[2K> i2s rat[2K> i2s rate
+I2S WCLK RATE: edges=4305 elapsed_ms=250 observed_hz=17220 expected_hz=48000
+GPIO polling estimate; scope/analyzer remains authoritative. PCM resumes automatically.
+> 
+[2K> i[2K> i2[2K> i2s[2K> i2s [2K> i2s r[2K> i2s ra[2K> i2s rat[2K> i2s rate
+I2S WCLK RATE: edges=4310 elapsed_ms=250 observed_hz=17240 expected_hz=48000
+GPIO polling estimate; scope/analyzer remains authoritative. PCM resumes automatically.
+> 
+[2K> i[2K> i2[2K> i2s[2K> i2s [2K> i2s r[2K> i2s ra[2K> i2s rat[2K> i2s rate
+I2S WCLK RATE: edges=4299 elapsed_ms=250 observed_hz=17196 expected_hz=48000
+GPIO polling estimate; scope/analyzer remains authoritative. PCM resumes automatically.
+> 

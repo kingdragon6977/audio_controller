@@ -163,7 +163,235 @@ deployment. Inspect code, tests, and subsequent task evidence before proceeding.
    local files and sidebar organization alone do not establish shared context
    in every existing conversation.
 
-Pending: obtain independent whole-image/post-flash health evidence, identify any
+## Hardware verification — 2026-10-12
+
+Performed locally at source commit `a682235` on `stm32-safe-flash`, with ESP at
+`192.168.114.54` and STM32 UART2 `/dev/ttyACM1` at 115200 8N1.
+
+- PlatformIO `esp01_1m_ota` build and OTA upload succeeded (uploader Result: OK).
+  Uploaded ESP binary: 331,200 bytes, SHA-256
+  `2f3981ec28d7921399160a796d81b1a8134fe3767947d2d4eb0ad115c2162265`.
+- Preserved the original STM32 binary/manifest; staged manifest only.
+- Read-only ROM test: sync ACK, GET/GET ID OK, both PB2 checks PASS,
+  bootloader `0x22`, PID `0x0414`, 256 KiB flash, target PASS.
+- Whole installed application verification: PASS, 53,168 bytes; actual and
+  expected SHA-256 both
+  `42d9141bd2765f934eea788de883e1712d07d3e4fa88d0d21ac11168ab264ba5`.
+  This confirms the earlier application programming succeeded. It hashes the
+  manifest image range, not unused bytes across the entire 256 KiB flash.
+- Application restarted: 72 MHz SYSCLK, codec ACK, I2S WS synchronization PASS,
+  bring-up complete, CLI ready, READY received and PCM stream enabled.
+  Received 97 512-byte UDP PCM packets during the recovery observation.
+- Final cleanup explicitly confirmed PA0 authorization OFF/HIGH, ODR=1 IDR=1.
+- Raw verification/serial evidence: [verification log](verification-2026-10-12.log).
+
+No STM32 erase/write or reflash was performed. Completion ACK ordering and retry
+fixes are now uploaded to ESP, but the destructive FLASH_FINISH exchange was not
+rerun; its reporting fix is not yet independently exercised on hardware.
+
+## Automatic OTA integration — 2026-10-12
+
+Implemented in the working tree based on `a682235` (`stm32-safe-flash`):
+
+- CRC-checked `0xF4` STM32 request binds session, image size, and canonical
+  manifest digest; PB2/BOOT1 readback precedes a two-second PA0 grant.
+- A 1 ms SysTick expires the grant independently of the main loop. Rechecks
+  cannot renew it; failed requests and READY/STOP release authorization.
+- ESP checks the same grant twice with 250 ms settling, removes the automatic
+  legacy fallback, and restricts ROM retries to the authorized session/manifest.
+- Existing target/capability/page/full-image verification remains mandatory.
+- Host distinguishes `FLASH_IMAGE_VERIFIED` from final `FLASH_COMPLETE`, polling
+  for fresh PCM plus STM32 `0xF5` health (stream active and PA0 released).
+- ESP's own OTA retains STOP/READY coordination; STOP now releases authorization.
+- Protocol, migration order, and bench acceptance: [OTA integration](ota-integration.md).
+
+Validation performed: STM32 cross-build, ESP PlatformIO build, new-image manifest
+generation and offline `--flash --dry-run`, three native test executables
+(authorization/CRC/expiry/session mutation; board interrupt expiry; ESP finish
+ordering/retry/readback failures/recovery gates), and 11 Python manifest/recovery
+tests all PASS. `make ota-test BUILD=build/ota-integration` reruns the tests.
+
+New STM32 image is 54,200 bytes, 27 pages, SHA-256
+`e31a0f89d593a0b3c51f1b4f3375f8f1c2462eff193feccfa4dca05386a433fe`,
+in `build/ota-integration/`. New ESP binary SHA-256:
+`8833d9f53eae4ae80f445967e500dad6365f6562c04df86d132586cfbde49f3e`.
+The previously hardware-verified `build/audio_controller.bin` was preserved and
+its original hash rechecked. These new changes have not been uploaded, committed,
+or pushed. Deploy STM32 first through the currently installed ESP/manual grant,
+verify recovery, then update ESP; its new routine requires the new STM32 protocol.
+Hardware frame timing, timer/PA0 traces, automatic flash and failure/retry behavior
+remain pending; host tests are not new hardware evidence.
+
+## Coordinated deployment and hardware tests — 2026-10-12
+
+User authorized flashing both processors and verifying their existing locations.
+ESP remains `192.168.114.54` (MAC `ec:fa:bc:53:d1:1b`); STM32 UART2 remains
+`/dev/ttyACM1`, 115200 8N1. Deployed the integration binaries identified above
+from the working tree based on `a682235`; source changes remain uncommitted.
+
+1. Bootstrapped STM32 through the previously installed ESP with manual PA0
+   authorization and the host script from `a682235`. An initial UDP timeout
+   occurred before programming; a direct manifest-only request subsequently
+   returned a valid ACK. Retry programmed/verified all 27 pages, verified the
+   whole 54,200-byte image, reported completion, and recovered application/PCM.
+2. Uploaded new ESP firmware using PlatformIO OTA: uploader `Result: OK`.
+3. Started with PA0 OFF and exercised the new automatic `--flash` routine using
+   the same validated STM32 image. Both new authorization ACKs passed; all
+   pages and the installed image verified. Final output:
+   `FLASH_COMPLETE session=0x05826AAE application=PASS pcm=PASS bootauth=OFF`.
+4. Repeated FLASH_FINISH and APPLICATION_STATUS for the completed session:
+   both returned OK, 27 pages; no new startup banner/reset was observed.
+5. Ran independent read-only ROM verification with the new ESP. PID `0x0414`,
+   flash 256 KiB, target PASS; image SHA-256 actual/expected both
+   `e31a0f89d593a0b3c51f1b4f3375f8f1c2462eff193feccfa4dca05386a433fe`.
+   Application restarted, codec/I2S checks passed and PCM resumed.
+6. UART2 confirmed PA0 OFF/HIGH, ODR=1 IDR=1. Stream counters advanced
+   11,321 to 11,828, DMA errors 0, FE/NE 0, ORE 1 (unchanged between reads).
+
+Evidence: [bootstrap](ota-deployment-2026-10-12.log),
+[automatic update/retry](ota-automatic-2026-10-12.log),
+[independent readback/recovery](ota-readback-2026-10-12.log).
+
+Separate unresolved audio transport observation: passive capture received
+97 PCM UDP packets in 12 seconds; a follow-up eight-second capture received
+exactly 8 packets per second and no heartbeats. Nominal 24 kHz mono PCM with
+256 samples per UDP packet requires 93.75 packets/second. This verifies some
+continued delivery, not complete/lossless audio throughput. Determine whether
+the limitation is sampling/stream production, ESP forwarding, LAN broadcast,
+or host reception before trusting sustained audio timing. No cause is asserted.
+Electrical grant-expiry traces, malformed-frame hardware checks, and simulated
+application-failure recovery remain future bench validation.
+
+## Audio delivery/timing investigation — 2026-10-12
+
+User authorized continued diagnosis and confirms TLV320 analog inputs are
+disconnected. Added ESP stream counters and receiver-selected unicast delivery;
+updated the receiver with subscription retries, telemetry, and finite checks.
+Unicast received 407 of 407 observed ESP UDP submissions over 12 seconds, with
+12 heartbeats; broadcast received 65 while ESP submitted 271 over 8 seconds.
+No UART sequence gaps, malformed headers, or UDP submission failures were
+reported in either comparison. Exact broadcast discard point remains unknown.
+
+An independent upstream timing mismatch remains: ESP receives ~135.26 PCM
+frames/s (~8.66 ksample/s), and three STM32 GPIO WCLK estimates are near 17.2 kHz,
+not 48 kHz. Codec readback matches the intended 16-MHz-MCLK profile. The physical
+MCLK source/frequency is awaiting user confirmation; no PLL retuning was done.
+Nominal 24 kHz labels must not be treated as measured capture timing.
+
+Current deployed STM32 SHA-256:
+`fd91cc7236e967d0da478a11d9d16c61d290c661a53bb757b3a8bd976379128d`
+(54,560 bytes; adds `i2s rate`). Current ESP SHA-256:
+`318bb5882f945823143b3b6ec8ec88e6f06de33f1047f8a0a77e7b30d4ff0320`.
+Automatic STM32 programming completed with verified image/application/PCM and
+PA0 OFF; final ESP OTA returned OK. The firmware source remains uncommitted.
+Read [audio investigation](audio-transport-investigation.md) for measurements,
+idle-input statistics, evidence links, and remaining clock validation.
+
+Clock-source clarification: user reports a 16 MHz crystal on the AV6301 board,
+but the AV6301 was isolated and left unpowered. The original reference clock was
+likely removed. TLV master mode derives BCLK/WCLK from an external reference;
+it still needs MCLK. TI confirms MCLK is pin 24 and IOVDD is pin 21; the earlier
+investigation document's incorrect pin number has been corrected. Hardware
+connectivity/waveform is not yet measured. Clock-source selection is pending
+(dedicated oscillator, STM32 PA8 output with matching profile, or original feed).
+Do not retune against the apparent output frequency or treat idle data as
+calibrated until a valid reference and sample timing are established.
+
+Clock-source decision: user will build/wire a dedicated 16 MHz oscillator
+daughterboard, preserving the current boards and 16 MHz codec profile. No MCU
+clock-output changes or PLL retuning are needed for this choice. A passive
+crystal requires powered oscillator circuitry; use its digital output at a
+level compatible with TLV IOVDD, feeding MCLK pin 24 with a common ground and
+the former AV6301 clock source isolated. Hardware installation is pending.
+After connection, verify approximately 48 kHz WCLK, 1.536 MHz BCLK, 24 ksample/s
+decimated PCM and 93.75 UDP packets/s, plus stable counters and no clipping.
+
+2026-10-13 hardware proposal: user plans to salvage a three-pin resonator and
+associated capacitors from a spare board. Exact part/markings and connections
+are unidentified; do not assume the center pin is clock output or attach supply
+to unknown terminals. Common three-terminal ceramic resonators use the center
+as capacitor ground and the outer terminals in an active oscillator loop. The
+resonator/capacitors alone do not supply the required driven MCLK. Identify the
+part and donor oscillator IC/circuit before choosing the daughterboard wiring.
+
+2026-10-30 clock alternative: user reports PB9 is accessible, while accessing
+the nearby pins would risk tested wiring. Corrected the earlier pin-name mixup:
+dedicated MCO is PA8, not PB8. ST's STM32F103RC pin table maps PB9 to TIM4_CH4.
+Current compiled source has no PB9/TIM4 use. A proposed alternative is hardware
+PWM on PB9 at 12 MHz (72 MHz TIM4 clock, PSC=0, ARR=5, CCR4=3), enabling only
+channel 4 and leaving PB6/PB7 I2C unchanged. TLV 12 MHz profile would use
+P=1, R=1, J=8, D=1920, retaining the 48 kHz ADC target and 24 kHz PCM target.
+This is a verified pin-mapping/calculated design proposal, not implemented or
+hardware-tested. Do not bridge PB8/PB9; PB9 can generate its own timer output.
+Confirm PB9 has no external load/driver and TLV IOVDD is compatible with the
+STM32's 3.3 V output before wiring MCLK pin 24. Firmware must be changed before
+PB9 supplies a clock. Dedicated resonator oscillator hardware remains an option.
+
+2026-10-30 follow-up: user confirms PA8 is accessible and will check circuit
+integrity before jumpering it to TLV MCLK. Preferred proposal is PA8 TIM1_CH1
+hardware PWM at 12 MHz/50% (72 MHz timer, PSC=0 ARR=5 CCR1=3) with the matching
+12 MHz TLV PLL profile, rather than adding a discrete oscillator. PA8 also has
+MCO, but a 16 MHz clock is not directly available from the present 72 MHz clock
+tree; do not imply that selecting PA8 automatically supplies 16 MHz.
+Suggested wiring is PA8 through a 33-ohm starting-value series damping resistor
+placed near the STM32, then a short wire to MCLK pin 24, with nearby digital
+ground return. Confirm TLV IOVDD is 3.3 V for direct STM32-level drive, isolate
+the old clock source, and do not drive an unpowered TLV. Pin wiring/IOVDD and
+clock waveform are not yet confirmed; no new clock firmware was flashed.
+
+2026-10-31 wiring completion reported by user: STM32 PA8 to a solder point
+about 1.5 cm away, then a 40-ohm series resistor, followed by 7–8 cm of clock
+wire twisted with ground to TLV MCLK pin 24; common ground about 1 cm from TLV.
+No new clock firmware has been flashed. Source corresponding to the last
+uploaded STM32 binary (SHA-256 fd91cc7236e967d0da478a11d9d16c61d290c661a53bb757b3a8bd976379128d)
+does not configure PA8; startup clears MCO and no TIM1 output is enabled.
+Expected PA8 state is reset-default floating input/high impedance, inferred
+from source, not newly measured GPIO registers. With the former clock source
+isolated and wiring correct, no new output drive/contention is expected.
+TLV IOVDD voltage remains unconfirmed; measure pin 21 to digital ground before
+enabling the proposed 3.3 V PA8 output. The 40-ohm resistor is damping, not a
+level shifter or protection against driving an unpowered TLV. MCLK remains
+invalid until a suitable clock is enabled and measured.
+
+## PA8 clock firmware prepared for GitHub — 2026-10-31
+
+User confirms TLV IOVDD pin 21 shares the STM32 3.3 V rail and requests local
+implementation, safety/diagnostics, and commit/push. The prior wiring report
+(PA8, 40 ohms, short twisted clock/ground to TLV pin 24) is the hardware contract.
+
+Implemented PA8 TIM1_CH1 at a calculated 12 MHz/50%, with no timer IRQ/DMA,
+and codec P=1 R=1 J=8 D=1920 for calculated 48 kHz ADC / 24 kHz mono PCM.
+The codec is held reset until MCLK register checks pass. Critical codec
+readback errors and I2C programming errors hold reset; adjacent PLL D writes
+and settling delay precede ADC activation. Live WCLK polling must estimate
+48 kHz within 1% before capture/stream activation, with a bounded loop and
+once-per-second streaming retries. Profile/reset changes invalidate the rate.
+
+DMA buffering now provides 5.333 ms per half against approximately 2.76 ms of
+UART work. Completed halves are copied to snapshots with DMA ownership checks
+before/after copying. Missed halves and 100 ms progress stalls stop/resynchronize
+capture, increment counters, and signal a sequence discontinuity. Existing
+analog gain and transport format are retained; calibrated analog response and
+anti-alias DSP are not established by these checks.
+
+UART2 adds `mclk status`; `i2s rate` uses the new bounded preflight; `esp status`
+reports overruns/stalls and the WCLK estimate. See [PA8 clock procedure](pa8-audio-clock.md).
+All earlier related OTA/transport changes, native tests, and recorded hardware
+evidence are included in this GitHub update; unrelated captures/build caches
+and private Wi-Fi configuration are excluded.
+
+Validation: STM32 and ESP builds PASS; six native test executables and 11 Python
+tests PASS; manifest generation and host `--flash --dry-run` PASS. New STM32
+binary in `build/pa8-clock/`: 57,264 bytes, SHA-256
+`ea8d57569d1af89555980df71ca2bdbbac8d59a2fee1458896e07502803630d2`.
+[Manifest](firmware/pa8-clock-manifest.json) and
+[validation metadata](firmware/pa8-clock-validation.json) preserve build identity.
+This PA8 version has not been flashed: output voltage/duty/ringing, corrected
+sample timing, sustained capture under CLI load, and physical failure behavior
+still require bench verification. The boards remain on the previously recorded
+diagnostic firmware until an authorized upload.
+
+Pending: identify any
 fourth ChatGPT chat and additional local Codex tasks,
 and choose the intended ChatGPT project if the original chats should be moved.
 The available ChatGPT project is named `apm32f030 wifi mic`; its membership in

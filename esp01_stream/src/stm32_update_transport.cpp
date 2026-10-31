@@ -23,7 +23,8 @@ enum PacketType {
     PKT_ABORT          = 7,
     PKT_STATUS         = 8,
     PKT_FLASH_BEGIN    = 9,
-    PKT_FLASH_FINISH   = 10
+    PKT_FLASH_FINISH   = 10,
+    PKT_APPLICATION_STATUS = 11
 };
 
 enum ReplyCode {
@@ -77,6 +78,7 @@ static Stm32UpdateFlashPageCallback flashPageCallback = NULL;
 static Stm32UpdateReadCallback flashReadCallback = NULL;
 static Stm32UpdateFlashEndCallback flashEndCallback = NULL;
 static void *flashCallbackContext = NULL;
+static Stm32UpdateRecoveryCallback recoveryCallback = NULL;
 
 static uint32_t rotr32(uint32_t x, uint32_t n)
 {
@@ -257,6 +259,11 @@ static bool sameHash(const uint8_t a[32], const uint8_t b[32])
 
 } // namespace
 
+void stm32UpdateTransportSetRecoveryCallback(Stm32UpdateRecoveryCallback callback)
+{
+    recoveryCallback = callback;
+}
+
 void stm32UpdateTransportReset()
 {
     resetState();
@@ -407,7 +414,7 @@ bool stm32UpdateTransportHandlePacket(
             return true;
         }
 
-        if (!flashBeginCallback(st.session, st.imageSize, st.pageCount,
+        if (!flashBeginCallback(st.session, st.imageSize, st.pageCount, st.manifestHash,
                                 flashCallbackContext)) {
             reply(replySocket, replyIp, replyPort, type,
                   REPLY_FLASH_FAILED, session, 0);
@@ -615,6 +622,14 @@ bool stm32UpdateTransportHandlePacket(
         st.haveLastVerifiedPage = true;
         st.lastVerifiedPage = index;
         reply(replySocket, replyIp, replyPort, type, REPLY_OK, session, index);
+        return true;
+    }
+
+    if (type == PKT_APPLICATION_STATUS) {
+        bool ready = packetLen == 12u && st.flashCompleted && recoveryCallback &&
+                     recoveryCallback(flashCallbackContext);
+        reply(replySocket, replyIp, replyPort, type,
+              ready ? REPLY_OK : REPLY_INCOMPLETE, session, st.flashedPages);
         return true;
     }
 

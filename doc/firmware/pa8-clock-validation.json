@@ -1,0 +1,31 @@
+{
+  "date": "2026-10-31",
+  "branch": "stm32-safe-flash",
+  "source_parent": "a682235",
+  "profile": "PA8_TIM1_12M_ADC48K_PCM24K",
+  "toolchain": "arm-none-eabi-gcc 13.2.1 20231009",
+  "stm32_image_size": 57264,
+  "stm32_sha256": "ea8d57569d1af89555980df71ca2bdbbac8d59a2fee1458896e07502803630d2",
+  "esp_sha256": "318bb5882f945823143b3b6ec8ec88e6f06de33f1047f8a0a77e7b30d4ff0320",
+  "stm32_text_bytes": 55528,
+  "stm32_data_bytes": 1732,
+  "stm32_bss_bytes": 4844,
+  "checks": {
+    "stm32_cross_build": "PASS",
+    "esp_build": "PASS",
+    "native_test_executables": 6,
+    "python_tests": 11,
+    "tests": "PASS",
+    "host_flash_dry_run": "PASS",
+    "diff_whitespace": "PASS"
+  },
+  "hardware_flashing_performed": false,
+  "pa8_clock_waveform_verified": false,
+  "pending": [
+    "12 MHz MCLK voltage/duty/ringing at TLV pin 24",
+    "48 kHz WCLK and 1.536 MHz BCLK",
+    "independent programmed-image readback",
+    "sustained 24 ksample/s unicast reception and stable error counters",
+    "analog calibration and anti-alias DSP validation"
+  ]
+}

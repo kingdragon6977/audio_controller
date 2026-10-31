@@ -4,6 +4,7 @@
 #include <WiFiUdp.h>
 #include "wifi_config.h"
 #include "stm32_update_transport.h"
+#include "../../inc/flash_authorization.h"
 
 #ifndef OTA_HOSTNAME
 #define OTA_HOSTNAME "audio-esp01"
@@ -21,7 +22,8 @@ static const uint16_t UDP_BYTES = PCM_BYTES_PER_FRAME * UDP_FRAMES;
 static const uint8_t CTRL_READY = 0xF0u;
 static const uint8_t CTRL_STOP = 0xF1u;
 static const uint8_t CTRL_BOOT_PREP = 0xF2u;
-static const uint8_t CTRL_FLASH_PREP = 0xF3u;
+static const uint8_t CTRL_FLASH_AUTH = 0xF4u;
+static const uint8_t CTRL_HEALTH = 0xF5u;
 static const uint8_t BOOT_PREP_PASS = 0x01u;
 static const uint8_t BOOT_PREP_PROTOCOL = 0x01u;
 static const uint8_t BOOT_PREP_TARGET_TAG[] = {'R', 'C', 'T', '6'};
@@ -72,7 +74,14 @@ static bool otaActive = false;
 static uint32_t lastReadyMs = 0u;
 static uint32_t lastHeartbeatMs = 0u;
 static uint32_t pcmFrames = 0u;
+static uint32_t pcmUdpPackets = 0u;
+static uint32_t pcmUdpFailures = 0u;
+static uint32_t pcmMissingFrames = 0u;
+static uint32_t pcmBadHeaders = 0u;
 static bool stm32RomSessionActive = false;
+static uint32_t lastPcmMs = 0u;
+static uint32_t romFlashSession = 0u;
+static uint8_t romFlashHash[32];
 
 enum ParseState {
     WAIT_A5,
@@ -129,8 +138,10 @@ static void forwardFrame()
 
     pcmSeen = true;
     pcmFrames++;
+    lastPcmMs = millis();
 
     if (haveSeq && seq != expectedSeq) {
+        pcmMissingFrames += (uint16_t)(seq - expectedSeq);
         udpFill = 0u;
     }
     expectedSeq = (uint16_t)(seq + 1u);
@@ -142,7 +153,8 @@ static void forwardFrame()
     if (udpFill == UDP_BYTES) {
         udpTx.beginPacket(targetIp, UDP_TARGET_PORT);
         udpTx.write(udpBuffer, UDP_BYTES);
-        udpTx.endPacket();
+        if (udpTx.endPacket() == 1) ++pcmUdpPackets;
+        else ++pcmUdpFailures;
         udpFill = 0u;
     }
 }
@@ -173,6 +185,7 @@ static void consumeByte(uint8_t b)
         header[headerPos++] = b;
         if (headerPos == sizeof(header)) {
             if (!headerValid()) {
+                ++pcmBadHeaders;
                 resetParser();
                 break;
             }
@@ -388,13 +401,28 @@ static void hashToHex(const uint8_t hash[32], char out[65])
     out[64] = '\0';
 }
 
-static bool stm32PrepareControl(uint8_t control)
+static bool stm32PrepareControl(uint8_t control, const uint8_t *request = NULL)
 {
     size_t matched = 0u;
     uint32_t start;
 
     serialDrainRx();
     Serial.write(control);
+    if (request) {
+        /* STM32 USART1 is polled: let it stop DMA, then pace the small frame. */
+        Serial.flush();
+        delay(2);
+        uint16_t checksum = flash_auth_crc16(request);
+        for (size_t i = 0; i < 40u; ++i) {
+            Serial.write(request[i]);
+            Serial.flush();
+            delay(1);
+        }
+        Serial.write((uint8_t)checksum);
+        Serial.flush();
+        delay(1);
+        Serial.write((uint8_t)(checksum >> 8));
+    }
     Serial.flush();
 
     start = millis();
@@ -415,8 +443,14 @@ static bool stm32PrepareControl(uint8_t control)
                             targetOk = false;
                     }
 
+                    if (request) {
+                        for (size_t i = 0; i < 4u; ++i) {
+                            int echo = serialReadTimeout(100u);
+                            if (echo < 0 || (uint8_t)echo != request[i]) targetOk = false;
+                        }
+                    }
                     return status == BOOT_PREP_PASS &&
-                           protocol == BOOT_PREP_PROTOCOL &&
+                           protocol == (request ? 2 : BOOT_PREP_PROTOCOL) &&
                            targetOk;
                 }
             } else {
@@ -434,11 +468,6 @@ static bool stm32PrepareBoot()
     return stm32PrepareControl(CTRL_BOOT_PREP);
 }
 
-static bool stm32PrepareFlash()
-{
-    return stm32PrepareControl(CTRL_FLASH_PREP);
-}
-
 static void stm32RestoreApplication()
 {
     digitalWrite(STM32_BOOT_PIN, HIGH);
@@ -449,6 +478,7 @@ static void stm32RestoreApplication()
     Serial.setDebugOutput(false);
     stm32Reset(false);
     stm32RomSessionActive = false;
+    romFlashSession = 0u;
 
     resetParser();
     udpFill = 0u;
@@ -461,6 +491,7 @@ static bool stm32FlashBeginCallback(
     uint32_t session,
     uint32_t imageSize,
     uint16_t pageCount,
+    const uint8_t manifestHash[32],
     void *context)
 {
     bool readSupported = false;
@@ -470,11 +501,12 @@ static bool stm32FlashBeginCallback(
     uint16_t flashKb = 0u;
     int syncResponse;
 
-    (void)session;
-    (void)imageSize;
     (void)pageCount;
     (void)context;
 
+    if (stm32RomSessionActive &&
+        (session != romFlashSession || memcmp(manifestHash, romFlashHash, 32u) != 0))
+        return false;
     /*
      * If a previous transport attempt was interrupted while ROM remained
      * active, first probe that existing session instead of requiring the
@@ -487,30 +519,22 @@ static bool stm32FlashBeginCallback(
         pcmSeen = false;
         announcedReady = false;
 
-        /*
-         * New STM32 firmware understands FLASH_PREP and explicitly reports
-         * PA0 BOOT_AUTH.  The currently installed pre-upgrade firmware only
-         * knows BOOT_PREP, so allow that as a bootstrap fallback.  The physical
-         * PA0 gate is still mandatory: without manual 'bootauth on', BOOT0
-         * cannot rise and the ROM sync below fails before any erase/write.
-         */
-        bool explicitFlashPrep = stm32PrepareFlash();
-        if (!explicitFlashPrep && !stm32PrepareBoot()) {
+        uint8_t request[40];
+        for (size_t i = 0; i < 4u; ++i) {
+            request[i] = (uint8_t)(session >> (8u * i));
+            request[4u+i] = (uint8_t)(imageSize >> (8u * i));
+        }
+        memcpy(request + 8, manifestHash, 32u);
+        /* Only the new, manifest-bound, timed grant permits automatic OTA. */
+        if (!stm32PrepareControl(CTRL_FLASH_AUTH, request)) {
             sendReady();
             return false;
         }
 
         delay(BOOT1_LOW_SETTLE_MS);
-        if (explicitFlashPrep) {
-            if (!stm32PrepareFlash()) {
-                sendReady();
-                return false;
-            }
-        } else {
-            if (!stm32PrepareBoot()) {
-                sendReady();
-                return false;
-            }
+        if (!stm32PrepareControl(CTRL_FLASH_AUTH, request)) {
+            sendReady();
+            return false;
         }
 
         Serial.end();
@@ -532,6 +556,8 @@ static bool stm32FlashBeginCallback(
         }
 
         stm32RomSessionActive = true;
+        romFlashSession = session;
+        memcpy(romFlashHash, manifestHash, 32u);
     }
 
     /* Require the exact ROM capabilities before any page can be erased. */
@@ -653,6 +679,19 @@ static void stm32FlashEndCallback(bool success, void *context)
      */
     if (success)
         stm32RestoreApplication();
+}
+
+static bool stm32RecoveryCallback(void *context)
+{
+    (void)context;
+    if (stm32RomSessionActive || otaActive || !pcmSeen ||
+        (uint32_t)(millis() - lastPcmMs) > 2000u) return false;
+    /* Confirm the application has running DMA and released PA0, too. */
+    bool healthy = stm32PrepareControl(CTRL_HEALTH);
+    resetParser();
+    udpFill = 0u;
+    haveSeq = false;
+    return healthy;
 }
 
 static void udpReply(const IPAddress &ip, uint16_t port, const char *message)
@@ -984,6 +1023,28 @@ static void handleUdpControl()
         command[--count] = '\0';
     }
 
+    if (strcmp(command, "STREAM_SUBSCRIBE") == 0) {
+        /* Deliver to the requesting PC, avoiding LAN broadcast throttling.
+         * Destination port remains UDP_TARGET_PORT; no programming state changes. */
+        targetIp = replyIp;
+        char message[96];
+        snprintf(message, sizeof(message), "STREAM_SUBSCRIBED target=%s port=%u\n",
+                 targetIp.toString().c_str(), (unsigned)UDP_TARGET_PORT);
+        udpReply(replyIp, replyPort, message);
+        return;
+    }
+    if (strcmp(command, "STREAM_STATUS") == 0) {
+        char message[300];
+        snprintf(message, sizeof(message),
+                 "STREAM_STATUS uptime_ms=%lu pcm=%lu udp=%lu udp_fail=%lu missing=%lu bad_header=%lu target=%u.%u.%u.%u rom=%u\n",
+                 (unsigned long)millis(), (unsigned long)pcmFrames,
+                 (unsigned long)pcmUdpPackets, (unsigned long)pcmUdpFailures,
+                 (unsigned long)pcmMissingFrames, (unsigned long)pcmBadHeaders,
+                 (unsigned)targetIp[0], (unsigned)targetIp[1], (unsigned)targetIp[2],
+                 (unsigned)targetIp[3], stm32RomSessionActive ? 1u : 0u);
+        udpReply(replyIp, replyPort, message);
+        return;
+    }
     if (strcmp(command, "STM32_BOOT_TEST") == 0) {
         udpReply(replyIp, replyPort, "STM32_BOOT_TEST starting (read-only)\n");
         stm32BootloaderTest(replyIp, replyPort);
@@ -1056,7 +1117,7 @@ static void connectWifi()
     udpControl.begin(UDP_CONTROL_PORT);
 
     pcmSeen = false;
-    pcmFrames = 0u;
+    /* Diagnostic counters remain monotonic across Wi-Fi reconnections. */
     if (!stm32RomSessionActive)
         sendReady();
     sendHeartbeat();
@@ -1079,6 +1140,7 @@ void setup()
     delay(100);
     connectWifi();
     setupOta();
+    stm32UpdateTransportSetRecoveryCallback(stm32RecoveryCallback);
 }
 
 void loop()

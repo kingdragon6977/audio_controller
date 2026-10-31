@@ -7,6 +7,7 @@
 #include "i2s_meter.h"
 #include "audio_stream.h"
 #include "board.h"
+#include "audio_clock.h"
 #include "cli.h"
 #include <stdio.h>
 
@@ -288,6 +289,10 @@ static void print_esp_status(void)
             (unsigned long)audio_stream_dma_errors(),
             (unsigned long)esp_uart_rx_bytes());
     uart2_print(buf);
+    sprintf(buf, " stream_overruns=%lu clock_stalls=%lu wclk_estimate_hz=%lu\r\n",
+            (unsigned long)audio_stream_overruns(), (unsigned long)audio_stream_stalls(),
+            (unsigned long)audio_clock_wclk_hz());
+    uart2_print(buf);
 
     sprintf(buf,
             " uart_errors: ORE=%lu FE=%lu NE=%lu\r\n",
@@ -350,6 +355,7 @@ static void execute(char *cmd)
         uart2_print(" i2s capture        (full one-shot report)\r\n i2s capture N      (compact repeated captures, N=1..50)\r\n");
         uart2_print(" i2s meter          (5-second long audio meter)\r\n i2s meter N        (long meter, N=1..10 seconds)\r\n");
         uart2_print(" esp status         (USART1 + stream diagnostics)\r\n");
+        uart2_print(" i2s rate           (20 ms rate preflight; pauses PCM)\r\n mclk status        (PA8/TIM1 register readback)\r\n");
         uart2_print(" bootauth status    (read PA0 authorization state)\r\n");
         uart2_print(" bootauth on        (PA0 LOW only; does NOT reset or command ESP)\r\n");
         uart2_print(" bootauth off       (PA0 HIGH / safe default)\r\n");
@@ -402,13 +408,25 @@ static void execute(char *cmd)
 
     if (strcmp(cmd, "codec apply") == 0)
     {
-        uart2_print("Applying captured AV6301 TLV320ADC3101 profile...\r\nWARNING: this drives the shared I2C bus; use only after isolating the AV6301.\r\n");
-        uart2_print(codec_apply_av6301_profile() ?
+        audio_stream_stop();
+        i2s_rx_stop();
+        uart2_print("Applying PA8 12-MHz TLV320ADC3101 profile...\r\nWARNING: this drives the shared I2C bus; use only after isolating the AV6301.\r\n");
+        uart2_print(codec_apply_audio_profile() ?
                     "Codec profile applied successfully.\r\n" :
                     "Codec profile FAILED (I2C timeout/NACK).\r\n");
         return;
     }
 
+    if (strcmp(cmd, "mclk status") == 0) {
+        audio_clock_print();
+        return;
+    }
+    if (strcmp(cmd, "i2s rate") == 0) {
+        audio_stream_stop();
+        (void)audio_clock_check_wclk(1);
+        uart2_print("GPIO polling estimate; scope/analyzer remains authoritative. PCM resumes only with valid clock/profile.\r\n");
+        return;
+    }
     if (strcmp(cmd, "i2s capture") == 0)
     {
         (void)run_i2s_capture(1u, 1);

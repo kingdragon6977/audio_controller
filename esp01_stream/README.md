@@ -1,5 +1,12 @@
 # ESP-01 PCM to UDP bridge
 
+The new STM32 firmware requires the PA8 12 MHz reference-clock wiring and
+matching codec profile. See [PA8 audio clock](../doc/pa8-audio-clock.md) for
+startup checks, register diagnostics, DMA timing, and pending hardware tests.
+
+For automatic STM32 authorization, verified completion, and the one-time
+firmware migration order, see [OTA integration](../doc/ota-integration.md).
+
 This project receives the STM32 audio stream on the ESP-01 hardware UART at 1,000,000 baud and forwards 24 kHz mono signed PCM16LE over UDP port 5004.
 
 ## Wiring
@@ -62,18 +69,43 @@ Once Wi-Fi connects, the ESP sends control byte `0xF0` to the STM32. The STM32 t
 With ffplay installed:
 
 ```bash
-python3 esp01_stream/tools/udp_pcm_receiver.py | \
+python3 esp01_stream/tools/udp_pcm_receiver.py --esp 192.168.114.54 | \
   ffplay -nodisp -autoexit -f s16le -ar 24000 -ac 1 -i pipe:0
 ```
 
 Or with ALSA `aplay`:
 
 ```bash
-python3 esp01_stream/tools/udp_pcm_receiver.py | \
+python3 esp01_stream/tools/udp_pcm_receiver.py --esp 192.168.114.54 | \
   aplay -q -f S16_LE -r 24000 -c 1
 ```
 
 The ESP aggregates four 64-sample STM32 UART frames into each 512-byte UDP packet.
+
+`--esp` requests unicast to the receiving PC on UDP port 5004 and refreshes that
+subscription every five seconds, including after an ESP restart. Without it,
+the receiver listens for the configured destination, which defaults to LAN
+broadcast. On the current LAN, measured broadcast reception lost most packets;
+unicast delivered the ESP's observed packet count and restored heartbeats.
+
+For a finite transport check without playing or saving PCM:
+
+```bash
+python3 esp01_stream/tools/udp_pcm_receiver.py --esp 192.168.114.54 --duration 15 --discard
+```
+
+Diagnostics go to stderr; stdout remains raw PCM. `STREAM_STATUS` reports
+ESP uptime, parsed UART frames (`pcm`), successful/failed PCM UDP submissions,
+missing UART sequences, malformed headers, and destination. Counters are
+monotonic until ESP reboot. Successful UDP submission is not proof of delivery;
+compare receiver counts over the same interval. `STREAM_SUBSCRIBE` selects the
+requesting PC as the destination; the last subscriber wins. Destination port
+remains the firmware's `UDP_TARGET_PORT`.
+
+The stream header currently advertises a nominal 24 kHz. Hardware measurements
+on 2026-10-12 found WCLK near 17.2 kHz and effective decimated PCM near 8.6 kHz;
+the physical MCLK and codec timing need confirmation. Playback at 24 kHz does
+not establish that the captured samples actually have that rate.
 
 
 ## Read-only STM32 ROM bootloader test

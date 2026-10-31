@@ -7,6 +7,7 @@
 #include "diagnostics.h"
 #include "i2s_rx.h"
 #include "audio_stream.h"
+#include "audio_clock.h"
 
 static void delay(uint32_t d)
 {
@@ -57,7 +58,7 @@ static int codec_apply_profile_with_recovery(void)
 
     for (attempt = 0u; attempt < 3u; ++attempt)
     {
-        if (codec_apply_av6301_profile())
+        if (codec_apply_audio_profile())
             return 1;
 
         if (attempt == 2u)
@@ -99,12 +100,15 @@ int main(void)
 
     uart2_print("\r\n========================================\r\n");
     uart2_print(" audio_controller - RCT6 bring-up\r\n");
+    uart2_print(" Profile: PA8_TIM1_12M_ADC48K_PCM24K\r\n");
     uart2_print("========================================\r\n");
     uart2_print("USART2: PA2=TX PA3=RX 115200 8N1\r\n");
     uart2_print("USART1: PA9=TX PA10=RX 1000000 8N1 (ESP-01 PCM link)\r\n");
 
     diagnostics_print_mcu();
     diagnostics_print_clock();
+    (void)audio_clock_init();
+    audio_clock_print();
     diagnostics_print_audio_pins();
     diagnostics_print_i2s_clock_ownership();
 
@@ -126,7 +130,8 @@ int main(void)
 
     uart2_print("\r\nResetting TLV320ADC3101 on PB14...\r\n");
     codec_reset();
-    uart2_print("TLV320 reset released.\r\n");
+    uart2_print(audio_clock_ready() ? "TLV320 reset released.\r\n"
+                                   : "TLV320 held reset: MCLK prerequisite failed.\r\n");
     diagnostics_print_audio_pins();
 
     if (i2c_safe)
@@ -154,7 +159,7 @@ int main(void)
 
     if (codec_present && i2s_safe)
     {
-        uart2_print("Applying AV6301 codec profile...\r\n");
+        uart2_print("Applying PA8 12-MHz codec profile...\r\n");
         if (codec_apply_profile_with_recovery())
         {
             uart2_print("Codec profile applied.\r\n");
@@ -163,10 +168,10 @@ int main(void)
 
             diagnostics_print_i2s_clock_ownership();
             uart2_print("\r\nI2S CLOCK ACTIVITY CHECK: ");
-            i2s_clock_active = diagnostics_i2s_clock_pins_active();
+            i2s_clock_active = audio_clock_check_wclk(1);
             uart2_print(i2s_clock_active
-                        ? "PASS - WCLK activity observed on PB12\r\n"
-                        : "WARN - no WCLK transition observed by coarse MCU poll\r\n");
+                        ? "PASS - PB12 WCLK estimate within 1% of 48 kHz\r\n"
+                        : "FAIL - clock rate prerequisite missing; DMA blocked\r\n");
             uart2_print("  NOTE: logic analyzer/scope remains authoritative for exact clock frequency and duty cycle.\r\n");
 
             if (i2s_clock_active && diagnostics_i2s2_safe())

@@ -6,10 +6,8 @@
 #include <WiFiUdp.h>
 
 /*
- * Non-destructive STM32 update staging protocol.
- *
- * This layer can receive/validate an immutable manifest and one page of image
- * data. It intentionally has no dependency on the STM32 ROM erase/write code.
+ * Manifest-bound staging and explicit flash protocol. Destructive operations
+ * use board callbacks only after a committed manifest and FLASH_BEGIN.
  */
 typedef bool (*Stm32UpdateReadCallback)(
     uint32_t address,
@@ -28,6 +26,7 @@ typedef bool (*Stm32UpdateFlashBeginCallback)(
     uint32_t session,
     uint32_t imageSize,
     uint16_t pageCount,
+    const uint8_t manifestHash[32],
     void *context);
 
 typedef bool (*Stm32UpdateFlashPageCallback)(
@@ -40,6 +39,8 @@ typedef bool (*Stm32UpdateFlashPageCallback)(
 typedef void (*Stm32UpdateFlashEndCallback)(
     bool success,
     void *context);
+typedef bool (*Stm32UpdateRecoveryCallback)(void *context);
+void stm32UpdateTransportSetRecoveryCallback(Stm32UpdateRecoveryCallback callback);
 
 void stm32UpdateTransportReset();
 

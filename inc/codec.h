@@ -9,8 +9,9 @@
 /* Hardware reset on STM32 PB14, active low. */
 void codec_reset(void);
 
-/* Apply the five Page-0 writes captured from the AV6301. */
-int codec_apply_av6301_profile(void);
+/* Apply/verify the PA8 12-MHz clock and isolated analog-input profile. */
+int codec_profile_ready(void);
+int codec_apply_audio_profile(void);
 
 /* Read and print the key Page-0 registers used by the captured profile. */
 void codec_dump_profile(void);

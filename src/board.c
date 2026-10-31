@@ -2,6 +2,25 @@
 #include "board.h"
 
 static uint8_t led_state = 0;
+static volatile uint32_t uptime_ms;
+static volatile uint32_t auth_remaining_ms;
+
+uint32_t board_millis(void) { return uptime_ms; }
+
+void SysTick_Handler(void)
+{
+    ++uptime_ms;
+    if (auth_remaining_ms && --auth_remaining_ms == 0u)
+        GPIO_SetBits(GPIOA, GPIO_Pin_0);
+}
+
+void board_boot_auth_lease(unsigned int milliseconds)
+{
+    /* Install expiry before driving the authorization pin. */
+    auth_remaining_ms = milliseconds;
+    if (milliseconds) board_boot_auth_on();
+    else board_boot_auth_off();
+}
 
 void board_init(void)
 {
@@ -23,6 +42,12 @@ void board_init(void)
     gpio.GPIO_Mode  = GPIO_Mode_Out_PP;
     gpio.GPIO_Speed = GPIO_Speed_2MHz;
     GPIO_Init(GPIOA, &gpio);
+    /* Hold codec reset while its reference clock is established. */
+    GPIO_ResetBits(GPIOB, GPIO_Pin_14);
+    gpio.GPIO_Pin = GPIO_Pin_14;
+    GPIO_Init(GPIOB, &gpio);
+    SystemCoreClockUpdate();
+    SysTick_Config(SystemCoreClock / 1000u);
 
     /* PB2 LED - active high: PB2 HIGH = LED ON */
     gpio.GPIO_Pin   = GPIO_Pin_2;
@@ -67,6 +92,7 @@ int board_boot1_hold_low(void)
 
 void board_boot_auth_off(void)
 {
+    auth_remaining_ms = 0u;
     /* Active-low authorization: HIGH = first 4407 OFF. */
     GPIO_SetBits(GPIOA, GPIO_Pin_0);
 }

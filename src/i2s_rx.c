@@ -2,6 +2,8 @@
 #include "i2s_rx.h"
 #include "diagnostics.h"
 #include "uart.h"
+#include "audio_clock.h"
+#include "codec.h"
 
 static uint16_t rx_buffer[I2S_RX_SAMPLES];
 static uint32_t dma_error_flags;
@@ -302,7 +304,7 @@ int i2s_rx_start_capture(void)
     debug_state.ws_sync_ok = 0u;
     debug_state.ws_level_at_enable = 0u;
 
-    if (!diagnostics_i2s2_safe())
+    if (!diagnostics_i2s2_safe() || !codec_profile_ready() || !audio_clock_rate_valid())
         return 0;
 
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_SPI2, ENABLE);
